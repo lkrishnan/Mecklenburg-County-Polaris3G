@@ -1,0 +1,6 @@
+/* Write your global styles here, in PostCSS syntax */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.esri-view .esri-view-surface--inset-outline:focus::after {  outline: none !important;}
