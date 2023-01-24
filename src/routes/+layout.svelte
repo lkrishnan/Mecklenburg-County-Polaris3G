@@ -1,5 +1,5 @@
 <Map />
-<main>
+<main class="absolute left-0 top-0">
     <slot />
 </main>
 
