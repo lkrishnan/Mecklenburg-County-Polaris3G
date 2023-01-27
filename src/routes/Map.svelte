@@ -71,12 +71,5 @@
 <style>
     @import "@arcgis/core/assets/esri/themes/light/main.css";
 
-    .view {
-		margin: 0;
-		min-height: 100px;
-        outline: none !important;
-    }
-
-    
 
 </style>

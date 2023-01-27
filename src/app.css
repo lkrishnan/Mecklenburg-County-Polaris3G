@@ -3,4 +3,8 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+	overflow: none !important;
+}
+
 .esri-view .esri-view-surface--inset-outline:focus::after {  outline: none !important;}
