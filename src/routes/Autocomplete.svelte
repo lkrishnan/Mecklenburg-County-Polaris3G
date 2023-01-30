@@ -37,7 +37,7 @@
         <ul class="w-full bg-white shadow-lg rounded-b-md border-t" bind:this={list} >
             {#if !nomatch}
                 {#each results as result, i}
-                    <li class="text-gray-700 px-2 py-2 text-sm overflow-ellipsis overflow-hidden whitespace-nowrap hover:bg-gray-100 hover:cursor-pointer last:rounded-b-md">
+                    <li on:click="{()=>close(i)}" on:keydown="{()=>close(i)}" class="text-gray-700 px-2 py-2 text-sm overflow-ellipsis overflow-hidden whitespace-nowrap hover:bg-gray-100 hover:cursor-pointer last:rounded-b-md">
                         <span class="font-bold pr-1">{result.type}:</span>
                         {@html result.label}
                     </li>

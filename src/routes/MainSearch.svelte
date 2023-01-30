@@ -29,18 +29,13 @@
 
         </div>
     {/if}
-
-    
     
 </div>
 
-
-
-    
-
 <script>
     import AutoComplete from "./Autocomplete.svelte"
-    import jsonToURL from "./jsontourl";
+    import jsonToURL from "./jsontourl"
+    import { validateGISID } from "./validateStrings" 
 
     let items = [ ],
         nomatch = false,
@@ -64,12 +59,43 @@
             
         // Address Query
         const address_args = {
-                columns: "full_address as value, 'ADDRESS' as type, groundpid, round(ST_X(ST_Transform(the_geom, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(the_geom, 4326))::NUMERIC,4) as lat, num_parent_parcel as pid, full_address as address",
+                columns: "full_address as value, 'ADDRESS' as type, objectid as matid, groundpid as gisid, round(ST_X(the_geom)::NUMERIC,4) as x, round(ST_Y(the_geom)::NUMERIC,4) as y, round(ST_X(ST_Transform(the_geom, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(the_geom, 4326))::NUMERIC,4) as lat, num_parent_parcel as pid, full_address as address",
                 limit: 8,
-                filter: `ts @@ to_tsquery('addressing_en', '${srch_str.toUpperCase().replace(/ /g, '&') + ':*'}') and cde_status='A' and the_geom is not null`
+                filter: `ts @@ to_tsquery('addressing_en', '${srch_str.toUpperCase().replace(/ /g, '&') + ':*'}')
+                            and txt_cdeuse not in ('METER', 'VALUE-IMPR', 'MINING', 'SIGN', 'MASTER ADDRESS', 'BRIDGE', 'CATV', 'PHONE', 'UTILITY', 'SAW SERVICE', 'BUS STOP', 'CELL TOWER', 'UNKNOWN', 'OTHER MUNICIPAL', 'FOREST-PARK', 'OCS POLE', 'GREENWAY ENTRANCE', 'DUMPSTER' )
+                            and the_geom is not null`
             }
         urls.push( `https://api.mcmap.org/v1/query/master_address_table?${jsonToURL( address_args )}` )
 
+        // GISID Query
+        console.log( validateGISID( srch_str ) )
+        if( validateGISID( srch_str ) ){
+            const gisid_args = {
+                columns: `pid as value, 'GISID' as type, pid as gisid, ST_Area(shape) As sqft, ST_AsText(shape) as parcelgeom`,
+                limit: 5,
+                filter: `pid ~* '${srch_str}' and the_geom is not null`,
+                group: `pid`
+            
+            }
+            urls.push( `https://api.mcmap.org/v1/query/tax_parcels?${jsonToURL( gisid_args )}` )
+        
+        }
+
+        // Park Query
+        const park_args = {
+            columns: `prkname as value, 'PARK' as type, round(ST_X(p.the_geom)::NUMERIC,4) as x, round(ST_Y(p.the_geom)::NUMERIC,4) as y, round(ST_X(ST_Transform(p.the_geom, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(p.the_geom, 4326))::NUMERIC,4) as lat, t.pid as pid, prkaddr as address`,
+            limit: 5,
+            filter: `prkname ilike '%${srch_str}%' and p.the_geom && t.the_geom`
+        }
+        urls.push( `https://api.mcmap.org/v1/query/parks p, tax_parcels t?${jsonToURL( park_args )}` )
+
+        // Library Query
+        const library_args = {
+            columns: `name as value, 'LIBRARY' as type, round(ST_X(l.the_geom)::NUMERIC,4) as x, round(ST_X(l.the_geom)::NUMERIC,4) as y, round(ST_X(ST_Transform(l.the_geom, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(l.the_geom, 4326))::NUMERIC,4) as lat, p.pid as pid, address`,
+            limit: 5,
+            filter: `name ilike '%${srch_str}%' and l.the_geom && p.the_geom`
+        }
+        urls.push( `https://api.mcmap.org/v1/query/libraries l, tax_parcels p?${jsonToURL( library_args )}` )
 
         // Fetch Results
         spinner = true
@@ -79,7 +105,7 @@
                 nomatch = false
                 items = [ ].concat( ...jsons )
                             .map( elem => { 
-                                elem.groundpid = elem.groundpid || elem.pid 
+                                elem.gisid = elem.gisid || elem.pid 
                                 return elem 
                             } )
 
@@ -88,6 +114,5 @@
             } )
 
     }
-
 
 </script>
