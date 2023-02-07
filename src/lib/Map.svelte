@@ -62,7 +62,7 @@
 		} )
 
 		view.ui.remove( [ "attribution" ] )
-		view.ui.move( "zoom", "bottom-left" )
+		view.ui.move( "zoom", "bottom-right" )
 	
 	}
 
