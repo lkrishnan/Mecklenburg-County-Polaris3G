@@ -90,7 +90,15 @@
                 urls = [
                     `/api/address?addr=${srch_str}`,
                     ...( validateCNumber( srch_str ) ? [ `/api/gisid?gisid=${srch_str}` ] : [ ] ),
-                    ...( validateOnlyAlpha( srch_str ) ? [ `/api/facility?name=${srch_str}&type=park` ] : [ ] )
+                    ...( validateOnlyAlpha( srch_str ) ? [ 
+                            `/api/facility?name=${srch_str}&type=park`,
+                            `/api/facility?name=${srch_str}&type=library`,
+                            `/api/facility?name=${srch_str}&type=public_school`,
+                            `/api/facility?name=${srch_str}&type=charter_school`,
+                            `/api/facility?name=${srch_str}&type=private_school`, 
+                            `/api/facility?name=${srch_str}&type=business`,
+
+                        ] : [ ] )
 
                     ]
             
@@ -100,6 +108,7 @@
             jsons = await Promise.all( urls.map( url => fetch( url ).then( resp => resp.json( ) ) ) )
             spinner = false
             nomatch = false
+            
             items = [ ].concat( ...jsons )
                         .map( elem => { 
                             elem.gisid = elem.gisid || elem.pid 

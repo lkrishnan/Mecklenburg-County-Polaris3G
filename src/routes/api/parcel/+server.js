@@ -3,13 +3,62 @@ import jsonToURL from "$lib/jsontourl"
 
 /** @type {import('./$types').RequestHandler} */
 export const GET = async ( { url, fetch } ) => {
-    const name = url.searchParams.get( "name" ) ?? null,
-        typ = url.searchParams.get( "type" ) ?? null,
+    const pid = url.searchParams.get( "pid" ) ?? null,
+        gisid = url.searchParams.get( "gisid" ) ?? null,
+        info = url.searchParams.get( "info" ) ?? null,
 
-        getArgs = ( typ, name ) => {
+        getArgs = ( info, typ, id ) => {
+            const filter_cols = {
+                geom: {
+                    gisid: {
+                        columns: `pid as value, 'GISID' as type, pid as gisid, ST_AsText( the_geom ) as parcelgeom, ST_Area( the_geom ) As sqft`,
+                        filter: `pid ~* '${id}' and the_geom is not null`,
+
+                    }
+                    
+                }
+                
+            }
+
+            return { }
+
+        }, 
+
+
+
+        getArgs = ( info, typ, id ) => {
+            const args = {
+                geom: {
+                    pid: {
+                        columns: ,
+                        limit: 5,
+                        filter: getFilter( info, typ, id ),
+
+                    },
+                    gisid: {
+                        columns: `pid as value, 'GISID' as type, pid as gisid`,
+                        limit: 5,
+                        filter: getFilter( info, typ, id ),
+
+                    }
+                    
+    
+                }
+            }
+            
+            return {
+                columns: 
+
+                }
+
+        },
+
+
+
+        getArgs = ( info, pid, gisid ) => {
             const args = {
                 park: {
-                    columns: `prkname as value, 'PARK' as type, round(ST_X(p.the_geom)::NUMERIC,4) as x, round(ST_Y(p.the_geom)::NUMERIC,4) as y, round(ST_X(ST_Transform(p.the_geom, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(p.the_geom, 4326))::NUMERIC,4) as lat, t.pid as gisid, prkaddr as address`,
+                    columns: `pid as value, 'GISID' as type, pid as gisid`,
                     limit: 5,
                     filter: `prkname ilike '%${name}%' and p.the_geom && t.the_geom`,
                 
@@ -50,23 +99,35 @@ export const GET = async ( { url, fetch } ) => {
             return args[ typ ]
             
         },
-        
-        getURL = ( typ, name ) => {
-            const urls = {
-                    park: `https://api.mcmap.org/v1/query/parks p, tax_parcels t?${jsonToURL( getArgs( typ, name ) )}`,
-                    library: `https://api.mcmap.org/v1/query/libraries l, tax_parcels p?${jsonToURL( getArgs( typ, name ) )}`,
-                    public_school: `https://api.mcmap.org/v1/query/schools s, tax_parcels p?${jsonToURL( getArgs( typ, name ) )}`,
-                    charter_school: `https://api.mcmap.org/v1/query/charter_schools s, tax_parcels p?${jsonToURL( getArgs( typ, name ) )}`,
-                    private_school: `https://api.mcmap.org/v1/query/schools_private s, tax_parcels p?${jsonToURL( getArgs( typ, name ) )}`,
-                    business: `https://api.mcmap.org/v1/query/businesswise_businesses b, tax_parcels p?${jsonToURL( getArgs( typ, name ) )}`,
+
+    const getFilter = ( ) => {
+            let filter = "the_geom is not null"
+            const aliases = [ "gisid", "pid", "common_pid", "commonpid", "groundpid", "ground_pid", "id" ]
+
+            aliases.forEach( alias => { 
+                if( url.searchParams.get( alias ) ){
+                    filter += ` and pid ~* '${url.searchParams.get( alias )}'`
+                    return
 
                 }
 
-            return urls[ typ ]
+            } )
+
+            return filter
 
         },
-        response = await fetch( getURL( typ, name ) )
-        
+        args = {
+                columns: "pid as value, 'GISID' as type, pid as gisid",
+                limit: 5,
+                filter: getFilter( ),
+                group: `pid`,
+
+            },
+
+        response = await fetch( getURL( info, ( pid ? 'pid' : 'gisid' ), ( pid ? pid : gisid ) ) )
+
+
+        response = await fetch( `https://api.mcmap.org/v1/query/tax_parcels?${jsonToURL( args )}`)
         
     if( response.ok ){
         const data = await response.json( )
