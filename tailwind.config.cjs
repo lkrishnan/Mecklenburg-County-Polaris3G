@@ -4,11 +4,11 @@ module.exports = {
   	theme: {
     	extend: {
       		colors: {
-        		primary: "#aa6164",
-				secondary: "#f7e18f",
+        		primary: `theme('colors.gray.500')`,
+				secondary: "theme('colors.gray.100')",
 				surface: "#ffffff",
-				edge: "#dbc576",
-				signify: "#768cdb",
+				edge: "theme('colors.gray.300')",
+				signify: "theme('colors.blue.700')",
 				statictxt: "#374151",
 				inputtxt: "#6b7280"
 

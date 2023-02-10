@@ -26,14 +26,14 @@
         
     </div>
     <!-- Search Row -->
-    <AutoComplete placeholder="Enter address / parcel# /owner / landmark" minchar="5" spinner={spinner} nomatch={nomatch} {items} padding="px-12 py-1 md:pr-1 pr-11"
+    <AutoComplete placeholder="Enter address / parcel# /owner / landmark" minchar="5" spinner={spinner} go={true} nomatch={nomatch} {items} padding="px-12 py-1 md:pr-1 pr-11"
         on:hit={handleHit} on:query={handleQuery} on:open={handleOpen} />
 
      <!-- Navigation Row -->
     {#if !is_open}
         <div class="hidden md:flex flex-row border-t border-edge">
             <button type="button" class="rounded-bl-md p-2 text-center inline-flex items-center text-primary text-sm font-medium hover:bg-secondary focus:outline-none focus:ring-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-600" 
-                on:click="{()=>{goto( `/othersearch` )}}">
+                on:click="{()=>{goto( `/othersearch/owner` )}}">
                 Other Search
             </button>
 
@@ -54,11 +54,10 @@
 
 <script>
     import AutoComplete from "$lib/Autocomplete.svelte"
-    import jsonToURL from "$lib/jsontourl"
-    import { validateGISID } from "$lib/validateStrings" 
+    import { validateCNumber, validateOnlyAlpha } from "$lib/validate" 
     import { goto } from "$app/navigation"
     import { last_hit } from '$lib/store.js'
-
+	
     // variables
     let items = [ ],
         nomatch = false,
@@ -88,80 +87,13 @@
             let jsons
 
             const srch_str = event.detail.trim( ),
-                urls = [ ]
-                
-            // Address Query
-            const address_args = {
-                    columns: "full_address as value, 'ADDRESS' as type, objectid as matid, groundpid as gisid, round(ST_X(the_geom)::NUMERIC,4) as x, round(ST_Y(the_geom)::NUMERIC,4) as y, round(ST_X(ST_Transform(the_geom, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(the_geom, 4326))::NUMERIC,4) as lat, num_parent_parcel as pid, full_address as address",
-                    limit: 8,
-                    filter: `ts @@ to_tsquery('addressing_en', '${srch_str.toUpperCase().replace(/ /g, '&') + ':*'}')
-                                and txt_cdeuse not in ('METER', 'VALUE-IMPR', 'MINING', 'SIGN', 'MASTER ADDRESS', 'BRIDGE', 'CATV', 'PHONE', 'UTILITY', 'SAW SERVICE', 'BUS STOP', 'CELL TOWER', 'UNKNOWN', 'OTHER MUNICIPAL', 'FOREST-PARK', 'OCS POLE', 'GREENWAY ENTRANCE', 'DUMPSTER' )
-                                and the_geom is not null`
-                }
-            urls.push( `https://api.mcmap.org/v1/query/master_address_table?${jsonToURL( address_args )}` )
+                urls = [
+                    `/api/address?addr=${srch_str}`,
+                    ...( validateCNumber( srch_str ) ? [ `/api/gisid?gisid=${srch_str}` ] : [ ] ),
+                    ...( validateOnlyAlpha( srch_str ) ? [ `/api/facility?name=${srch_str}&type=park` ] : [ ] )
 
-            // GISID Query
-            console.log( validateGISID( srch_str ) )
-            if( validateGISID( srch_str ) ){
-                const gisid_args = {
-                    columns: `pid as value, 'GISID' as type, pid as gisid`,
-                    limit: 5,
-                    filter: `pid ~* '${srch_str}' and the_geom is not null`,
-                    group: `pid`
-                
-                }
-                urls.push( `https://api.mcmap.org/v1/query/tax_parcels?${jsonToURL( gisid_args )}` )
+                    ]
             
-            }
-
-            // Park Query
-            const park_args = {
-                columns: `prkname as value, 'PARK' as type, round(ST_X(p.the_geom)::NUMERIC,4) as x, round(ST_Y(p.the_geom)::NUMERIC,4) as y, round(ST_X(ST_Transform(p.the_geom, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(p.the_geom, 4326))::NUMERIC,4) as lat, t.pid as gisid, prkaddr as address`,
-                limit: 5,
-                filter: `prkname ilike '%${srch_str}%' and p.the_geom && t.the_geom`
-            }
-            urls.push( `https://api.mcmap.org/v1/query/parks p, tax_parcels t?${jsonToURL( park_args )}` )
-
-            // Library Query
-            const library_args = {
-                columns: `name as value, 'LIBRARY' as type, round(ST_X(l.the_geom)::NUMERIC,4) as x, round(ST_X(l.the_geom)::NUMERIC,4) as y, round(ST_X(ST_Transform(l.the_geom, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(l.the_geom, 4326))::NUMERIC,4) as lat, p.pid as gisid, address`,
-                limit: 5,
-                filter: `name ilike '%${srch_str}%' and l.the_geom && p.the_geom`
-            }
-            urls.push( `https://api.mcmap.org/v1/query/libraries l, tax_parcels p?${jsonToURL( library_args )}` )
-
-            // Public Schools Query
-            const public_schools_args = {
-                columns: `s.schlname as value, 'SCHOOL' as type, round(ST_X(s.the_geom)::NUMERIC,4) as x, round(ST_X(s.the_geom)::NUMERIC,4) as y, round(ST_X(ST_Transform(s.the_geom, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(s.the_geom, 4326))::NUMERIC,4) as lat, p.pid as gisid, s.address || ' ' ||s.city as address, s.type as desc`,
-                limit: 5,
-                filter: `s.schlname ilike '%${srch_str}%' and s.the_geom && p.the_geom`
-            }
-            urls.push( `https://api.mcmap.org/v1/query/schools s, tax_parcels p?${jsonToURL( public_schools_args )}` )
-
-            // Charter Schools Query
-            const charter_schools_args = {
-                columns: `s.school as value, 'SCHOOL' as type, round(ST_X(s.the_geom)::NUMERIC,4) as x, round(ST_X(s.the_geom)::NUMERIC,4) as y, round(ST_X(ST_Transform(s.the_geom, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(s.the_geom, 4326))::NUMERIC,4) as lat, p.pid as gisid, s.address || ' ' || s.city || ' NC ' || zip as address`,
-                limit: 5,
-
-                filter: `s.school ilike '%${srch_str}%' and s.the_geom && p.the_geom`
-            }
-            urls.push( `https://api.mcmap.org/v1/query/charter_schools s, tax_parcels p?${jsonToURL( charter_schools_args )}` )
-
-            // Private Schools Query
-            const private_schools_args = {
-                columns: `s.school as value, 'SCHOOL' as type, round(ST_X(s.the_geom)::NUMERIC,4) as x, round(ST_X(s.the_geom)::NUMERIC,4) as y, round(ST_X(ST_Transform(s.the_geom, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(s.the_geom, 4326))::NUMERIC,4) as lat, p.pid as gisid, s.address || ' ' || s.city || ' NC ' || zip as address`,
-                limit: 5,
-                filter: `s.school ilike '%${srch_str}%' and s.the_geom && p.the_geom`
-            }
-            urls.push( `https://api.mcmap.org/v1/query/schools_private s, tax_parcels p?${jsonToURL( private_schools_args )}` )
-
-            // Business Query
-            const business_args = {
-                columns: `b.company as value, 'BUSINESS' as type, round(ST_X(b.the_geom)::NUMERIC,4) as x, round(ST_X(b.the_geom)::NUMERIC,4) as y, round(ST_X(ST_Transform(b.the_geom, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(b.the_geom, 4326))::NUMERIC,4) as lat, p.pid as gisid, b.address || ' ' || b.city || ' ' || b.state || ' ' || b.zip as address`,
-                limit: 5,
-                filter: `b.company ilike '%${srch_str}%' and b.the_geom && p.the_geom`
-            }
-            urls.push( `https://api.mcmap.org/v1/query/businesswise_businesses b, tax_parcels p?${jsonToURL( business_args )}` )
 
             // Fetch Results
             spinner = true
