@@ -133,12 +133,12 @@
         filterResults = ( ) =>{ // format results
             results = items.map( item => {
                 const text = typeof item !== "string" ? item.value : item
-                
+
                 return {
                     value: item.value || item,
                     type: item.type,
                     label: null2empty( str ) === '' ? text : text.replace( RegExp( regExpEscape( null2empty( str ).trim( ) ), "i" ), "<span class='text-gray-700 font-bold'>$&</span>" )
-
+                    
                 }
 
             } )

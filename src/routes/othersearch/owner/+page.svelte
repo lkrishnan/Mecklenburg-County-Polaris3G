@@ -88,16 +88,16 @@
             const srch_str = event.detail.trim( ),
                 getArgs = ( ) => {
                     const args = { 
-                            value: field,
+                            get: field,
                             ...( fields.lastname.val && { lastname: fields.lastname.val } ),
-                            ...( fields.firstname.val && { firstname: fields.firstname.val } ), 
+                            ...( fields.firstname.val && { firstname: fields.firstname.val } ),
                             
                         }
 
                     return args
 
                 },
-                response = await fetch( `/api/owner?${jsonToURL( getArgs( ) )}` ), 
+                response = await fetch( `/api/parcel/owner?${jsonToURL( getArgs( ) )}` ), 
                 json = ( response.ok ? await response.json( ) : [ ] )
 
             fields[ field ] = { ...fields[ field ], items:json, spinner: false, nomatch: false }

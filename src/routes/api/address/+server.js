@@ -12,12 +12,11 @@ export const GET = async ( { url, fetch } ) => {
                             and the_geom is not null`
             },
         response = await fetch( `https://api.mcmap.org/v1/query/master_address_table?${jsonToURL( args )}`)
-        
 
     if( response.ok ){
         const data = await response.json( )
         
-        return new Response( JSON.stringify( data ), { status: 200 } )
+        return new Response( JSON.stringify( data ), { status: 200, statusText: "OK" } )
 
     }
 

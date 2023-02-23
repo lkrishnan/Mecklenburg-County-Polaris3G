@@ -89,13 +89,12 @@
             const srch_str = event.detail.trim( ),
                 urls = [
                     `/api/address?addr=${srch_str}`,
-                    ...( validateCNumber( srch_str ) ? [ `/api/gisid?gisid=${srch_str}` ] : [ ] ),
+                    ...( validateCNumber( srch_str ) ? [ `/api/parcel?gisid=${srch_str}` ] : [ ] ),
+                    `/api/parcel?pid=${srch_str}`,
                     ...( validateOnlyAlpha( srch_str ) ? [ 
-                            `/api/facility?name=${srch_str}&type=park`,
-                            `/api/facility?name=${srch_str}&type=library`,
-                            `/api/facility?name=${srch_str}&type=public_school`,
-                            `/api/facility?name=${srch_str}&type=charter_school`,
-                            `/api/facility?name=${srch_str}&type=private_school`, 
+                            `/api/facility/park?name=${srch_str}`,
+                            `/api/facility/library?name=${srch_str}`,
+                            `/api/facility/school?name=${srch_str}`,
                             `/api/facility?name=${srch_str}&type=business`,
 
                         ] : [ ] )
