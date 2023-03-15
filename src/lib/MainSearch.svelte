@@ -57,6 +57,7 @@
     import { validateCNumber, validateOnlyAlpha } from "$lib/validate" 
     import { goto } from "$app/navigation"
     import { last_hit } from '$lib/store.js'
+    import { srchstr2qrystr } from "$lib/utils"
 	
     // variables
     let items = [ ],
@@ -74,7 +75,7 @@
     // constants
     const handleHit = event => {
             last_hit.set( event.detail )
-            goto( `/${event.detail.type.toLowerCase( )}/${event.detail.value.replace(/\s/g, "+").toLowerCase( )}` )
+            goto( `/${event.detail.type.toLowerCase( )}/${srchstr2qrystr( event.detail.value )}` )
 
         },
 
@@ -101,7 +102,6 @@
 
                     ]
             
-
             // Fetch Results
             spinner = true
             jsons = await Promise.all( urls.map( url => fetch( url ).then( resp => resp.json( ) ) ) )
@@ -109,10 +109,10 @@
             nomatch = false
             
             items = [ ].concat( ...jsons )
-                        .map( elem => { 
+                        /*.map( elem => { 
                             elem.gisid = elem.gisid || elem.pid 
                             return elem 
-                        } )
+                        } )*/
 
             if( items.length === 0 ) nomatch = true
 

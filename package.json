@@ -15,12 +15,12 @@
 		"roll2dev": "npm run build && npm run move2dev",
 		"move2stage": "del-cli //gispolarisdev1v/d$/node_apps/polaris3g/!(node_modules)* -force && copyfiles -u 1 build/**/* //gispolarisdev1v/d$/node_apps/polaris3g && copyfiles ./package.json //gispolarisdev1v/d$/node_apps/polaris3g",
 		"roll2stage": "npm run build && npm run move2stage"
-
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/adapter-node": "^1.2.0",
 		"@sveltejs/kit": "^1.8.3",
+		"@vite-pwa/sveltekit": "^0.1.3",
 		"autoprefixer": "^10.4.13",
 		"copyfiles": "^2.4.1",
 		"del-cli": "^5.0.0",

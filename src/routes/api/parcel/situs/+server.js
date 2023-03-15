@@ -54,9 +54,9 @@ export const GET = async ( { url, locals } ) => {
                                 from tb_PUBLOCATION
                                 where ${filter.join( " and " )}`,
                                                                 
-                    info: `select id_pid as parcel_id, id_common_pid as common_parcel_id, LTRIM(RTRIM(num_HouseNo)) as house_number, LTRIM(RTRIM(txt_stdir)) as prefix, 
+                    info: `select id_pid as pid, id_common_pid as gisid, LTRIM(RTRIM(num_HouseNo)) as house_number, LTRIM(RTRIM(txt_stdir)) as prefix, 
                             LTRIM(RTRIM(txt_stname)) as street_name, LTRIM(RTRIM(txt_STTYPE)) as road_type, LTRIM(RTRIM(txt_STSUFFIX)) as suffix, ISNULL(LTRIM(RTRIM(num_HouseUnit)),'') as unit, 
-                            CDE_MUNIC_DESC AS city 
+                            CDE_MUNIC_DESC AS municipality 
                             from tb_PUBLOCATION
                             where ${filter.join( " and " )}`
 

@@ -47,9 +47,10 @@ export const GET = async ( { url, locals } ) => {
                                 where ${filter.join( " and " )}
                                 group by nme_ownerlastname, nme_ownerfirstname`,
 
-                    "info": `select top 5 id_pid as parcel_id, id_common_pid as common_parcel_id, txt_OwnerNumber as owner_number, nme_ownerlastname as last_name, nme_ownerfirstname as first_name, txt_ownertype_desc as owner_type, txt_mailaddr1 as address_1, ISNULL( txt_mailaddr2,'' ) as address_2, txt_city as city, txt_State as state, txt_zipcode as zipcode
+                    "info": `select id_pid as pid, id_common_pid as gisid, txt_OwnerNumber as owner_number, nme_ownerlastname as last_name, nme_ownerfirstname as first_name, txt_ownertype_desc as owner_type, txt_mailaddr1 as address_1, ISNULL( txt_mailaddr2,'' ) as address_2, txt_city as city, txt_State as state, txt_zipcode as zipcode
                             from tb_PubOwner
-                            where ${filter.join( " and " )}`
+                            where ${filter.join( " and " )}
+                            order by id_pid,txt_OwnerNumber`
 
                 },
 

@@ -1,3 +1,7 @@
+<svelte:head>
+	{@html webManifest}
+</svelte:head>
+
 <Map />
 <div class="absolute left-0 top-0 flex flex-col gap-[10px] md:w-[430px] w-full h-full {!hideBg( $page.url.pathname ) ? 'bg-surface md:border-r md:border-edge' : ''} transition-colors text-statictxt">
     {#if !hideMainSearch( $page.url.pathname ) }
@@ -36,12 +40,27 @@
     
 </div>
 
+{#if ReloadPrompt}
+	<svelte:component this={ReloadPrompt} />
+{/if}
+
 <script>
     import "../app.css"
     import Map from "$lib/Map.svelte"
     import MainSearch from "$lib/MainSearch.svelte"
     import { page } from "$app/stores"
 	import { goto } from "$app/navigation"
+	import { onMount } from "svelte"
+	import { pwaInfo } from "virtual:pwa-info"
+
+	let ReloadPrompt
+	
+	onMount( async ( ) => {
+		pwaInfo && ( ReloadPrompt = ( await import( "$lib/ReloadPrompt.svelte" ) ).default )
+
+	} )
+
+	$: webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : ""
 
     const hideMainSearch = ( route ) => {
 			const route_parts = route.split( "/" ),
