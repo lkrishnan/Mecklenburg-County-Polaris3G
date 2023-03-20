@@ -1,5 +1,5 @@
 import { error } from "@sveltejs/kit"
-import jsonToURL from "$lib/jsontourl"
+import { json2URL } from "$lib/utils"
 
 /** @type {import('./$types').RequestHandler} */
 export const GET = async ( { url, fetch } ) => {
@@ -53,12 +53,12 @@ export const GET = async ( { url, fetch } ) => {
         
         getURL = ( typ, name ) => {
             const urls = {
-                    park: `https://api.mcmap.org/v1/query/parks p, tax_parcels t?${jsonToURL( getArgs( typ, name ) )}`,
-                    library: `https://api.mcmap.org/v1/query/libraries l, tax_parcels p?${jsonToURL( getArgs( typ, name ) )}`,
-                    public_school: `https://api.mcmap.org/v1/query/schools s, tax_parcels p?${jsonToURL( getArgs( typ, name ) )}`,
-                    charter_school: `https://api.mcmap.org/v1/query/charter_schools s, tax_parcels p?${jsonToURL( getArgs( typ, name ) )}`,
-                    private_school: `https://api.mcmap.org/v1/query/schools_private s, tax_parcels p?${jsonToURL( getArgs( typ, name ) )}`,
-                    business: `https://api.mcmap.org/v1/query/businesswise_businesses b, tax_parcels p?${jsonToURL( getArgs( typ, name ) )}`,
+                    park: `https://api.mcmap.org/v1/query/parks p, tax_parcels t?${json2URL( getArgs( typ, name ) )}`,
+                    library: `https://api.mcmap.org/v1/query/libraries l, tax_parcels p?${json2URL( getArgs( typ, name ) )}`,
+                    public_school: `https://api.mcmap.org/v1/query/schools s, tax_parcels p?${json2URL( getArgs( typ, name ) )}`,
+                    charter_school: `https://api.mcmap.org/v1/query/charter_schools s, tax_parcels p?${json2URL( getArgs( typ, name ) )}`,
+                    private_school: `https://api.mcmap.org/v1/query/schools_private s, tax_parcels p?${json2URL( getArgs( typ, name ) )}`,
+                    business: `https://api.mcmap.org/v1/query/businesswise_businesses b, tax_parcels p?${json2URL( getArgs( typ, name ) )}`,
 
                 }
 

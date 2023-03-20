@@ -7,13 +7,13 @@ validateNumeric = str => {
 
 },
 
-validateTaxPIDAtleast7 = str => {
+validateAtleast7= str => {
     return ( ( str.match( /^[0-2]\d{6}[0-9]?([A-Z])?$/ ) || str.match( /^[0-2]\d{2}-\d{3}-\d{1}[0-9]?([A-Z])?$/ ) ) ? true : false ) 
 
 },
 
 validateCNumber = str => {
-    return ( str.match( /^[0-2]\d{4}(C|c|)\d{2}$/ ) ? true : false )
+    return ( str.match( /^[0-2]\d{4}(C|c)\d{2}$/ ) ? true : false )
 
 },
 
@@ -29,6 +29,16 @@ validateGISID = str => {
 
 validateOnlyAlpha = str => {
     return ( str.match( /^[a-z]+$/i ) ? true : false )
+
+},
+
+validateIntersection = str => {
+    return ( str.match( /^(\w+\s*){3}(AND|&)(\s*\w+){3}$/ ) ? true : false )
+
+},
+
+validateOwnerName = str => {
+    return ( str.match( /^[A-Za-z]+\s*(,)\s*[A-Za-z]+$/ ) ? true : false )
 
 },
 
@@ -60,4 +70,4 @@ validateForm = fields => {
 
 }
 
-export { validateStreetName, validateNumeric, validateTaxPIDAtleast7, validateCNumber, validateTaxPID, validateGISID, validateOnlyAlpha, validateForm }
+export { validateStreetName, validateNumeric, validateAtleast7, validateCNumber, validateTaxPID, validateGISID, validateOnlyAlpha, validateOwnerName, validateIntersection, validateForm }

@@ -1,5 +1,5 @@
-import { genError, getInvalidParams } from "$lib/api.js"
-import jsonToURL from "$lib/jsontourl"
+import { genError, getInvalidParams } from "$lib/api"
+import { json2URL } from "$lib/utils"
 
 /** @type {import('./validate/$types').RequestHandler} */
 export const GET = async ( { url, locals, fetch } ) => {
@@ -62,7 +62,7 @@ export const GET = async ( { url, locals, fetch } ) => {
                 response = intersect_result.rows
 
             }else{
-                const nearby_result = await fetch( `/api/parcel/geometry/nearby?${ jsonToURL( x&&y ? { x: x, y: y } : {lng: lng, lat: lat} ) }` )
+                const nearby_result = await fetch( `/api/parcel/geometry/nearby?${ json2URL( x&&y ? { x: x, y: y } : {lng: lng, lat: lat} ) }` )
 
                 response = await nearby_result.json( )
 

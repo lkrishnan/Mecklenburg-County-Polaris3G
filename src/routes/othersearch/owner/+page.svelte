@@ -41,7 +41,7 @@
 
 <script>
     import { validateForm } from "$lib/validate" 
-    import jsonToURL from "$lib/jsontourl"
+    import { json2URL } from "$lib/utils"
     import AutoComplete from "$lib/Autocomplete.svelte"
 	
     let fields = {
@@ -97,7 +97,7 @@
                     return args
 
                 },
-                response = await fetch( `/api/parcel/owner?${jsonToURL( getArgs( ) )}` ), 
+                response = await fetch( `/api/parcel/owner?${json2URL( getArgs( ) )}` ), 
                 json = ( response.ok ? await response.json( ) : [ ] )
 
             fields[ field ] = { ...fields[ field ], items:json, spinner: false, nomatch: false }

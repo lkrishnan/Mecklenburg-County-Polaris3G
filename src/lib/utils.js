@@ -19,6 +19,10 @@ filterObj = ( theobj, allowed ) => {
             .filter( key => allowed.includes( key ) )
             .reduce( ( obj, key ) => { obj[ key ] = theobj[ key ]; return obj; }, { } )
 
+},
+json2URL = obj => {
+    return Object.keys( obj ).map( ( i ) => i + '=' + encodeURIComponent( obj[ i ] ) ).join( '&' )
+
 } 
 
-export { null2empty, removeArrayDups, srchstr2qrystr, qrystr2srchstr, filterObj }
+export { null2empty, removeArrayDups, srchstr2qrystr, qrystr2srchstr, filterObj, json2URL }

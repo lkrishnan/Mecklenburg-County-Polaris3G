@@ -1,4 +1,4 @@
-import jsonToURL from "$lib/jsontourl"
+import { json2URL } from "$lib/utils"
 import { genError, getErrorMsg } from "$lib/api.js"
 import { validateNumeric } from "$lib/validate.js"
 

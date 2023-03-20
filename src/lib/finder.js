@@ -1,45 +1,27 @@
-import jsonToURL from "$lib/jsontourl"
 import { selection, results } from "$lib/store"
 import human from "$lib/human"
-import { filterObj } from "$lib/utils"
+import { filterObj, json2URL } from "$lib/utils"
 
 export default async function finder( filter, fetch ){
     console.log( filter )
     try{
-
-        const addgeom = async ( ) => {
-            const response = await fetch( `/api/parcel/geometry?${jsonToURL( { gisid: filter.gisid } )}` ),
-                    rows = await response.json( )
-
-            if( rows.length > 0 )
-                selection.set( { ...filter, geom: rows[ 0 ].geom, sqft: rows[ 0 ].sqft } )
-
-            else
-                selection.set( filter )
-
-        }
-
-        /**************** */
-        // HAS Everything!
-        /**************** */
-        if( [ "matid", "pid", "gisid", "geom" ].every( key => filter.hasOwnProperty( key ) ) ){ 
-            console.log( "No 0")
-            selection.set( filter )
-
-        }
-        
         /********************** */
         // HAS MATID, PID, GISID 
         /********************** */
-        else if( [ "matid", "pid", "gisid" ].every( key => filter.hasOwnProperty( key ) ) ){ 
+        if( [ "matid", "pid", "gisid" ].every( key => filter.hasOwnProperty( key ) ) ){ 
             console.log( "No 1")
-            // Get sqft and parcelgeom
-            const response = await fetch( `/api/parcel/geometry?${jsonToURL( { gisid: filter.gisid } )}` ),
-                rows = await response.json( )
+            if( !filter.hasOwnProperty( "geom" ) ){
+                // Get sqft and parcelgeom
+                const response = await fetch( `/api/parcel/geometry?${json2URL( { gisid: filter.gisid } )}` ),
+                    rows = await response.json( )
 
-            if( rows.length > 0 )
-                finder( { ...filter, geom: rows[ 0 ].geom, sqft: rows[ 0 ].sqft }, fetch )
-                
+                if( rows.length > 0 )
+                    filter = { ...filter, geom: rows[ 0 ].geom, sqft: rows[ 0 ].sqft }
+
+            }
+            
+            selection.set( filter )
+        
         }
         
         /****************** */
@@ -48,13 +30,13 @@ export default async function finder( filter, fetch ){
         else if( [ "matid", "pid" ].every( key => filter.hasOwnProperty( key ) ) ){
             console.log( "No 2")
             // Get GIS ID
-            const response = await fetch( `/api/parcel/geometry?${jsonToURL( { pid: filter.pid } )}` ),
+            const response = await fetch( `/api/parcel/geometry?${json2URL( { pid: filter.pid } )}` ),
                 rows = await response.json( )
 
             if( rows.length > 0 )
                 finder( { ...filter, ...rows[ 0 ] }, fetch )
             
-            else
+            else // The parcel hasn't been mapped yet (this case is very rare)
                 selection.set( filter )
     
         }
@@ -65,7 +47,7 @@ export default async function finder( filter, fetch ){
         else if( [ "matid", "gisid" ].every( key => filter.hasOwnProperty( key ) ) ){
             console.log( "No 3")
             // Get situs
-            const response = await fetch( `/api/parcel/situs?${jsonToURL( { gisid: filter.gisid } )}` ),
+            const response = await fetch( `/api/parcel/situs?${json2URL( { gisid: filter.gisid } )}` ),
                 rows = await response.json( )      
 
             if( rows.length > 0 ){
@@ -76,17 +58,11 @@ export default async function finder( filter, fetch ){
                 if( match > -1 )
                     finder( { ...filter, pid: rows[ match ].pid }, fetch )
                     
-                else // Parcel might not be mapped yet (address with reserved parcel). Ask human for manual input
-                    human( { 
-                        ...filterObj( filter, [ "x", "y", "lat", "lng", "type", "value", "address", "matid" ] ), 
-                        location: true 
-                    }, fetch )
+                else // Parcel might not be mapped yet (address with reserved parcel). Request manual input.
+                    throw "to_human"
                 
-            }else // Parcel might not be mapped yet (address with reserved parcel). Ask human for manual input
-                human( { 
-                    ...filterObj( filter, [ "x", "y", "lat", "lng", "type", "value", "address", "matid" ] ), 
-                    location: true 
-                }, fetch )
+            }else // Parcel might not be mapped yet (address with reserved parcel). Request manual input.
+                throw "to_human"
             
         }
         
@@ -111,10 +87,10 @@ export default async function finder( filter, fetch ){
                     finder( { ...filter, ...rows[ match ] }, fetch )
                     
                 else // The MAT PID might be bad, let the user pick the right MAT in the property details card
-                    addgeom( )
+                    throw "with_no_mat"
                 
             }else // Unable to find an address point within the ground parcel, must be a vacant parcel
-                addgeom( )
+                throw "with_no_mat"
             
         }
         
@@ -123,30 +99,65 @@ export default async function finder( filter, fetch ){
         /********** */
         else if( [ "matid" ].every( key => filter.hasOwnProperty( key ) ) ){
             console.log( "No 5")
-            // Get MAT ID
+            // Get GIS ID and geometry
             const response = await fetch( `/api/parcel/geometry?matid=${filter.matid}` ),
                 rows = await response.json( )
 
             if( rows.length > 0 )
                 finder( { ...filter, ...rows[ 0 ] }, fetch )
 
-            else{ // Unable to find an intersecting ground parcel, show nearby ground parcels and ask user to manually pick one.
-                const geom_resp = await fetch( `/api/parcel/geometry/nearby?x=${filter.x }&y=${filter.y}` ),
-                    geom_rows = await geom_resp.json( ),
-                    gisid = geom_rows.reduce( ( a, row ) => [ ...a, row.gisid ], [ ] ).join(",")
-                    
-                //if( gisid.includes( "," ) )
-
-                console.log( geom_resp, geom_rows, gisid )
-
-            }
-
+            else // Unable to find an intersecting ground parcel. Request manual input.
+                throw "to_human"
             
         }
+
+        /********** */
+        // Has GIS ID
+        /********** */
+        else if( [ "gisid" ].every( key => filter.hasOwnProperty( key ) ) ){
+            console.log( "No 6")
+            const response = await fetch( `/api/parcel/switcher?gisid=${filter.gisid}` ),
+                rows = await response.json( )
+
+            if( rows.length > 1 )
+                throw "to_human"
+                
+            else if( rows.length > 0 )
+                finder( { ...filter, ...rows[ 0 ] }, fetch )
+
+            else
+                throw "hands_up"
+                
+
+        }
         
-    }catch( err ){
-        return { type: "error",  "msg": err }
-        
+    }catch( exception ){
+        switch( exception ){
+            case "to_human":
+                human( filter )
+                break
+
+            case "hands_up":
+                console.log( "show unable to find page" )
+                break
+
+            case "with_no_mat":
+                if( !filter.hasOwnProperty( "geom" ) ){
+                    // Get sqft and parcelgeom
+                    const response = await fetch( `/api/parcel/geometry?${json2URL( { gisid: filter.gisid } )}` ),
+                        rows = await response.json( )
+
+                    if( rows.length > 0 )
+                        filter = { ...filter, geom: rows[ 0 ].geom, sqft: rows[ 0 ].sqft }
+
+                }
+
+                selection.set( filter )
+
+                break
+
+        }
+                
     }
 
 }

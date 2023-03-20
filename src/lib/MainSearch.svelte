@@ -54,11 +54,11 @@
 
 <script>
     import AutoComplete from "$lib/Autocomplete.svelte"
-    import { validateCNumber, validateOnlyAlpha } from "$lib/validate" 
+    import { validateCNumber, validateOnlyAlpha, validateOwnerName, validateNumeric, validateAtleast7, validateIntersection } from "$lib/validate" 
     import { goto } from "$app/navigation"
     import { last_hit } from '$lib/store.js'
-    import { srchstr2qrystr } from "$lib/utils"
-	
+    import { srchstr2qrystr, json2URL } from "$lib/utils"
+    	
     // variables
     let items = [ ],
         nomatch = false,
@@ -88,19 +88,33 @@
             let jsons
 
             const srch_str = event.detail.trim( ),
+                space_split = srch_str.split( " " ),
+                comma_split = srch_str.split( "," ).map( item => item.trim( ) ),
+                amprsnd_split = srch_str.split( "&" ).map( item => item.trim( ) ),
                 urls = [
-                    `/api/address?addr=${srch_str}`,
+                    //address
+                    ...( validateNumeric( space_split[ 0 ] ) ? [ `/api/address?addr=${srch_str}` ] : [ ] ),
+                    //gisid
                     ...( validateCNumber( srch_str ) ? [ `/api/parcel?gisid=${srch_str}` ] : [ ] ),
-                    `/api/parcel?pid=${srch_str}`,
+                    //pid
+                    ...( validateAtleast7 ? [ `/api/parcel?pid=${srch_str}` ] : [ ] ),
+                    //intersection
+                    `/api/road?name=${srch_str}`,
+                    //intersection
+                    ...( validateIntersection( srch_str ) ? [ `/api/intersection?street1=${amprsnd_split[ 0 ]}&street2=${amprsnd_split[ 1 ]}` ] : [ ] ),
+                    //facilities
                     ...( validateOnlyAlpha( srch_str ) ? [ 
                             `/api/facility/park?name=${srch_str}`,
                             `/api/facility/library?name=${srch_str}`,
                             `/api/facility/school?name=${srch_str}`,
-                            `/api/facility?name=${srch_str}&type=business`,
+                            `/api/facility/business?name=${srch_str}`,
 
-                        ] : [ ] )
+                        ] : [ ] ),
+                    //owner name - fullname
+                    ...( validateOwnerName( srch_str ) ? [ `/api/parcel/owner?get=fullname&lastname=${comma_split[ 0 ]}&firstname=${comma_split[ 1 ]}` ] : [ ] ),
+                    
 
-                    ]
+                ]
             
             // Fetch Results
             spinner = true
