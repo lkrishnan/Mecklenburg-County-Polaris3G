@@ -42,6 +42,13 @@ validateOwnerName = str => {
 
 },
 
+validateAddress = str => {
+    const space_split = str.split( " " )
+
+    return ( validateNumeric( space_split[ 0 ] ) ? true : false )
+
+},
+
 validateForm = fields => {
     let valid = true
 
@@ -70,4 +77,4 @@ validateForm = fields => {
 
 }
 
-export { validateStreetName, validateNumeric, validateAtleast7, validateCNumber, validateTaxPID, validateGISID, validateOnlyAlpha, validateOwnerName, validateIntersection, validateForm }
+export { validateStreetName, validateNumeric, validateAtleast7, validateCNumber, validateTaxPID, validateGISID, validateOnlyAlpha, validateOwnerName, validateIntersection, validateAddress, validateForm }

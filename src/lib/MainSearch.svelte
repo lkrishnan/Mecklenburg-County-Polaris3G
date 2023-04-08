@@ -2,9 +2,10 @@
     <!-- Hamburger Button -->
     <div class = "absolute z-10 left-[0px] my-1 ml-1">
         <button class="inline-flex items-center justify-center w-10 h-10 text-primary transition-colors duration-150 rounded-full focus:shadow-outline hover:bg-secondary">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <!--<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
+            </svg>-->
+            <calcite-icon icon="hamburger" scale="m" class="w-6 h-6 stroke-primary"></calcite-icon>
         </button>
     </div>
     <div class = "md:hidden absolute z-1 right-[0px] my-1 mr-1">
@@ -26,8 +27,8 @@
         
     </div>
     <!-- Search Row -->
-    <AutoComplete placeholder="Enter address / parcel# /owner / landmark" minchar="5" spinner={spinner} go={true} nomatch={nomatch} {items} padding="px-12 py-1 md:pr-1 pr-11"
-        on:hit={handleHit} on:query={handleQuery} on:open={handleOpen} />
+    <AutoComplete placeholder="Enter address / parcel# /owner / landmark" minchar="3" spinner={spinner} go={true} nomatch={nomatch} {items} padding="px-12 py-1 md:pr-1 pr-11"
+        on:hit={handleHit} on:brute={handleBrute} on:query={handleQuery} on:open={handleOpen} />
 
      <!-- Navigation Row -->
     {#if !is_open}
@@ -53,12 +54,13 @@
 </div>
 
 <script>
-    import AutoComplete from "$lib/Autocomplete.svelte"
-    import { validateCNumber, validateOnlyAlpha, validateOwnerName, validateNumeric, validateAtleast7, validateIntersection } from "$lib/validate" 
     import { goto } from "$app/navigation"
-    import { last_hit } from '$lib/store.js'
-    import { srchstr2qrystr, json2URL } from "$lib/utils"
-    	
+    import AutoComplete from "$lib/Autocomplete.svelte"
+    import { getAPIURL } from "$lib/api"
+    import { last_hit } from '$lib/store'
+    import { srchstr2qrystr } from "$lib/utils"
+    import { validateCNumber, validateAddress, validateOwnerName, validateNumeric, validateAtleast7, validateIntersection } from "$lib/validate" 
+        	
     // variables
     let items = [ ],
         nomatch = false,
@@ -79,6 +81,10 @@
 
         },
 
+        handleBrute = event => {
+            console.log( event )
+        },
+
         handleOpen = event => {
             is_open  = event.detail.open
 
@@ -88,32 +94,30 @@
             let jsons
 
             const srch_str = event.detail.trim( ),
-                space_split = srch_str.split( " " ),
-                comma_split = srch_str.split( "," ).map( item => item.trim( ) ),
-                amprsnd_split = srch_str.split( "&" ).map( item => item.trim( ) ),
                 urls = [
                     //address
-                    ...( validateNumeric( space_split[ 0 ] ) ? [ `/api/address?addr=${srch_str}` ] : [ ] ),
+                    ...( validateAddress( srch_str ) ? [ getAPIURL( "address", srch_str ) ] : [ ] ),
                     //gisid
-                    ...( validateCNumber( srch_str ) ? [ `/api/parcel?gisid=${srch_str}` ] : [ ] ),
+                    ...( validateCNumber( srch_str ) ? [ getAPIURL( "gisid", srch_str ) ] : [ ] ),
                     //pid
-                    ...( validateAtleast7 ? [ `/api/parcel?pid=${srch_str}` ] : [ ] ),
+                    ...( validateAtleast7 ? [ getAPIURL( "pid", srch_str ) ] : [ ] ),
+                    //road
+                    getAPIURL( "road", srch_str ),
                     //intersection
-                    `/api/road?name=${srch_str}`,
-                    //intersection
-                    ...( validateIntersection( srch_str ) ? [ `/api/intersection?street1=${amprsnd_split[ 0 ]}&street2=${amprsnd_split[ 1 ]}` ] : [ ] ),
+                    ...( validateIntersection( srch_str ) ? [ getAPIURL( "intersection", srch_str ) ] : [ ] ),
                     //facilities
-                    ...( validateOnlyAlpha( srch_str ) ? [ 
-                            `/api/facility/park?name=${srch_str}`,
-                            `/api/facility/library?name=${srch_str}`,
-                            `/api/facility/school?name=${srch_str}`,
-                            `/api/facility/business?name=${srch_str}`,
+                    ...( ( validateNumeric( srch_str ) || validateCNumber( srch_str ) ) ? [ ] : [ 
+                            getAPIURL( "park", srch_str ),
+                            getAPIURL( "library", srch_str ),
+                            getAPIURL( "school", srch_str ),
+                            getAPIURL( "business", srch_str ),
+                            getAPIURL( "busstop", srch_str ),
+                            getAPIURL( "lightrail", srch_str ),
 
-                        ] : [ ] ),
+                        ] ),
                     //owner name - fullname
-                    ...( validateOwnerName( srch_str ) ? [ `/api/parcel/owner?get=fullname&lastname=${comma_split[ 0 ]}&firstname=${comma_split[ 1 ]}` ] : [ ] ),
-                    
-
+                    ...( validateOwnerName( srch_str ) ? [ getAPIURL( "owner", srch_str ) ] : [ ] ),
+            
                 ]
             
             // Fetch Results
@@ -133,7 +137,6 @@
         },
         
         handleContextChoice = where => {
-            console.log( where )
             context_menu_open = false
 
         }

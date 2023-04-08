@@ -39,6 +39,7 @@
 	"type": "module",
 	"dependencies": {
 		"@arcgis/core": "^4.26.0",
+		"@esri/calcite-ui-icons": "^3.21.2",
 		"dotenv": "^16.0.3",
 		"mssql": "^9.1.1",
 		"pg": "^8.9.0"

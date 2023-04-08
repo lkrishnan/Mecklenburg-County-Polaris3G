@@ -21,6 +21,7 @@ export default async function finder( filter, fetch ){
             }
             
             selection.set( filter )
+            
         
         }
         
@@ -128,6 +129,41 @@ export default async function finder( filter, fetch ){
             else
                 throw "hands_up"
                 
+
+        }
+
+        /********** */
+        // Has STCODE
+        /********** */
+        else if( [ "lastname", "firstname" ].some( key => filter.hasOwnProperty( key ) ) ){
+            console.log( "No 7" )
+            let params = { }
+            
+            [ "lastname", "firstname" ].forEach( key => {
+                if( filter.hasOwnProperty( key ) )
+                    params[ key ] = filter[ key ]
+
+            } )
+
+            const response = await fetch( `/api/parcel/owner?${json2URL( params )}` ),
+                rows = await response.json( )
+
+            if( rows.length > 1 )
+                throw "to_human"
+                
+            else if( rows.length > 0 )
+                finder( { ...filter, ...rows[ 0 ] }, fetch )
+
+            else
+                throw "hands_up"
+
+        }
+
+        /********** */
+        // Has STCODE
+        /********** */
+        else if( [ "stcode" ].every( key => filter.hasOwnProperty( key ) ) ){
+            console.log( "No 7" )
 
         }
         

@@ -3,9 +3,9 @@
 </svelte:head>
 
 <Map />
-<div class="absolute left-0 top-0 flex flex-col gap-[10px] md:w-[430px] w-full h-full {!hideBg( $page.url.pathname ) ? 'bg-surface md:border-r md:border-edge' : ''} transition-colors text-statictxt">
+<div class="absolute left-0 top-0 flex flex-col md:w-[430px] w-full h-full {!hideBg( $page.url.pathname ) ? 'bg-surface md:border-r md:border-edge' : ''} transition-colors text-statictxt bg-stone-100">
     {#if !hideMainSearch( $page.url.pathname ) }
-		<div class="flex flex-initial px-2 pt-2 ">
+		<div class="flex flex-initial p-2">
 			<MainSearch />
 		</div>	
 		
@@ -32,7 +32,7 @@
 	{/if}   
     
     <div class="flex-auto overflow-auto scrollbar">
-        <main>
+		<main>
             <slot />
         </main>
 
@@ -84,21 +84,27 @@
 <style>
     /* For Firefox Browser */
 .scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #9ca3af #fff;
+  	scrollbar-width: thin;
+  	scrollbar-color: #9ca3af #f3f4f6;
+
 }
 
 
 /* For Chrome, EDGE, Opera, Others */
 .scrollbar::-webkit-scrollbar {
-  width: 5px;
+  	width: 7px;
+
 }
 
 .scrollbar::-webkit-scrollbar-track { 
-  background: #fff;
+  	background: #f3f4f6;
+
 }
 
 .scrollbar::-webkit-scrollbar-thumb { 
-  background:#9ca3af;
+  	background:#9ca3af;
+
 }
+
 </style>
+

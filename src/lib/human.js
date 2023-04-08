@@ -1,15 +1,19 @@
 import { json2URL } from "$lib/utils"
 import { selection, results } from "$lib/store"
 
-export default async function human( filter, fetch ){
+export default async function human( filter ){
     try{
         console.log( "human", filter )
-        if( [ "x", "y" ].every( key => filter.hasOwnProperty( key ) ) ){
+        //if( [ "x", "y" ].every( key => filter.hasOwnProperty( key ) ) ){
             
-        }
+        //}
 
-        else if( [ "gisid" ].every( key => filter.hasOwnProperty( key ) ) ){
-            
+        if( [ "gisid" ].every( key => filter.hasOwnProperty( key ) ) ){
+            const response = await fetch( `/api/parcel/situs/ownership?gisid=${filter.gisid}` ),
+                rows = await response.json( )
+
+            results.set( rows )
+
         }
         
     }catch( err ){

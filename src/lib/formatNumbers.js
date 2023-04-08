@@ -1,21 +1,22 @@
-function formatCommas(num, decimals = 0) {
-  if (num === null || isNaN(num)) return "N/A";
-  return parseFloat(num).toLocaleString("en-US", {
-    maximumFractionDigits: decimals,
-  });
-}
+const formatCommas = ( num, decimals = 0 ) => {
+		if( num === null || isNaN( num ) ) 
+			return "N/A"
 
-function formatMoney(num) {
-  if (num === null || isNaN(num)) return "N/A";
-  return parseFloat(num).toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-  });
-}
+		return parseFloat( num ).toLocaleString( "en-US", { maximumFractionDigits: decimals, } )
 
-function formatDate(dateString) {
-  let date = new Date(dateString);
-  return date.toLocaleDateString("en-US");
-}
+	},
+	formatMoney = num => {
+  		if( num === null || isNaN( num ) ) 
+			return "N/A"
 
-export { formatCommas, formatMoney, formatDate };
+  		return parseFloat( num ).toLocaleString( "en-US", { style: "currency", currency: "USD", } )
+
+	},
+	formatDate = dateString => {
+  		let date = new Date( dateString )
+  		
+		return date.toLocaleDateString( "en-US" )
+
+	}
+
+export { formatCommas, formatMoney, formatDate }

@@ -1,10 +1,36 @@
 /* Write your global styles here, in PostCSS syntax */
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html, body {
 	overflow: none !important;
+	font-family: Roboto, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";;
+	
 }
 
 .esri-view .esri-view-surface--inset-outline:focus::after {  outline: none !important;}
+
+/* For Firefox Browser */
+.scrollbar {
+	scrollbar-width: thin;
+	scrollbar-color: #9ca3af #f3f4f6;
+
+}
+  /* For Chrome, EDGE, Opera, Others */
+.scrollbar::-webkit-scrollbar {
+	width: 7px;
+
+}
+
+.scrollbar::-webkit-scrollbar-track { 
+	background: #f3f4f6;
+
+}
+
+.scrollbar::-webkit-scrollbar-thumb { 
+	background:#9ca3af;
+
+}

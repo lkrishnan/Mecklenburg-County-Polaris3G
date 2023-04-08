@@ -10,6 +10,7 @@ export const GET = async ( { url, locals, fetch } ) => {
         let sql, result
         const addr = url.searchParams.get( "addr" ) ?? null,
             gisid = url.searchParams.get( "gisid" ) ?? null,
+            fulladdr = url.searchParams.get( "fulladdr" ) ?? null,
             { gis_pool } = locals
             
         if( addr ){
@@ -29,8 +30,18 @@ export const GET = async ( { url, locals, fetch } ) => {
                 response = [ ]
                 //throw new Error( "Invalid House number and/or street name" )
     
+        }else if( fulladdr ){
+            sql = `select full_address as value, 'ADDRESS' as type, cast(num_addr as text) as matid, num_parent_parcel as matpid, full_address as address,
+                    round(ST_X(shape)::NUMERIC,4) as x, round(ST_Y(shape)::NUMERIC,4) as y, 
+                    round(ST_X(ST_Transform(shape, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(shape, 4326))::NUMERIC,4) as lat
+                    from masteraddress_pt
+                    where full_address = '${fulladdr}'`
+
+            result = await gis_pool.query( sql )
+            response = result.rows
+
         }else if( gisid ){
-            sql = `select m.num_addr as matid, m.full_address as address, m.num_parent_parcel as matpid, 
+            sql = `select m.num_addr::text as matid, m.full_address as address, m.num_parent_parcel as matpid, 
                     ST_Y( m.shape ) as y, ST_X( m.shape ) as x, ST_y( ST_transform( m.shape, 4326 ) ) as lat, ST_x( ST_transform( m.shape, 4326 ) ) as lng, 
                     p.pid as gisid, ST_AsText( p.shape ) as geom, ST_Area( p.shape ) As sqft, round(ST_x(ST_PointOnSurface(p.shape))::NUMERIC,4) as centroid_x, round(ST_y(ST_PointOnSurface(p.shape))::NUMERIC,4) as centroid_y,
                     round(ST_x(ST_PointOnSurface(ST_transform(p.shape,4326)))::NUMERIC,4) as centroid_lon, round(ST_y(ST_PointOnSurface(ST_transform(p.shape,4326)))::NUMERIC,4) as centroid_lat
@@ -43,7 +54,7 @@ export const GET = async ( { url, locals, fetch } ) => {
             response = result.rows
         
         }else
-            throw new Error( getErrorMsg( url.searchParams, [ "addr", "gisid" ] ) )
+            throw new Error( getErrorMsg( url.searchParams, [ "addr", "fulladdr", "gisid" ] ) )
             
     }catch( err ){
         response = genError( { "message": err.message, "code": err.code } )

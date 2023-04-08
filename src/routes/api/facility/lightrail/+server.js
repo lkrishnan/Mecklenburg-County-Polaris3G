@@ -1,5 +1,3 @@
-import { genError, getInvalidParams } from "$lib/api.js"
-
 /** @type {import('./validate/$types').RequestHandler} */
 export const GET = async ( { url, locals } ) => {
     let response, status = 200
@@ -9,13 +7,13 @@ export const GET = async ( { url, locals } ) => {
 
         if( name ){ 
             const { gis_pool } = locals,
-                sql = `SELECT prkname as value, 'PARK' as type, round(ST_X(shape)::NUMERIC,4) as x, round(ST_Y(shape)::NUMERIC,4) as y, 
-                        round(ST_X(ST_Transform(shape, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(shape, 4326))::NUMERIC,4) as lat, 
-                        prkname as name, prkaddr as address, true as nearby
-                        FROM parks_pt
-                        WHERE prkname ~* $$${name}$$
+                sql = `select name as value, 'LIGHTRAIL' as type, round(ST_X(shape)::NUMERIC,4) as x, round(ST_Y(shape)::NUMERIC,4) as y, 
+                        round(ST_X(ST_Transform(shape, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(shape, 4326))::NUMERIC,4) as lat,
+                        name as lightrail, true as nearby 
+                        from cats_blueline_stations_pt
+                        where name ~* $$${name}$$
                         LIMIT 5`,
-                result = await gis_pool.query( sql )
+                        result = await gis_pool.query( sql )
 
             response = result.rows
                 

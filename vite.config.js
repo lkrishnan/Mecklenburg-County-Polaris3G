@@ -37,7 +37,6 @@ const config = {
 				runtimeCaching: [ //not working yet
 					{
 						urlPattern: ( {url} ) => {
-							console.log(url)
 							return url.pathname.startsWith( "/api" )
 						
 						},
