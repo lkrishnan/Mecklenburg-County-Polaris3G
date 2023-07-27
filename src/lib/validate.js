@@ -7,6 +7,11 @@ validateNumeric = str => {
 
 },
 
+validateSpChar = str => {
+    return ( str.match( /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/ ) ? true : false )
+
+},
+
 validateAtleast7= str => {
     return ( ( str.match( /^[0-2]\d{6}[0-9]?([A-Z])?$/ ) || str.match( /^[0-2]\d{2}-\d{3}-\d{1}[0-9]?([A-Z])?$/ ) ) ? true : false ) 
 
@@ -49,6 +54,42 @@ validateAddress = str => {
 
 },
 
+validateCountyYear = yr => {
+    yr = parseInt( yr );
+        
+    return ( ( !isNaN( yr ) && ( yr >= 0 && yr <= new Date( ).getFullYear( ) ) ) ? true : false )
+
+},
+    
+validateLatLng = str => {
+    const coords = str.split( "," ).map( coord => parseFloat( coord.trim( ) ) )
+            
+    if( ( ( coords[ 0 ] >= -81.0562802910356 && coords[ 0 ] <= -80.5567016747919 ) && ( coords[ 1 ] >= 34.9991000096838 && coords[ 1 ] <= 35.5560858870075 ) ) || 
+            ( ( coords[ 1 ] >= -81.0562802910356 && coords[ 1 ] <= -80.5567016747919 ) && ( coords[ 0 ] >= 34.9991000096838 && coords[ 0 ] <= 35.5560858870075 ) ) )
+        return true
+    
+    else 
+        return false
+    
+        
+},
+    
+validateStatePlane = inp => {
+    const coords = ( Array.isArray( inp ) ? inp : inp.split( "," ).map( coord => parseFloat( coord.trim( ) ) ) )
+
+    if( ( ( coords[ 0 ] >= 1384251 && coords[ 0 ] <= 1537013 ) && ( coords[ 1 ] >= 460978 && coords[ 1 ] <= 660946 ) ) || 
+            ( ( coords[ 1 ] >= 1384251 && coords[ 1 ] <= 1537013 ) && ( coords[ 0 ] >= 460978 && coords[ 0 ] <= 660946 ) ) )
+        return true
+        
+    else
+        return false
+
+},
+
+validateRings = arr => {
+    return ( arr.flat( ).filter( item => !validateStatePlane( item ) ).length > 0 ? false : true )
+},
+
 validateForm = fields => {
     let valid = true
 
@@ -77,4 +118,6 @@ validateForm = fields => {
 
 }
 
-export { validateStreetName, validateNumeric, validateAtleast7, validateCNumber, validateTaxPID, validateGISID, validateOnlyAlpha, validateOwnerName, validateIntersection, validateAddress, validateForm }
+export { validateStreetName, validateNumeric, validateSpChar, validateAtleast7, validateCNumber, validateTaxPID, 
+    validateGISID, validateOnlyAlpha, validateOwnerName, validateIntersection, validateAddress, 
+    validateCountyYear, validateLatLng, validateStatePlane, validateRings, validateForm  }

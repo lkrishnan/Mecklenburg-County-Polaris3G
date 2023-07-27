@@ -1,0 +1,611 @@
+[
+    {
+        "id": "labels", 
+        "name": "Labels",
+        "sublyrs": {
+            "lbls": [ 0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13, 14, 15, 16 ]
+        },
+        "checked": false,
+        "open": false,
+        "children": [
+            { 
+                "id": "dims", 
+                "name": "Lot Dimensions", 
+                "sublyrs": {
+                    "lbls": [ 0, 16 ]
+                },                
+                "checked": false
+                
+            }, { 
+                "id": "addrnos", 
+                "name": "Address No", 
+                "sublyrs": {
+                    "lbls": [ 1 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "pids", 
+                "name": "Parcel IDs", 
+                "sublyrs": {
+                    "lbls": [ 2 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "businesses", 
+                "name": "Businesses", 
+                "sublyrs": {
+                    "lbls": [ 3 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "pois", 
+                "name": "Points of Interest", 
+                "sublyrs": {
+                    "lbls": [ 4, 8, 9, 10, 11, 12, 13, 14, 15 ]
+                },
+                "checked": false
+
+            }
+
+        ]
+
+    }, {
+        "id": "boundaries", 
+        "name": "Boundaries",
+		"sublyrs": {
+            "ostreets": [ 11, 12, 13, 20, 23, 25, 26, 27 ]
+        },
+        "checked": false,
+        "open": false,
+        "children": [
+            { 
+                "id": "commdist", 
+                "name": "County Commissioner Districts", 
+                "sublyrs": {
+                    "ostreets": [ 11 ]
+                },
+                "checked": false
+                
+            }, { 
+                "id": "citycncldist", 
+                "name": "Charlotte City Council Districts", 
+                "sublyrs": {
+                    "ostreets": [ 12 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "mundist", 
+                "name": "Municipal Service Districts", 
+                "sublyrs": {
+                    "ostreets": [ 20 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "sphrinflu", 
+                "name": "Spheres of Influence (City ETJs)", 
+                "sublyrs": {
+                    "ostreets": [ 23 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "votprec", 
+                "name": "Voter Precincts", 
+                "sublyrs": {
+                    "ostreets": [ 13 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "zone", 
+                "name": "Zoning", 
+                "sublyrs": {
+                    "ostreets": [ 26, 27 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "zip", 
+                "name": "Zip Code Boundaries", 
+                "sublyrs": {
+                    "ostreets": [ 25 ]
+                },
+                "checked": false
+
+            }
+        ] 
+
+    }, {
+        "id": "environmental",
+        "name": "Environmental",
+        "sublyrs": {
+            "ostreets": [ 6, 24, 30, 36 ],
+            "trans": [ 38, 39, 40, 41, 42, 43, 60, 61 ]
+        },		 
+        "checked": false,
+        "open": false,
+        "children": [
+            { 
+                "id": "fldp", 
+                "name": "Community & FEMA Floodplains, Floodways", 
+                "sublyrs": {
+                    "trans": [ 40, 41, 42, 43 ]
+                },
+                "checked": false,
+                "clone": true 
+
+            }, { 
+                "id": "postconstdist", 
+                "name": "Post Construction Districts", 
+                "sublyrs": {
+                    "ostreets": [ 6 ]
+                },
+                "checked": false,
+                "clone": true 
+
+            }, { 
+                "id": "postconstbuff", 
+                "name": "Post Construction Buffers", 
+                "sublyrs": {
+                    "trans": [ 38 ]
+                },
+                "checked": false,
+                "clone": false 
+
+            }, { 
+                "id": "strmwtrsheds", 
+                "name": "Stream Watersheds", 
+                "sublyrs": {
+                    "ostreets": [ 24 ]
+                },
+                "checked": false,
+                "clone": true 
+
+            }, { 
+                "id": "drnkwtrsheds", 
+                "name": "Regulated Drinking Watersheds", 
+                "sublyrs": {
+                    "ostreets": [ 36 ]
+                },
+                "checked": false,
+                "clone": true 
+
+            }, { 
+                "id": "soils", 
+                "name": "Soils", 
+                "sublyrs": {
+                    "ostreets": [ 30 ]
+                },
+                "checked": false,
+                "clone": true 
+
+            }, { 
+                "id": "wtrqulbuff", 
+                "name": "Water Quality Buffers(SWIM)", 
+                "sublyrs": {
+                    "trans": [ 39 ]
+                },
+                "checked": false,
+                "clone": true 		
+
+            },  { 
+                "id": "mplcntmn", 
+                "name": "County MPL Contamination Sites", 
+                "sublyrs": {
+                    "trans": [ 60 ]
+                },
+                "checked": false,
+                "clone": true 		
+
+            },  { 
+                "id": "brwnflds", 
+                "name": "NCDEQ Brownfields", 
+                "sublyrs": {
+                    "trans": [ 61 ]
+                },
+                "checked": false,
+                "clone": true 		
+
+            }
+
+        ]
+
+    }, {
+        "id": "lnddvlpmnt",
+        "name": "Land Development",
+        "sublyrs": {
+            "ostreets": [ 0, 1, 2, 3, 4, 5, 14, 22 ],
+			"trans": [ 59 ]
+        },		 
+        "checked": false,
+        "open": false,
+        "children": [
+            { 
+                "id": "enggrid", 
+                "name": "Engineering Map Grid", 
+                "sublyrs": {
+                    "ostreets": [ 14 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "prelimplans", 
+                "name": "Engineering Preliminary Plans", 
+                "sublyrs": {
+                    "ostreets": [ 22 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "comrclbldprog", 
+                "name": "Commercial Bldgs - In Progress(Last 365days)", 
+                "sublyrs": {
+                    "ostreets": [ 0 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "comrclbldcomp", 
+                "name": "Commercial Bldgs - Completed(Last 365days)", 
+                "sublyrs": {
+                    "ostreets": [ 1 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "singfambldprog", 
+                "name": "Single-Family Bldgs - In Progress(Last 365days)", 
+                "sublyrs": {
+                    "ostreets": [ 2 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "singfambldcomp", 
+                "name": "Single-Family Bldgs - Completed(Last 365days)", 
+                "sublyrs": {
+                    "ostreets": [ 3 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "multifambldprog", 
+                "name": "Multi-Family Bldgs - In Progress(Last 365days)", 
+                "sublyrs": {
+                    "ostreets": [ 4 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "multifambldcomp", 
+                "name": "Multi-Family Bldgs - Completed(Last 365days)", 
+                "sublyrs": {
+                    "ostreets": [ 5 ]
+                },
+                "checked": false
+                
+            }, { 
+                "id": "bipopprtuntyarea", 
+                "name": "BIP Opportunity Area", 
+                "sublyrs": {
+                    "trans": [ 59 ]
+                },
+                "checked": false
+
+            }
+
+        ]
+
+    }, {
+        "id": "propcomp", 
+		"name": "Sales", 
+        "sublyrs": {
+            "trans": [ 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 62, 64, 66, 69 ]
+        },
+        "checked": false,
+        "open": false,
+        "children": [
+            { 
+                "id": "sales2023", 
+                "name": "2023 Sales", 
+                "sublyrs": {
+                    "trans": [ 69 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "sales2022", 
+                "name": "2022 Sales", 
+                "sublyrs": {
+                    "trans": [ 66 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "sales2021", 
+                "name": "2021 Sales", 
+                "sublyrs": {
+                    "trans": [ 64 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "sales2020", 
+                "name": "2020 Sales", 
+                "sublyrs": {
+                    "trans": [ 62 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "sales2019", 
+                "name": "2019 Sales", 
+                "sublyrs": {
+                    "trans": [ 49 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "sales2018", 
+                "name": "2018 Sales", 
+                "sublyrs": {
+                    "trans": [ 50 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "sales2017", 
+                "name": "2017 Sales", 
+                "sublyrs": {
+                    "trans": [ 51 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "sales2016", 
+                "name": "2016 Sales", 
+                "sublyrs": {
+                    "trans": [ 52 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "sales2015", 
+                "name": "2015 Sales", 
+                "sublyrs": {
+                    "trans": [ 53 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "sales2014", 
+                "name": "2014 Sales", 
+                "sublyrs": {
+                    "trans": [ 54 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "sales2013", 
+                "name": "2013 Sales", 
+                "sublyrs": {
+                    "trans": [ 55 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "sales2012", 
+                "name": "2012 Sales", 
+                "sublyrs": {
+                    "trans": [ 56 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "sales2011", 
+                "name": "2011 Sales", 
+                "sublyrs": {
+                    "trans": [ 57 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "sales2010", 
+                "name": "2010 Sales", 
+                "sublyrs": {
+                    "trans": [ 58 ]
+                },
+                "checked": false
+
+            }
+
+        ]
+
+    }, {
+        "id": "histgrp", 
+		"name": "Historical",
+        "sublyrs": {
+            "ostreets": [ 15, 16, 17, 18, 63 ]
+        },
+        "checked": false,
+        "open": false,
+        "children": [
+            { 
+                "id": "histcemeteries", 
+                "name": "Historic Cemeteries", 
+                "sublyrs": {
+                    "ostreets": [ 16 ]
+                },
+                "checked": false
+            }, { 
+                "id": "histdist", 
+                "name": "Historic Districts(Charlotte)", 
+                "sublyrs": {
+                    "ostreets": [ 15 ]
+                },
+                "checked": false
+            }, { 
+                "id": "histdist2", 
+                "name": "Historic Districts(Davidson)", 
+                "sublyrs": {
+                    "ostreets": [ 63 ]
+                },
+                "checked": false
+            }, { 
+                "id": "histprop", 
+                "name": "Historic Properties", 
+                "sublyrs": {
+                    "ostreets": [ 17, 18 ]
+                },
+                "checked": false
+            }
+
+        ]
+
+    }, { 
+		"id": "transgrp", 
+		"name": "Transportation",
+        "sublyrs": {
+            "ostreets": [ 8, 9, 21, 35, 47, 48, 67, 68 ]
+        },
+        "checked": false,
+        "open": false,
+        "children": [
+            { 
+                "id": "cats", 
+                "name": "CATS Bus Routes and Stops", 
+                "sublyrs": {
+                    "ostreets": [ 8, 9 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "trafficcnts", 
+                "name": "NC DOT Traffic Counts", 
+                "sublyrs": {
+                    "ostreets": [ 21 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "towncityroads", 
+                "name": "Town and City Maintained Roads", 
+                "sublyrs": {
+                    "ostreets": [ 67 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "ncroads", 
+                "name": "NC State Maintained Roads", 
+                "sublyrs": {
+                    "ostreets": [ 35 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "pvtroads", 
+                "name": "Privately Maintained Roads", 
+                "sublyrs": {
+                    "ostreets": [ 68 ]
+                },
+                "checked": false
+
+            }, { 
+                "id": "bikelanes", 
+                "name": "Charlotte Bike Lanes", 
+                "sublyrs": {
+                    "ostreets": [ 47, 48 ]
+                },
+                "checked": false
+
+            }
+        ]
+
+    }, { 
+        "id": "othrgrp", 
+        "name": "Others", 
+        "sublyrs": {
+            "lbls": [ 6, 7, 5 ],
+			"ostreets": [ 10, 19, 28, 29, 31, 32, 33, 34, 36 ],
+			"trans": [ 45, 46 ]
+        },
+        "checked": false,
+        "open": false,
+        "children": [
+            { 
+                "id": "censustracts", 
+                "name": "Census Tracts", 
+                "sublyrs": {
+                    "ostreets": [ 10 ]
+                },
+                "checked": false
+            }, { 
+                "id": "easements", 
+                "name": "Easements - Interior Lot Lines", 
+                "sublyrs": {
+                    "ostreets": [ 28, 29 ]
+                },
+                "checked": false
+            }, { 
+                "id": "fire", 
+                "name": "Fire Stations and Districts", 
+                "sublyrs": {
+                    "lbls": [ 6, 7 ],
+                    "ostreets": [ 33, 65 ]
+                },
+                "checked": false
+            }, { 
+                "id": "police", 
+                "name": "Police Offices and Divisions", 
+                "sublyrs": {
+                    "lbls": [ 5 ],
+                    "ostreets": [ 31 ]
+                },
+                "checked": false
+            }, { 
+                "id": "policerspns", 
+                "name": "Police Response Areas", 
+                "sublyrs": {
+                    "ostreets": [ 32 ]
+                },
+                "checked": false
+            }, { 
+                "id": "landuse", 
+                "name": "Tax Parcel Landuse", 
+                "sublyrs": {
+                    "ostreets": [ 19 ]
+                },
+                "checked": false
+            }, { 
+                "id": "publicprop", 
+                "name": "Public owned Properties", 
+                "sublyrs": {
+                    "trans": [ 46 ]
+                },
+                "checked": false
+            }, { 
+                "id": "monuments", 
+                "name": "NC Geodetic Monuments", 
+                "sublyrs": {
+                    "ostreets": [ 34 ]
+                },
+                "checked": false
+            }, { 
+                "id": "geodeticbuff", 
+                "name": "2000ft Geodetic Buffers", 
+                "sublyrs": {
+                    "trans": [ 45 ]
+                },
+                "checked": false
+            }
+        ]
+
+    }
+
+]

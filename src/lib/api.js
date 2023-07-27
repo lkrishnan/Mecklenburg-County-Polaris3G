@@ -21,45 +21,51 @@ const genError = err => {
     getAPIURL = ( srch_type, srch_str ) => {
         switch( srch_type ){
             case "address":
-                return `/api/address?addr=${srch_str}`
+                return `/api/validate/address?addr=${srch_str}`
+
+            case "situs":
+                return `/api/validate/situs?address=${srch_str}`
 
             case "business": 
-                return `/api/facility/business?name=${srch_str}`
+                return `/api/validate/facility/business?name=${srch_str}`
 
             case "busstop": 
-                return `/api/facility/busstop?name=${srch_str}`
+                return `/api/validate/facility/busstop?name=${srch_str}`
 
             case "intersection": 
                 const amprsnd_split = srch_str.split( "&" ).map( item => item.trim( ) )
-                return `/api/intersection?street1=${amprsnd_split[ 0 ]}&street2=${amprsnd_split[ 1 ]}`
+                return `/api/validate/intersection?street1=${amprsnd_split[ 0 ]}&street2=${amprsnd_split[ 1 ]}`
                 
             case "gisid": 
-                return `/api/parcel?gisid=${srch_str}`
+                return `/api/validate/gisid?gisid=${srch_str}`
 
             case "lightrail": 
-                return `/api/facility/lightrail?name=${srch_str}`
+                return `/api/validate/facility/lightrail?name=${srch_str}`
 
             case "library": 
-                return `/api/facility/library?name=${srch_str}`
+                return `/api/validate/facility/library?name=${srch_str}`
 
             case "lightrail": 
-                return `/api/facility/lightrail?name=${srch_str}`
+                return `/api/validate/facility/lightrail?name=${srch_str}`
 
             case "owner": 
                 const comma_split = srch_str.split( "," ).map( item => item.trim( ) )
-                return `/api/parcel/owner?get=fullname&lastname=${comma_split[ 0 ]}&firstname=${comma_split[ 1 ]}`
+                return `/api/validate/owner?get=fullname&lastname=${comma_split[ 0 ]}&firstname=${comma_split[ 1 ]}`
+
+            case "ownerlast":
+                return `/api/validate/owner?get=lastname&lastname=${srch_str}`
 
             case "park": 
-                return `/api/facility/park?name=${srch_str}`
+                return `/api/validate/facility/park?name=${srch_str}`
 
             case "pid": 
-                return `/api/parcel?pid=${srch_str}`
+                return `/api/validate/pid?pid=${srch_str}`
                 
             case "road": 
-                return `/api/road?name=${srch_str}`
+                return `/api/validate/road?name=${srch_str}`
 
             case "school": 
-                return `/api/facility/school?name=${srch_str}`
+                return `/api/validate/facility/school?name=${srch_str}`
                 
             default:
                 return null
