@@ -1,79 +1,101 @@
-import { genError, getInvalidParams } from "$lib/api"
-import { json2URL } from "$lib/utils"
+import { genError, getInvalidParams } from "$lib/api.js"
+import { json2URL, arrHasAllElems } from "$lib/utils.js"
 
 /** @type {import('./validate/$types').RequestHandler} */
 export const GET = async ( { url, locals, fetch } ) => {
     let response, status = 200
 
-    try{
-        let gisid = url.searchParams.get( "gisid" ) ?? null
+    const allowed = [ "pid", "gisid", "matid", "xy", "latlng", "rings", "nearby", "buffer", "geom" ]
         
-        const pid = url.searchParams.get( "pid" ) ?? null,
-            matid = url.searchParams.get( "matid" ) ?? null,
-            x = url.searchParams.get( "x" ) ?? null,
-            y = url.searchParams.get( "y" ) ?? null,
-            lat = url.searchParams.get( "lat" ) ?? null,
-            lng = url.searchParams.get( "lng" ) ?? null
+    try{
+        let params = { geom: 1, ...Object.fromEntries( url.searchParams ) }
+        
+        if( arrHasAllElems( allowed, Object.keys( params ) ) ){
+            let sql
 
-        if( pid ){ //get gisid through switcher
-            const switcher_response = await fetch( `/api/parcel/switcher?pid=${pid}` ),
-                switcher_data = await switcher_response.json( )
-
-            if( switcher_data.length > 0 )
-                gisid = switcher_data[ 0 ].gisid
-
-            else
-                throw { message: "Supplied pid is invalid", code: 500 }
-
-        }
-
-        if( gisid ){ //use parcels layer
-            const { gis_pool } = locals,
-                sql = `select pid as gisid, ST_AsText( shape ) as geom, ST_Area( shape ) As sqft, round(ST_x(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_x, round(ST_y(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_y,
-                        round(ST_x(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lon, round(ST_y(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lat
-                        from parcels_py 
-                        where pid = '${gisid}' and shape is not null`,
-                result = await gis_pool.query( sql )
-            
-            response = result.rows
-
-        }else if( matid ){
-            const { gis_pool } = locals,
-                sql = `select p.pid as gisid, ST_AsText( p.shape ) as geom, ST_Area( p.shape ) As sqft, round(ST_x(ST_PointOnSurface(p.shape))::NUMERIC,4) as centroid_x, round(ST_y(ST_PointOnSurface(p.shape))::NUMERIC,4) as centroid_y,
-                        round(ST_x(ST_PointOnSurface(ST_transform(p.shape,4326)))::NUMERIC,4) as centroid_lon, round(ST_y(ST_PointOnSurface(ST_transform(p.shape,4326)))::NUMERIC,4) as centroid_lat
-                        from parcels_py p, masteraddress_pt m
-                        where m.num_addr = '${matid}'
-                        and ST_DWithin( p.shape, m.shape, 0 )
-                        and m.txt_cdeuse not in ('METER', 'VALUE-IMPR', 'MINING', 'SIGN', 'MASTER ADDRESS', 'BRIDGE', 'CATV', 'PHONE', 'UTILITY', 'SAW SERVICE', 'BUS STOP', 'CELL TOWER', 'UNKNOWN', 'OTHER MUNICIPAL', 'FOREST-PARK', 'OCS POLE', 'GREENWAY ENTRANCE', 'DUMPSTER' )`,
-                result = await gis_pool.query( sql )
-
-            response = result.rows
-
-        }else if( ( x && y ) || ( lat && lng ) ){
-            const { gis_pool } = locals,
-                sql =`select pid as gisid, ST_AsText( shape ) as geom, ST_Area( shape ) As sqft, round(ST_x(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_x, round(ST_y(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_y,
-                    round(ST_x(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lon, round(ST_y(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lat
-                    from parcels_py 
-                    where shape is not null 
-                    and ST_DWithin(shape, ${ ( x && y ? `ST_GeomFromText('POINT(${x} ${y})',2264)` : `ST_transform(ST_GeomFromText('POINT(${lng} ${lat})',4326),2264)` ) } ,0)`,
-                intersect_result = await gis_pool.query( sql ) 
-
-            if( intersect_result.rows.length > 0 ){
-                response = intersect_result.rows
-
-            }else{
-                const nearby_result = await fetch( `/api/query/gis/parcel_geom/nearby?${ json2URL( x&&y ? { x: x, y: y } : {lng: lng, lat: lat} ) }` )
-
-                response = await nearby_result.json( )
+            if( params?.pid & !params?.gisid ){
+                const switcher_response = await fetch( `/api/query/cama/switcher?pid=${params.pid}` ),
+                    switcher_data = await switcher_response.json( )
+    
+                if( switcher_data.length > 0 )
+                    params.gisid = switcher_data[ 0 ].gisid
+    
+                else
+                    throw { message: "Supplied pid is invalid", code: 500 }
 
             }
 
+            if( params?.gisid ){
+                sql = `SELECT pid as gisid, ${params.geom == 1? "ST_AsText( shape ) as geom,": "" } ST_Area( shape ) As sqft, round(ST_x(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_x, round(ST_y(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_y,
+                        round(ST_x(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lon, round(ST_y(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lat
+                        FROM parcels_py 
+                        WHERE pid in ( '${params.gisid.replace(/,/g,"','")}' )
+                        AND shape is not null`
+
+            }else if( params?.matid ){
+                sql = `SELECT p.pid as gisid, ${params.geom == 1? "ST_AsText( p.shape ) as geom,": "" } ST_Area( p.shape ) As sqft, round(ST_x(ST_PointOnSurface(p.shape))::NUMERIC,4) as centroid_x, round(ST_y(ST_PointOnSurface(p.shape))::NUMERIC,4) as centroid_y,
+                        round(ST_x(ST_PointOnSurface(ST_transform(p.shape,4326)))::NUMERIC,4) as centroid_lon, round(ST_y(ST_PointOnSurface(ST_transform(p.shape,4326)))::NUMERIC,4) as centroid_lat
+                        FROM parcels_py p, masteraddress_pt m
+                        WHERE m.num_addr = '${params.matid}'
+                        AND p.shape is not null
+                        and ST_DWithin( p.shape, m.shape, 0 )
+                        and m.txt_cdeuse not in ('METER', 'VALUE-IMPR', 'MINING', 'SIGN', 'MASTER ADDRESS', 'BRIDGE', 'CATV', 'PHONE', 'UTILITY', 'SAW SERVICE', 'BUS STOP', 'CELL TOWER', 'UNKNOWN', 'OTHER MUNICIPAL', 'FOREST-PARK', 'OCS POLE', 'GREENWAY ENTRANCE', 'DUMPSTER' )`
+
+            }else if( params?.xy ){
+                const arr = params.xy.split( "," )
+
+                sql = `SELECT pid as gisid, ${params.geom == 1? "ST_AsText( shape ) as geom,": "" } ST_Area( shape ) As sqft, round(ST_x(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_x, round(ST_y(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_y,
+                        round(ST_x(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lon, round(ST_y(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lat
+                        FROM parcels_py 
+                        WHERE ST_DWithin(shape, ST_GeomFromText('POINT(${arr[0]} ${arr[1]})',2264), 0)
+                        AND shape is not null`
+
+            }else if( params?.latlng ){
+                const arr = params.latlng.split( "," )
+
+                sql = `SELECT pid as gisid, ${params.geom == 1? "ST_AsText( shape ) as geom,": "" } ST_Area( shape ) As sqft, round(ST_x(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_x, round(ST_y(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_y,
+                        round(ST_x(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lon, round(ST_y(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lat
+                        FROM parcels_py 
+                        WHERE ST_DWithin(shape, ST_transform(ST_GeomFromText('POINT(${arr[1]} ${arr[0]})',4326),2264), 0)
+                        AND shape is not null`
+                        
+            }else if( params?.rings ){
+                sql = `SELECT pid as gisid, ${params.geom == 1? "ST_AsText( shape ) as geom,": "" } ST_Area( shape ) As sqft, round(ST_x(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_x, round(ST_y(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_y,
+                        round(ST_x(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lon, round(ST_y(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lat
+                        FROM parcels_py 
+                        WHERE ST_DWithin(shape, ST_GeomFromText('${params.rings}',2264), 0 )
+                        AND shape is not null`
+
+            }else if( params?.nearby ){
+                const arr = params.nearby.split( "," )
+
+                sql = `SELECT pid as gisid, ${params.geom == 1? "ST_AsText( shape ) as geom,": "" } ST_Area( shape ) As sqft, round(ST_x(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_x, round(ST_y(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_y,
+                        round(ST_x(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lon, round(ST_y(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lat
+                        FROM parcels_py 
+                        WHERE shape is not null
+                        ORDER BY round((parcels_py.shape <-> ST_GeomFromText('POINT(${arr[0]} ${arr[1]})',2264))::Numeric,2)
+                        LIMIT 5`
+
+            }else if( params?.buffer ){
+                const arr = params.buffer.split( "|" )
+
+                sql = `SELECT pid as gisid, ${params.geom == 1? "ST_AsText( shape ) as geom,": "" } ST_Area( shape ) As sqft, round(ST_x(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_x, round(ST_y(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_y,
+                        round(ST_x(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lon, round(ST_y(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lat
+                        FROM parcels_py 
+                        where ST_DWithin( shape, (select shape from parcels_py where pid = '${arr[0]}' ), ${arr[1]} )`
+
+            }
+
+            const { gis_pool } = locals,
+                result = await gis_pool.query( sql )
+
+            response = result.rows
+
         }else{
-            const allowed_params = [ "gisid", "matid", "x", "y", "lat", "lng" ],
-            invalid_params = getInvalidParams( url.searchParams, allowed_params ).join( ', ' )
-            
+            const invalid_params = getInvalidParams( url.searchParams, allowed ).join( ', ' )
+                
             response = genError( { "message": `invalid paramater(s) sent: ${invalid_params}` } )
-            status = 500
+            status = 500 
 
         }
 

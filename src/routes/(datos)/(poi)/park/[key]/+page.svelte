@@ -8,28 +8,32 @@
 </div>
 
 <script>
-	import { poi } from "$lib/store.js"   
+	import { poi, last_hit } from "$lib/store"   
     import Heading from "$lib/components/Heading.svelte"
     import InfoTable from "$lib/components/InfoTable.svelte"
     import QuickButtons from "$lib/components/QuickButtons.svelte"
+    import { srchstr2qrystr } from "$lib/utils"
+    import { goto } from "$app/navigation"
     
     let infos = [ ],
-        btns = [ ]
+        btns = [ ],
+        _poi
 
     const handleClick = event => {
         if( event.detail.icon === "nearby" ){
-            const hit = { value: `${_poi.x},${_poi.y}`, type: "NEARBY", nearby: `${_poi.x},${_poi.y}` }
+            const hit = { value: `${_poi.x},${_poi.y}`, type: "NEARBY", nearby: `${_poi.x},${_poi.y}`, page: 1, view: "ownership" }
 			
             last_hit.set( hit )
-			goto( `/${hit.type.toLowerCase( )}/${srchstr2qrystr( hit.value ) }` )
+            goto( `/${hit.type.toLowerCase( )}/${srchstr2qrystr( hit.value ) }` )
 
         }
 
     }
 
     poi.subscribe( async value => {
+        _poi = value
+
         if( Object.keys( value ).length > 0 ){
-            
             infos = [ 
                 { label: "Name", value: value.name  }, 
                 { label: "Address", value: value.address  }, 

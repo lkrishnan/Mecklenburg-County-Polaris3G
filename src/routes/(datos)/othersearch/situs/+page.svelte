@@ -27,7 +27,7 @@
 <script>
     import { validateForm } from "$lib/validate" 
     import { json2URL, srchstr2qrystr } from "$lib/utils"
-    import AutoComplete from "$lib/components/AutoComplete.svelte"
+    import AutoComplete from "$lib/components/search/AutoComplete.svelte"
     import { last_hit } from '$lib/store'
     import { goto } from "$app/navigation"
 

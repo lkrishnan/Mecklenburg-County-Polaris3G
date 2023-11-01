@@ -11,7 +11,9 @@ html, body {
 	
 }
 
-.esri-view .esri-view-surface--inset-outline:focus::after {  outline: none !important;}
+/*.esri-view .esri-view-surface--inset-outline:focus::after {  outline: none !important;}*/
+
+.esri-view .esri-view-surface:focus::after{ outline: none !important;}
 
 /* For Firefox Browser */
 .scrollbar {
@@ -22,6 +24,7 @@ html, body {
   /* For Chrome, EDGE, Opera, Others */
 .scrollbar::-webkit-scrollbar {
 	width: 7px;
+
 }
 
 .scrollbar::-webkit-scrollbar-track { 
@@ -31,4 +34,5 @@ html, body {
 
 .scrollbar::-webkit-scrollbar-thumb { 
 	background:#9ca3af;
+
 }

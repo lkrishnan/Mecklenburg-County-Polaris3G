@@ -10,22 +10,21 @@
     import Heading from "$lib/components/Heading.svelte"
 
     // component props
-    export let legal = null
-    export let landuse = null
+    export let main = null
     export let sqft = null
     
     let infos = [ ]
 
     //reactives
-    $: if( legal ){
+    $: if( main ){
         infos = [ 
-            { label: "Legal Desc", value: formatLegalDesc( legal[ 0 ].legal_description ) }, 
-            { label: "Land Area", value: ( sqft ? ( formatLandArea( legal[ 0 ].total_acres, legal[ 0 ].land_unit_type, legal[ 0 ].land_unit_desc, ( sqft / 43650 ) ) ) : null ) },
-            { label: "Fire District", value: formatUCWords( legal[ 0 ].fire_district.toLowerCase( ) ) },
-            { label: "Special District", value: ( legal[ 0 ].special_district === "NA" ? legal[ 0 ].special_district : formatUCWords( legal[ 0 ].special_district.toLowerCase( ) ) ) },
-            { label: "Account Type", value: formatUCWords( legal[ 0 ].account_type.toLowerCase( ) ) },
-            { label: "Municipality", value: formatUCWords( legal[ 0 ].municipality.toLowerCase( ) ) },
-            { label: "Land Use", value: formatUCWords( arrayToNumList( [ ...new Set( landuse.map( item => item.land_use ) ) ] ).toLowerCase( ) ) }
+            { label: "Legal Desc", value: formatLegalDesc( main[ 0 ].legal_description ) }, 
+            { label: "Land Area", value: ( sqft ? ( formatLandArea( main[ 0 ].land_size, main[ 0 ].land_unit, ( sqft / 43650 ) ) ) : null ) },
+            { label: "Fire District", value: formatUCWords( main[ 0 ].fire_district.toLowerCase( ) ) },
+            { label: "Special District", value: ( main[ 0 ].special_district === "NA" ? main[ 0 ].special_district : formatUCWords( main[ 0 ].special_district.toLowerCase( ) ) ) },
+            { label: "Account Type", value: formatUCWords( main[ 0 ].account_type.toLowerCase( ) ) },
+            { label: "Municipality", value: formatUCWords( main[ 0 ].municipality.toLowerCase( ) ) },
+            { label: "Land Use", value: formatUCWords( arrayToNumList( [ ...new Set( main.map( item => item.land_use_desc ) ) ] ).toLowerCase( ) ) }
         
         ]
 

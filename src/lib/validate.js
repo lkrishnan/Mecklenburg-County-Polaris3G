@@ -1,9 +1,17 @@
-const validateStreetName = str => {
-    return ( str.match( /^(\d*\s*[A-Z]+)$/ ) ? true : false )
+import { filterObj } from "$lib/utils"
+
+const validateStreetName = str => { //needs improvmeent
+    //return ( str.match( /^(\d*\s*[A-Z]+)$/ ) ? true : false )
+    return ( str.match( /^(?:[A-Za-z]+[ -]?)+[A-Za-z]$/ ) ? true : false )
 },
 
 validateNumeric = str => {
     return ( str.match( /^\d+$/ ) ? true : false )
+
+},
+
+validateAlphaNumeric = str => {
+    return ( str.match( /^[a-zA-Z0-9 ]*$/ ) ? true : false )
 
 },
 
@@ -99,12 +107,12 @@ validateForm = fields => {
             fields[ field ].error = null
 
             // Check rule and store text if its an error
-            fields[ field ].rules.forEach( rule => {
+            fields[ field ].rules.forEach( ( rule, i ) => {
                 if( !fields[ field ].error ){
-                    fields[ field ].error = rule( fields[ field ].val )
-                
+                    fields[ field ].error = rule( ...Object.values( filterObj( fields[ field ], [ "val", "min", "max", "absolute_min", "absolute_max" ] ) ) )
+                    
                 }
-
+                
             } )
 
             // Mark of invalid if an error message exisits
@@ -118,6 +126,6 @@ validateForm = fields => {
 
 }
 
-export { validateStreetName, validateNumeric, validateSpChar, validateAtleast7, validateCNumber, validateTaxPID, 
+export { validateStreetName, validateNumeric, validateAlphaNumeric, validateSpChar, validateAtleast7, validateCNumber, validateTaxPID, 
     validateGISID, validateOnlyAlpha, validateOwnerName, validateIntersection, validateAddress, 
     validateCountyYear, validateLatLng, validateStatePlane, validateRings, validateForm  }

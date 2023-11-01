@@ -1,21 +1,21 @@
 import { json2URL } from "$lib/utils"
-import { selection, results, poi } from "$lib/store"
+import { rsltados, poi } from "$lib/store"
 
 export default async function human( filter ){
     try{
         if( [ "gisid" ].every( key => filter.hasOwnProperty( key ) ) ){
-            const response = await fetch( `/api/query/cama/situs/ownership?gisid=${filter.gisid}` ),
+            const response = await fetch( `/api/query/cama/main/situs?gisid=${filter.gisid}` ),
                 rows = await response.json( )
 
-            results.set( rows )
+            rsltados.set( rows )
 
         }
 
         else if( [ "lastname", "firstname" ].some( key => filter.hasOwnProperty( key ) ) ){
-            const response = await fetch( `/api/query/cama/situs/ownership?lastname=${(filter.hasOwnProperty( "lastname" ) ? filter.lastname : "" ) }&firstname=${(filter.hasOwnProperty( "firstname" ) ? filter.firstname : "" ) }` ),
+            const response = await fetch( `/api/query/cama/main/situs?lastname=${(filter.hasOwnProperty( "lastname" ) ? filter.lastname : "" ) }&firstname=${(filter.hasOwnProperty( "firstname" ) ? filter.firstname : "" ) }` ),
                 rows = await response.json( )
             
-            results.set( rows )
+            rsltados.set( rows )
 
         }
         

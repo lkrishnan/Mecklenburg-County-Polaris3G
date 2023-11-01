@@ -1,3 +1,8 @@
+import * as query from "@arcgis/core/rest/query"
+import Query from "@arcgis/core/rest/support/Query"
+import Point from "@arcgis/core/geometry/Point"
+import SpatialReference from "@arcgis/core/geometry/SpatialReference"
+
 const genError = err => {
     return { "statusCode":500, "error": "Internal Server Error", ...err }
         
@@ -60,6 +65,9 @@ const genError = err => {
 
             case "pid": 
                 return `/api/validate/pid?pid=${srch_str}`
+
+            case "pick": 
+                return `/api/validate/pid?pid=${srch_str}`
                 
             case "road": 
                 return `/api/validate/road?name=${srch_str}`
@@ -72,6 +80,23 @@ const genError = err => {
 
         }
 
+    },
+
+    idLayer = async ( xy_raw, lyr_id, target_geom="poly" ) => {
+        // create the Query object
+        const xy = xy_raw.split( "," ).map( coord => parseFloat( coord.trim( ) ) ),
+            url = `https://polaris3g.mecklenburgcountync.gov/polarisv/rest/services/layers/MapServer/${lyr_id}`,
+            options = { 
+                geometry: new Point( xy[ 0 ], xy[ 1 ], new SpatialReference( 2264 ) ),
+                outFields: [ "*" ], 
+                ...( target_geom === "poly" ? { } : { distance: 50, units: "feet", spatialRelationship: "intersects" } )
+
+            },
+            response = await query.executeQueryJSON( url, options ),
+            rows =  response.features.map( feature => feature.attributes )
+        
+        return rows
+     
     }
 
-export { genError, getInvalidParams, getErrorMsg, getAPIURL }
+export { genError, getInvalidParams, getErrorMsg, getAPIURL, idLayer }

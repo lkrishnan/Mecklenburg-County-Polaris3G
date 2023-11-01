@@ -7,20 +7,30 @@ export const GET = async ( { url, locals } ) => {
     try{
         const lastname = url.searchParams.get( "lastname" ) ?? null,
             firstname = url.searchParams.get( "firstname" ) ?? null,
-            typ = url.searchParams.get( "get" ) ?? "fullname"
+            typ = url.searchParams.get( "get" ) ?? "fullname",
+            exact = url.searchParams.get( "exact" ) ?? 0
 
         if( lastname || firstname ){
             let filter = [ ]
 
             // Determine Filter
             if( lastname && firstname ){
-                filter.push( `( ( ownr.Owner1LastName like '${lastname}%' AND ownr.Owner1FirstName like '${firstname}%' ) OR ( ownr.Owner2LastName like '${lastname}%' AND ownr.Owner2FirstName like '${firstname}%' ) OR ( ownr.Owner3LastName like '${lastname}%' AND ownr.Owner3FirstName like '${firstname}%' ) )` )
+                if( exact > 0 )
+                    filter.push( `( ( ownr.Owner1LastName = '${lastname}' AND ownr.Owner1FirstName = '${firstname}' ) OR ( ownr.Owner2LastName = '${lastname}' AND ownr.Owner2FirstName = '${firstname}' ) OR ( ownr.Owner3LastName = '${lastname}' AND ownr.Owner3FirstName = '${firstname}' ) )` )
+                else
+                    filter.push( `( ( ownr.Owner1LastName like '${lastname}%' AND ownr.Owner1FirstName like '${firstname}%' ) OR ( ownr.Owner2LastName like '${lastname}%' AND ownr.Owner2FirstName like '${firstname}%' ) OR ( ownr.Owner3LastName like '${lastname}%' AND ownr.Owner3FirstName like '${firstname}%' ) )` )
 
             }else if( lastname ){
-                filter.push( `ownr.Owner1LastName like '${lastname}%' OR ownr.Owner2LastName like '${lastname}%' OR ownr.Owner3LastName like '${lastname}%'` )
+                if( exact > 0 )
+                    filter.push( `ownr.Owner1LastName = '${lastname}' OR ownr.Owner2LastName = '${lastname}' OR ownr.Owner3LastName = '${lastname}'` )
+                else
+                    filter.push( `ownr.Owner1LastName like '${lastname}%' OR ownr.Owner2LastName like '${lastname}%' OR ownr.Owner3LastName like '${lastname}%'` )
 
             }else if( firstname ){
-                filter.push( `ownr.Owner1FirstName like '${firstname}%' OR ownr.Owner2FirstName like '${firstname}%' OR ownr.Owner3FirstName like '${firstname}%'` )
+                if( exact > 0 )
+                    filter.push( `ownr.Owner1FirstName = '${firstname}' OR ownr.Owner2FirstName = '${firstname}' OR ownr.Owner3FirstName = '${firstname}'` )
+                else
+                    filter.push( `ownr.Owner1FirstName like '${firstname}%' OR ownr.Owner2FirstName like '${firstname}%' OR ownr.Owner3FirstName like '${firstname}%'` )
             
             }
 
@@ -28,21 +38,21 @@ export const GET = async ( { url, locals } ) => {
                 getCaseBlock = ( val ) => {
                     switch( val ){
                         case "lastname":
-                                return `WHEN ( ownr.Owner1LastName like '${lastname}%' ) THEN ownr.Owner1LastName
-                                        WHEN ( ownr.Owner2LastName like '${lastname}%' ) THEN ownr.Owner2LastName
-                                        WHEN ( ownr.Owner3LastName like '${lastname}%' ) THEN ownr.Owner3LastName
+                                return `WHEN ( ownr.Owner1LastName like '${lastname}%' ) THEN LTRIM(RTRIM(ownr.Owner1LastName))
+                                        WHEN ( ownr.Owner2LastName like '${lastname}%' ) THEN LTRIM(RTRIM(ownr.Owner2LastName))
+                                        WHEN ( ownr.Owner3LastName like '${lastname}%' ) THEN LTRIM(RTRIM(ownr.Owner3LastName))
                                         ELSE NULL`
                         
                         case "firstname":
-                            return `WHEN ( ownr.Owner1FirstName like '${firstname}%' ) THEN ownr.Owner1FirstName
-                                    WHEN ( ownr.Owner2FirstName like '${firstname}%' ) THEN ownr.Owner2FirstName
-                                    WHEN ( ownr.Owner3FirstName like '${firstname}%' ) THEN ownr.Owner3FirstName
+                            return `WHEN ( ownr.Owner1FirstName like '${firstname}%' ) THEN LTRIM(RTRIM(ownr.Owner1FirstName))
+                                    WHEN ( ownr.Owner2FirstName like '${firstname}%' ) THEN LTRIM(RTRIM(ownr.Owner2FirstName))
+                                    WHEN ( ownr.Owner3FirstName like '${firstname}%' ) THEN LTRIM(RTRIM(ownr.Owner3FirstName))
                                     ELSE NULL`
 
                         case "fullname":
-                            return `WHEN ( ownr.Owner1LastName like '${lastname}%' AND ownr.Owner1FirstName like '${firstname}%' ) THEN ownr.Owner1LastName + ', ' + ownr.Owner1FirstName
-                                    WHEN ( ownr.Owner2LastName like '${lastname}%' AND ownr.Owner2FirstName like '${firstname}%' ) THEN ownr.Owner2LastName + ', ' + ownr.Owner2FirstName
-                                    WHEN ( ownr.Owner3LastName like '${lastname}%' AND ownr.Owner3FirstName like '${firstname}%' ) THEN ownr.Owner3LastName + ', ' + ownr.Owner3FirstName
+                            return `WHEN ( ownr.Owner1LastName like '${lastname}%' AND ownr.Owner1FirstName like '${firstname}%' ) THEN LTRIM(RTRIM(ownr.Owner1LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner1FirstName))
+                                    WHEN ( ownr.Owner2LastName like '${lastname}%' AND ownr.Owner2FirstName like '${firstname}%' ) THEN LTRIM(RTRIM(ownr.Owner2LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner2FirstName))
+                                    WHEN ( ownr.Owner3LastName like '${lastname}%' AND ownr.Owner3FirstName like '${firstname}%' ) THEN LTRIM(RTRIM(ownr.Owner3LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner3FirstName))
                                     ELSE NULL`
 
                     }               

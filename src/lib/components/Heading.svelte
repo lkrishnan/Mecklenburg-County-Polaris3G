@@ -1,5 +1,5 @@
 <div class="flex p-2 bg-primero text-lienzo fill-lienzo items-center">
-    <div class="flex-none">
+    <div class="flex-none text-suave fill-suave">
         {@html icon( iconname, 28, 28 )}
         
     </div>

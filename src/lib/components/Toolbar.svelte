@@ -79,8 +79,6 @@
         active = btns.findIndex( item => item.tool === map_tool ),
         measure_active = 0
 
-    console.log( active )
-
     const handleClick = ( tool, idx ) => {
             active = idx
 

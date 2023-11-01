@@ -58,11 +58,7 @@
         let _infos = [ ]
 
         for( let i = sale.length-1; i >= 0; i-- ){ //descending order
-			//const deed =  null2empty( sale[ i ].deed_book ).replace( /  +/g, " " ).split( " " )
-
-            //console.log( sale[ i ] )
-										
-            _infos.push( { 
+			_infos.push( { 
                 //"deed": formatDeed( ( deed.length === 2 ? deed[ 0 ] : "" ), ( deed.length === 2 ? deed[ 1 ] : "" ), sale[ i ].sale_date ), 
                 "deed": formatDeed( sale[ i ]. legal_reference, sale[ i ].sale_date ),
                 "sale_date":  sale[ i ].sale_date,

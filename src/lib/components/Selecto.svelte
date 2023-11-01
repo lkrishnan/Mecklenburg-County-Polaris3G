@@ -1,14 +1,14 @@
 <div class="w-full relative">
-    <button 
+    <button
         type="button" 
         class="relative w-full cursor-pointer rounded py-3 pl-3 pr-10 text-left shadow ring-1 ring-inset ring-primero focus:outline-none focus:ring-2 focus:ring-segundo sm:text-sm sm:leading-6 {items.length === 0 ? 'cursor-not-allowed text-suave' : 'text-primero' }"
         on:click="{(event)=>{ open = !open }}"
-        on:blur="{(event)=>{ ( debounce( e => { open = !open }, 200 ) )( ) }}"
+        on:blur="{(event)=>{ ( debounce( e => { open = false }, 200 ) )( ) }}"
         on:keydown="{(event)=>onKeyDown(event)}"
     >
         <span class="flex items-center">
             {#if items.length > 0 }
-                <span class="block">{items[ selected ].value}</span>
+                <span class="block">{items[ selected ].label}</span>
             {:else}
                 <span class="block text-suave">Nothing to Select</span>
             {/if}
@@ -20,21 +20,30 @@
         </span>
     </button>
 
-    <div class="{!open ? 'hidden' : 'absolute z-20'} w-full mt-1 pr-0.5 border border-primero rounded-md">
+    <div class="{open ? 'absolute z-20' : 'hidden'} w-full border border-primero">
         <ul 
             bind:this={element} 
-            class="bg-lienzo shadow-lg rounded-md md:max-h-[200px] overflow-y-auto scrollbar"
+            class="bg-lienzo shadow-lg md:max-h-[200px] overflow-y-auto scrollbar"
             on:focus={(event)=>{ arrowCounter = -1 }}
             on:mouseover={(event)=>{ arrowCounter = -1 }}
         >
             {#each items as item, i}
                 <li 
-                    on:click="{()=>close(i)}" on:keydown="{()=>close(i)}" 
                     class="relative py-1.5 pl-1.5 pr-9 text-sm overflow-ellipsis overflow-hidden whitespace-nowrap hover:bg-luz hover:cursor-pointer { i === arrowCounter ? ' bg-segundo text-lienzo' : '' }"
                 >
-                    <span class="font-normal ml-1.5 block truncate">{item.value}</span>
+                    <span
+                        class="font-normal ml-1.5 block truncate"
+                        on:click="{()=>close(i)}" 
+                        on:keydown="{()=>close(i)}" 
+                        role="button" 
+                        tabindex=-1
+                    >
+                        {item.label}
+                    </span>
                     {#if i == selected}  
-                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-segundo">
+                        <span 
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-segundo"
+                        >
                             {@html icon( "checksm", 28, 28 )}
                         </span>
                     {/if}

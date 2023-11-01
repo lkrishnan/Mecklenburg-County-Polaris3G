@@ -9,7 +9,7 @@ module.exports = {
 				primero: "#211746", //primary
 				segundo: "#00768a", //secondary
 				todo: "#5d594d", //all - mostly used
-				suave: "theme('colors.gray.300')", //soft
+				suave: "theme('colors.gray.400')", //soft
 				luz: "theme('colors.gray.100')", //light glow for empahsis on hover
 				pop: "#ef3e3d",
 				title: "theme('colors.slate.800')",

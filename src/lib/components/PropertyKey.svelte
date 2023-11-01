@@ -58,25 +58,48 @@
             <thead class="text-sm font-normal">
                 <tr class="border-b border-primary">
                     <th class="px-4 py-2">
-                        Owner Name
+                        Ownership
                     </th>
+                </tr>
+            </thead>
+            <tbody>
+                {#if owners.length > 0}
+                    {#each owners as owner, i}
+                        <tr>
+                            <td class="px-4 py-2 align-top">
+                                {i+1}. {owner}
+                            </td>
+                            
+                        </tr>
+                        
+                    {/each}
+                {:else}
+                    <tr>
+                        <td class="px-4 py-2 align-top">
+                            NA
+                        </td>
+                        
+                    </tr>
+                {/if}
+                
+            </tbody>
+        </table>
+
+         <!-- Address -->
+         <table class="w-full text-left  mb-2">
+            <thead class="text-sm font-normal">
+                <tr class="border-b border-primary">
                     <th class="px-4 py-2">
                         Mailing Address
                     </th>
                 </tr>
             </thead>
             <tbody>
-                {#each owners as owner}
-                    <tr>
-                        <td class="px-4 py-2 align-top">
-                            {concatArr( [ owner.first_name, owner.last_name ] ) }
-                        </td>
-                        <td class="px-4 py-2">
-                            {@html concatArr( [ concatArr( [ owner.address_1, owner.address_2 ] ), concatArr( [ owner.city, owner.state, owner.zipcode ] ) ], "<br/>" )}
-                        </td>
-                    </tr>
-                    
-                {/each}
+                <tr>
+                    <td class="px-4 py-2">
+                        {@html ( mailing_addr ? mailing_addr : "NA" ) }
+                    </td>
+                </tr>
             </tbody>
         </table>
 
@@ -132,7 +155,6 @@
 <script>
     import { last_hit } from "$lib/store.js"    
     import { goto } from "$app/navigation"
-    import { concatArr } from "$lib/format"
     import { srchstr2qrystr } from "$lib/utils"
     import Selecto from "$lib/components/Selecto.svelte"
     import BuildingPhoto from "$lib/components/BuildingPhoto.svelte"
@@ -151,6 +173,7 @@
     export let lng = null
     export let x = null
     export let y = null
+    export let mailing_addr = null
     export let owners = [ ]
 
     let grndaddrs = [ ],
@@ -197,6 +220,7 @@
 
             grndaddrs = rows.map( row => { return { 
                 value: row.address, 
+                label: row.address,
                 matid: row.matid, 
                 matpid: row.matpid, 
                 address: row.address, 
@@ -207,30 +231,6 @@
 
             } } )
         
-        },
-
-        setOwners = async ( ) => {
-            const response = await fetch( `/api/query/cama/owner?pid=${pid}&get=info` ),
-                rows = await response.json( ),
-                idxs = [ 1, 2 ,3 ]
-
-            let the_owners = [ ]
-
-            idxs.forEach( idx => {
-                if( rows[ 0 ][ "nme_owner" + idx + "lastname" ].length > 0 )
-                    the_owners.push( { 
-                        first_name: rows[ 0 ][ "nme_owner" + idx + "firstname" ], 
-                        last_name: rows[ 0 ][ "nme_owner" + idx + "lastname" ],  
-                        address_1: rows[ 0 ].address_1,
-                        address_2: rows[ 0 ].address_2,
-                        city: rows[ 0 ].city,
-                        state: rows[ 0 ].state,
-                        zipcode: rows[ 0 ].zipcode,
-                    } )
-                } )
-
-            owners = the_owners
-
         },
 
         setPhoto = async ( ) => {
@@ -264,7 +264,7 @@
             fields = verdict.fields
 
             if( verdict.valid ){
-                const hit = { value: `${gisid}|${fields.buffer.val}`, type: "BUFFER", gisid: gisid, buffer: fields.buffer.val }
+                const hit = { value: `${gisid}|${fields.buffer.val}`, type: "BUFFER", buffer: `${gisid}|${fields.buffer.val}`, page:1, view: "deed" }
 
                 last_hit.set( hit )
 			    goto( `/${hit.type.toLowerCase( )}/${srchstr2qrystr( hit.value ) }` )
@@ -275,26 +275,21 @@
 
     //reactives
     $: if ( matid && pid && gisid && x && y )
-        btns.push( { label: "Prop Report", icon: "pdf", link: `https://polaris3g.mecklenburgcountync.gov/ws/php/v1/report_prop.php?mat={matid}&xcoord=${x}&ycoord=${y}&pid=${pid}&gisid=${gisid}`  } )
+        btns.push( { label: "Prop Report", icon: "pdf", link: `https://polaris3g.mecklenburgcountync.gov/ws/php/v1/report_prop.php?mat={matid}&xcoord=${x}&ycoord=${y}&pid=${pid}&gisid=${gisid}`, width: "48px"  } )
 
     $: if ( gisid ){
-        btns.push( { label: "Buffer Search", icon: "circle" }, { label: "ZoomTo Prop", icon: "zoomin" } )
+        btns.push( { label: "Buffer Search", icon: "circle", width: "48px" }, { label: "ZoomTo Prop", icon: "zoomin", width: "48px" } )
 
         setPhoto( )
     }
 
-    $: if( pid ){
-        btns.push( { label: "Unselect Prop", icon: "uncheck" } )
-        setOwners( )
-
-    }
+    $: if( pid )
+        btns.push( { label: "Unselect Prop", icon: "uncheck", width: "48px" } )
         
 
     $: if( matid && ( gisid === pid ) )
         setGrndAddrs( )
-
     
-        
 
     $: if( lat && lng )
         setLinks( )

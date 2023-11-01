@@ -4,27 +4,34 @@ import { genError, getInvalidParams } from "$lib/api.js"
 export const GET = async ( { url, locals } ) => {
     let response, status = 200
 
-    try{
-        const pid = url.searchParams.get( "pid" ) ?? null,
-            gisid = url.searchParams.get( "gisid" ) ?? null,
-            { assess_pool } = locals
+    const allowed = [ "pid", "gisid" ]
 
-        if( gisid || pid ){
-            const sql = `SELECT parcels.parcelid as pid, parcels.AssessorMap as gisid 
-                            FROM Assess50Mecklenburg.dbo.Polaris_AllParceldata as parcels 
-                            WHERE ${pid ? `parcels.parcelid = '${pid}' or parcels.parcelid like '${pid}[A-Z|a-z]'` : `parcels.AssessorMap = '${gisid}'` } 
-                            GROUP BY parcels.parcelid, parcels.AssessorMap`,
+    try{
+        let qry_str = { }
+
+        allowed.forEach( key => {
+            if( url.searchParams.get( key ) )
+                qry_str[ key ] = url.searchParams.get( key )
+                        
+        } )
+
+        if( Object.keys( qry_str ).length > 0 ){
+            const { assess_pool } = locals,
+                filter = ( qry_str.hasOwnProperty( "pid" ) ? `parcels.parcelid = '${qry_str.pid}' or parcels.parcelid like '${qry_str.pid}[A-Z|a-z]'` : `parcels.AssessorMap = '${qry_str.gisid}'` ), 
+                sql = `SELECT parcels.parcelid as pid, parcels.AssessorMap as gisid 
+                        FROM dbo.Polaris_AllParceldata as parcels 
+                        WHERE ${ filter } 
+                        GROUP BY parcels.parcelid, parcels.AssessorMap`,
                 result  = await assess_pool.query( sql )
 
             response = result.recordset
 
         }else{
-            const allowed_params = [ "pid", "gisid" ],
-            invalid_params = getInvalidParams( url.searchParams, allowed_params ).join( ', ' )
-            
+            const invalid_params = getInvalidParams( url.searchParams, allowed ).join( ', ' )
+                
             response = genError( { "message": `invalid paramater(s) sent: ${invalid_params}` } )
-            status = 500
-        
+            status = 500 
+
         }
     
     }catch( err ){

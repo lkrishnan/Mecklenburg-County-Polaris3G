@@ -15,7 +15,7 @@
             <td class="px-4 py-2">
                 {info.label}
             </td>
-            <td class="px-4 py-2">
+            <td class="px-4 py-2 break-all">
                 {@html info.value }
             </td>
         </tr>
@@ -24,6 +24,6 @@
 </table>
 
 <script>
-    export let infos = [ ]
+	export let infos = [ ]
 
 </script>

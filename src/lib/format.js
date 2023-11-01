@@ -80,50 +80,19 @@ const arrayToNumList = ( arr ) => {
 		return deed
 
 	},
+	formatLandArea = ( size, unit, gis_acres ) => {
+		let landarea = ""
+		
+		if( size && unit && unit.length > 0 )
+			landarea = `${parseFloat(size).toFixed( 3 )} ${unit}`
+		else if( gis_acres )
+			landarea = `${parseFloat( gis_acres ).toFixed( 3 )} Acres (GIS Calc)`
 
-	/*formatDeed = ( deedbook, deedpage, saledate, astext ) => {
-		const a = new Date( saledate ),
-			b = new Date( "03/01/1990" ),
-			msDateA = Date.UTC ( a.getFullYear( ), a.getMonth( ) + 1, a.getDate( ) ),
-			msDateB = Date.UTC ( b.getFullYear( ), b.getMonth( ) + 1, b.getDate( ) )
+		return landarea
 
-		let deed = "NA"
+	},
 
-		if( deedbook && deedpage ){
-			deedbook = deedbook.trim( )
-			deedpage = deedpage.trim( )
-
-			if( deedbook.length > 0 & deedpage.length > 0 ){
-				if( astext )
-					deed = deedbook + "-" + deedpage
-
-				else{
-					if( ( parseFloat( msDateA ) <= parseFloat( msDateB ) ) && ( ( parseInt( deedbook ) > 1 && parseInt( deedbook )  < 33 ) || ( parseInt( deedbook ) > 33 && parseInt( deedbook )  < 6219 ) ) ){
-						var zeroPad = function( num, places ){
-							var zero = places - num.toString( ).length + 1;
-							return Array( + ( zero > 0 && zero ) ).join( "0" ) + num;
-						}
-						
-						deed = "<a href='http://meckrodhistorical.com/DocumentView.asp?DocumentType=Deed&Instrument=" + 
-							zeroPad( parseInt( deedbook ), 4 ) + zeroPad( parseInt( deedpage ), 4 ) + "&Close=True' target='_blank' rel='noreferrer' class='text-segundo underline underline-offset-4 hover:text-primero'>" + 
-							deedbook + "-" + deedpage + "</a>";
-					}else if( parseFloat( msDateA ) > parseFloat( msDateB ) ){
-						deed = "<a href='https://meckrod.manatron.com/RealEstate/SearchDetail.aspx?bk=" + deedbook.replace( /^0+/, '' ) + "&pg=" + deedpage.replace( /^0+/, '' ) + 
-							"&type=BkPg' target='_blank' rel='noreferrer' class='text-segundo underline underline-offset-4 hover:text-primero'>" + deedbook + "-" + deedpage + "</a>";
-					}
-
-				}
-
-			}
-
-
-		}
-
-		return deed
-			
-	},*/
-
-    formatLandArea = ( acres, unit, unit_desc, gis_acres ) => {
+    /*formatLandArea = ( acres, unit, unit_desc, gis_acres ) => {
         let landarea = ""
 		
 		if( acres && unit && unit.length > 0 ){
@@ -139,22 +108,7 @@ const arrayToNumList = ( arr ) => {
 		}else if( gis_acres )
 			landarea = `${parseFloat( gis_acres ).toFixed( 3 )} Acres (GIS Calc)`
 		
-		/*unit = ( unit ? unit.trim( ) : null )
-		acres = ( acres ? parseFloat( acres ) : null )
-				
-		if( acres ){
-			if( unit && unit.length > 0 ) //also checks if acres is greater than zero
-				landarea = acres.toFixed( ( unit === "AC" ? 3 : 0 ) ) + " " + unit
-
-			else //hack to take care of poorly maintained unit information
-				landarea = acres.toFixed( 3 ) + " AC"
-			  	
-		}else if( gis_acres )
-			landarea = parseFloat( gis_acres ).toFixed( 3 ) + " GIS Calc. Acres"*/
-		
-		return landarea
-    
-    },
+    },*/
 
     formatLegalDesc = desc => {
         desc = desc.trim( )
@@ -165,8 +119,6 @@ const arrayToNumList = ( arr ) => {
 				
             let bk = result[ 0 ].substring( 1, result[ 0 ].indexOf ( splitter ) ),
 				pg = result[ 0 ].substring( result[ 0 ].indexOf ( splitter ) + 1, result[ 0 ].length )
-
-            
 				
 			if( validateNumeric( bk ) && validateNumeric( pg ) ){
 				bk = parseInt( bk )
@@ -192,44 +144,42 @@ const arrayToNumList = ( arr ) => {
 
     formatOwnersAsHTML = ( owners ) => {
 		let temp = owners.reduce( ( html, owner, i ) => {
-			if( owner && owner.trim( ).length > 0 ){
-				const owner_arr = owner.split( "," )
-				html += `${( i > 0 ? "<br/>" : "" )} ${parseInt ( i + 1 )}. ${owner_arr[ 1 ]} ${owner_arr[ 0 ]}`
+			if( owner && owner.trim( ).length > 0 )
+				html += `${( i > 0 ? "<br/>" : "" )} ${parseInt ( i + 1 )}. ${owner}`
 				
-			}
-
 			return html
 
 		}, "<br/>" )
 
-
-		/*let temp =  owners.trim( )
-                .split( "|" )
-                .reduce( ( html, owner, i ) => {
-                    html += ( owner.trim( ).length > 0 ?  "<br/>" + parseInt ( i + 1 ) + ". " + owner.replace( ";", ", " ) : "" )
-
-                    return html
-
-                }, "" )*/
-
         return temp
         
     },
+
+	formatArrAsHTML = rows => {
+		let temp = rows.reduce( ( html, row, i ) => {
+			if( row && row.trim( ).length > 0 )
+				html += `${( i > 0 ? "<br/>" : "" )} ${parseInt ( i + 1 )}. ${row}`
+			
+			return html
+
+		}, "<br/>" )
+
+		return temp
+
+	},
 
 	formatFullName = ( lastname, firstname, comma=true ) => {
 		let fullname = ""
 
 		if( lastname ){
 			if( comma )
-				fullname = ( lastname ?? "" ) + ( firstname ? ", " + firstname : "" )
+				fullname = ( lastname ? lastname.trim( ) : "" ) + ( firstname ? ", " + firstname.trim( ) : "" )
 
 			else
-				fullname = ( firstname ?? "" ) + ( lastname ? " " + lastname : "" )
+				fullname = ( firstname ? firstname.trim( ) : "" ) + ( lastname ? " " + lastname.trim( ) : "" )
 			
 		}
 
-		console.log( fullname)
-		
 		return fullname
 
 	},
@@ -258,18 +208,44 @@ const arrayToNumList = ( arr ) => {
 		return parseFloat( num ).toLocaleString( "en-US", { maximumFractionDigits: decimals, } )
 
 	},
-	formatMoney = num => {
+	
+	formatMoney = ( num, mixin={} ) => {
   		if( num === null || isNaN( num ) ) 
 			return "N/A"
 
-  		return parseFloat( num ).toLocaleString( "en-US", { style: "currency", currency: "USD", } )
+  		return parseFloat( num ).toLocaleString( "en-US", { style: "currency", currency: "USD", ...mixin, } )
 
 	},
+	
 	formatDate = dateString => {
   		let date = new Date( dateString )
   		
 		return date.toLocaleDateString( "en-US" )
 
+	},
+
+	formatDecimal = ( num, places=3 ) => {
+		return ( ( !num && num !== 0 ) ? '' : parseFloat( num ).toFixed( places ) ) 
+			
+	},
+
+	formatIdentifyResult = ( rows, unique_key, field_format={ } ) => {
+		const discard = [ "shape", "geom", "thegeom" ],
+        	attribs = rows.map( row => { 
+				return Object.entries( row ) 
+						.filter( kv => !discard.includes( kv[ 0 ].toLowerCase( ) ) )
+						.map( fkv => ( { label: fkv[ 0 ], value: ( field_format.hasOwnProperty( fkv[ 0 ] ) ? field_format[fkv[ 0 ]](fkv[ 1 ]) : fkv[ 1 ] ) } ) ) 
+
+			} ),
+			dropdown_items = rows.map( ( row, i ) => ( { 
+				id: i, 
+				value: ( row.hasOwnProperty( unique_key ) ? row[ unique_key ] : row[ Object.keys( row )[ 0 ] ] ), 
+				label: ( row.hasOwnProperty( unique_key ) ? row[ unique_key ] : row[ Object.keys( row )[ 0 ] ] ),  
+
+			} ) )
+
+        return { attribs: attribs, dropdown_items: dropdown_items }
+
 	}
 
-export { arrayToNumList, concatArr, formatAddr, formatLandArea, formatLegalDesc, formatOwnersAsHTML, formatUCWords, formatDeed, formatCommas, formatMoney, formatDate, formatFullName }
+export { arrayToNumList, concatArr, formatAddr, formatLandArea, formatLegalDesc, formatOwnersAsHTML, formatUCWords, formatDeed, formatCommas, formatMoney, formatDate, formatFullName, formatDecimal, formatArrAsHTML, formatIdentifyResult }

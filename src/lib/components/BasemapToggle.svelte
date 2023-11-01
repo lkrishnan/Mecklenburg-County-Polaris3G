@@ -1,6 +1,8 @@
 <div class="relative"
     on:mouseleave="{(event)=>{ ( debounce( e => { if(!mouse_on)open=false }, 200 ) )( ) }}"
     on:blur="{(event)=>{ ( debounce( e => { if(!mouse_on)open=false }, 200 ) )( ) }}"    
+    role="button"
+    tabindex="-1"
 >
     <div class="flex col-span-1 row-span-2 justify-end p-0">
         <button 
@@ -22,6 +24,8 @@
             on:mouseover="{(event)=>{mouse_on=true}}"
             on:mouseleave="{(event)=>{ mouse_on=false }}"
             on:blur="{(event)=>{ mouse_on=false }}"
+            role="button"
+            tabindex="-1"
         >
             {#each basemaps as basemap, i}
                 {#if i!==basemap_idx}
