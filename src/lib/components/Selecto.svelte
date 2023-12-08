@@ -1,4 +1,4 @@
-<div class="w-full relative">
+<div class="w-full relative bg-lienzo">
     <button
         type="button" 
         class="relative w-full cursor-pointer rounded py-3 pl-3 pr-10 text-left shadow ring-1 ring-inset ring-primero focus:outline-none focus:ring-2 focus:ring-segundo sm:text-sm sm:leading-6 {items.length === 0 ? 'cursor-not-allowed text-suave' : 'text-primero' }"
@@ -20,7 +20,7 @@
         </span>
     </button>
 
-    <div class="{open ? 'absolute z-20' : 'hidden'} w-full border border-primero">
+    <div class="{open ? 'absolute z-20 mt-1' : 'hidden'} w-full border border-primero">
         <ul 
             bind:this={element} 
             class="bg-lienzo shadow-lg md:max-h-[200px] overflow-y-auto scrollbar"
@@ -115,8 +115,14 @@
 
         }
 
-</script>
 
-<style>
-    
-</style>
+    //reactives
+    $: if( open ){
+        dispatch( "open", { open: true } )
+
+    }else{
+        dispatch( "open", { open: false } )
+
+    }
+
+</script>

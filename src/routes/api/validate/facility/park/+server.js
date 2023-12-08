@@ -11,7 +11,8 @@ export const GET = async ( { url, locals } ) => {
             const { gis_pool } = locals,
                 sql = `SELECT prkname as value, 'PARK' as type, round(ST_X(shape)::NUMERIC,4) as x, round(ST_Y(shape)::NUMERIC,4) as y, 
                         round(ST_X(ST_Transform(shape, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(shape, 4326))::NUMERIC,4) as lat, 
-                        prkname as name, prkaddr as address, prktype, prkstatus as status, prkdist as district
+                        prkname as name, prkaddr as address, prktype, prkstatus as status, prkdist as district,
+                        prkname as srch_key
                         FROM parks_pt
                         WHERE prkname ~* $$${name}$$
                         LIMIT 5`,

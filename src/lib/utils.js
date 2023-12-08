@@ -20,6 +20,16 @@ qrystr2srchstr = str => {
 
 },
 
+strIsNum = str => {
+    return !isNaN( str )
+
+},
+
+isDecimal = val => {
+    return ( !( val.toString( ).indexOf( "." ) == -1 ) ? true : false )
+
+},
+
 filterObj = ( theobj, thekeys, include=true ) => {
     return Object.keys( theobj )
             .filter( key => ( include ? thekeys.includes( key ) : !thekeys.includes( key ) ) )
@@ -27,15 +37,21 @@ filterObj = ( theobj, thekeys, include=true ) => {
 
 },
 
-
-
 json2URL = obj => {
     return Object.keys( obj ).map( ( i ) => i + '=' + encodeURIComponent( obj[ i ] ) ).join( '&' )
 
 },
 
 URL2Obj = str => {
-    return Object.fromEntries( new URLSearchParams( str ) )
+    let obj = Object.fromEntries( new URLSearchParams( str ) )
+
+    Object.keys( obj ).forEach( key => {
+        if( strIsNum( obj[ key ] ) )
+            obj[ key ] = ( isDecimal( obj[ key ] ) ? parseFloat( obj[ key ] ) : parseInt( obj[ key ] ) )
+
+    } )
+
+    return obj
 
 },
 
@@ -111,6 +127,10 @@ icon = ( typ, width=36, height=36 ) => {
         circle: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 96 960 960" width="${width}" class="fill-current"><path d="M480 976q-82 0-155-31.5t-127.5-86Q143 804 111.5 731T80 576q0-83 31.5-156t86-127Q252 239 325 207.5T480 176q83 0 156 31.5T763 293q54 54 85.5 127T880 576q0 82-31.5 155T763 858.5q-54 54.5-127 86T480 976Zm0-60q142 0 241-99.5T820 576q0-142-99-241t-241-99q-141 0-240.5 99T140 576q0 141 99.5 240.5T480 916Zm0-340Z"/></svg>`,
         close: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 0 24 24" width="${width}" class="fill-current"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg>`,
         close2: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 -960 960 960" width="${width}"><path d="m249-207-42-42 231-231-231-231 42-42 231 231 231-231 42 42-231 231 231 231-42 42-231-231-231 231Z"/></svg>`,
+        doublearrowdown: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 -960 960 960" width="${width}"><path d="M480-200 240-440l56-56 184 183 184-183 56 56-240 240Zm0-240L240-680l56-56 184 183 184-183 56 56-240 240Z"/></svg>`,
+        doublearrowleft: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 -960 960 960" width="${width}"><path d="M440-240 200-480l240-240 56 56-183 184 183 184-56 56Zm264 0L464-480l240-240 56 56-183 184 183 184-56 56Z"/></svg>`,
+        doublearrowright: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 -960 960 960" width="${width}"><path d="M383-480 200-664l56-56 240 240-240 240-56-56 183-184Zm264 0L464-664l56-56 240 240-240 240-56-56 183-184Z"/></svg>`,
+        doublearrowup: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 -960 960 960" width="${width}"><path d="m296-224-56-56 240-240 240 240-56 56-184-183-184 183Zm0-240-56-56 240-240 240 240-56 56-184-183-184 183Z"/></svg>`,
         draw: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 0 24 24" width="${width}" class="fill-current"><path d="M9.75 20.85C11.53 20.15 11.14 18.22 10.24 17C9.35 15.75 8.12 14.89 6.88 14.06C6 13.5 5.19 12.8 4.54 12C4.26 11.67 3.69 11.06 4.27 10.94C4.86 10.82 5.88 11.4 6.4 11.62C7.31 12 8.21 12.44 9.05 12.96L10.06 11.26C8.5 10.23 6.5 9.32 4.64 9.05C3.58 8.89 2.46 9.11 2.1 10.26C1.78 11.25 2.29 12.25 2.87 13.03C4.24 14.86 6.37 15.74 7.96 17.32C8.3 17.65 8.71 18.04 8.91 18.5C9.12 18.94 9.07 18.97 8.6 18.97C7.36 18.97 5.81 18 4.8 17.36L3.79 19.06C5.32 20 7.88 21.47 9.75 20.85M20.84 5.25C21.06 5.03 21.06 4.67 20.84 4.46L19.54 3.16C19.33 2.95 18.97 2.95 18.76 3.16L17.74 4.18L19.82 6.26M11 10.92V13H13.08L19.23 6.85L17.15 4.77L11 10.92Z" /></svg>`,
         eye: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 -960 960 960" width="${width}"><path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z"/></svg>`,
         flood: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 96 960 960" width="${width}" class="fill-current"><path d="M80 976v-60q34-3 54.5-21.5T208 876q53 0 75.5 20t60.5 20q38 0 60.5-20t75.5-20q53 0 76 20t60 20q38 0 60.5-25t75.5-25q53 0 73.5 23.5T880 916v60q-42 0-68.5-25T752 926q-33 0-58 25t-78 25q-53 0-78-20t-58-20q-33 0-58 20t-78 20q-53 0-78-20t-58-20q-33 0-59.5 20T80 976Zm264-190q-53 0-78-20t-58-20q-33 0-59.5 20T80 786v-60q34-3 54.5-21.5T208 686q11 0 22.5 1.5T251 692l-51-185-62 77-47-38 300-370 445 170-22 56-92-35 86 321q18 10 36.5 24t35.5 13v61q-42 0-68.5-25T752 736q-33 0-58 25t-78 25q-53 0-78-20t-58-20q-33 0-58 20t-78 20Zm0-60q31 0 55.5-17.5T456 687l-37-136 136-36 55 211q38 4 62.5-22t69.5-28l-90-336-241-93-164 202 74 274q7 2 12 2.5t11 .5Zm151-237Z"/></svg>`,
@@ -139,6 +159,7 @@ icon = ( typ, width=36, height=36 ) => {
         payment: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 96 960 960" width="${width}" class="fill-current"><path d="M540 636q-50 0-85-35t-35-85q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35ZM220 776q-24.75 0-42.375-17.625T160 716V316q0-24.75 17.625-42.375T220 256h640q24.75 0 42.375 17.625T920 316v400q0 24.75-17.625 42.375T860 776H220Zm100-60h440q0-42 29-71t71-29V416q-42 0-71-29t-29-71H320q0 42-29 71t-71 29v200q42 0 71 29t29 71Zm480 180H100q-24.75 0-42.375-17.625T40 836V376h60v460h700v60ZM220 716V316v400Z"/></svg>`,
         pdf: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 96 960 960" width="${width}" class="fill-current"><path d="M331 625h37v-83h48q15.725 0 26.362-10.638Q453 520.725 453 505v-48q0-15.725-10.638-26.362Q431.725 420 416 420h-85v205Zm37-120v-48h48v48h-48Zm129 120h84q15 0 26-10.638 11-10.637 11-26.362V457q0-15.725-11-26.362Q596 420 581 420h-84v205Zm37-37V457h47v131h-47Zm133 37h37v-83h50v-37h-50v-48h50v-37h-87v205ZM260 856q-24 0-42-18t-18-42V236q0-24 18-42t42-18h560q24 0 42 18t18 42v560q0 24-18 42t-42 18H260Zm0-60h560V236H260v560ZM140 976q-24 0-42-18t-18-42V296h60v620h620v60H140Zm120-740v560-560Z"/></svg>`,
         person: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 -960 960 960" width="${width}"><path d="M440.5-500Q378-500 334-544.062 290-588.125 290-650q0-63 44.062-106.5Q378.125-800 440-800q63 0 106.5 43.5t43.5 106q0 62.5-43.5 106.5t-106 44Zm-.5-60q38 0 64-26.438 26-26.437 26-63.562 0-38-26-64t-63.5-26q-37.5 0-64 26T350-650.5q0 37.5 26.438 64Q402.875-560 440-560ZM898-20 758-160q-23 17-47.5 23.5t-50.065 6.5q-71.015 0-120.725-49.618Q490-229.235 490-300.118 490-371 539.618-420.5q49.617-49.5 120.5-49.5Q731-470 780.5-420.29T830-299.565q0 25.565-6.5 50.065Q817-225 800-202L940-62l-42 42ZM660-190q47 0 78.5-31.5T770-300q0-47-31.5-78.5T660-410q-47 0-78.5 31.5T550-300q0 47 31.5 78.5T660-190Zm-540 30v-94q0-37 17.5-63t50.5-43q47-23 122.5-43.5T464-419q-8 13-15 28.5T438-360q-78-1-136 18.5T212-306q-14 8-23 21.5t-9 30.5v34h258q11 17 20 31.5t20 28.5H120Zm320-490Zm-2 430Z"/></svg>`,
+        piechart: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 -960 960 960" width="${width}"><path d="M520-520h278q-15-110-91.5-186.5T520-798v278Zm-80 358v-636q-121 15-200.5 105.5T160-480q0 122 79.5 212.5T440-162Zm80 0q110-14 187-91t91-187H520v278Zm-40-318Zm0 400q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 155.5 31.5t127 86q54.5 54.5 86 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Z"/></svg>`,
         polygon: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 0 24 24" width="${width}" class="fill-current"><path d="M2,2V8H4.28L5.57,16H4V22H10V20.06L15,20.05V22H21V16H19.17L20,9H22V3H16V6.53L14.8,8H9.59L8,5.82V2M4,4H6V6H4M18,5H20V7H18M6.31,8H7.11L9,10.59V14H15V10.91L16.57,9H18L17.16,16H15V18.06H10V16H7.6M11,10H13V12H11M6,18H8V20H6M17,18H19V20H17" /></svg>`,
         print: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 0 24 24" width="${width}" class="fill-current"><path d="M19 8C20.66 8 22 9.34 22 11V17H18V21H6V17H2V11C2 9.34 3.34 8 5 8H6V3H18V8H19M8 5V8H16V5H8M16 19V15H8V19H16M18 15H20V11C20 10.45 19.55 10 19 10H5C4.45 10 4 10.45 4 11V15H6V13H18V15M19 11.5C19 12.05 18.55 12.5 18 12.5C17.45 12.5 17 12.05 17 11.5C17 10.95 17.45 10.5 18 10.5C18.55 10.5 19 10.95 19 11.5Z" /></svg>`,
         propinfo: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 -960 960 960" width="${width}"><path d="M680-600h80v-80h-80v80Zm0 160h80v-80h-80v80Zm0 160h80v-80h-80v80Zm0 160v-80h160v-560H480v56l-80-58v-78h520v720H680Zm-640 0v-400l280-200 280 200v400H360v-200h-80v200H40Zm80-80h80v-200h240v200h80v-280L320-622 120-480v280Zm560-360ZM440-200v-200H200v200-200h240v200Z"/></svg>`,
@@ -168,4 +189,4 @@ icon = ( typ, width=36, height=36 ) => {
     
 }
 
-export { null2empty, removeArrayDups, srchstr2qrystr, qrystr2srchstr, filterObj, json2URL, debounce, icon, sortArrayofObjs, arrHasSameElems, arrHasAllElems, objIsEqual, URL2Obj }
+export { null2empty, removeArrayDups, srchstr2qrystr, qrystr2srchstr, filterObj, json2URL, debounce, icon, sortArrayofObjs, arrHasSameElems, arrHasAllElems, objIsEqual, URL2Obj, strIsNum, isDecimal }

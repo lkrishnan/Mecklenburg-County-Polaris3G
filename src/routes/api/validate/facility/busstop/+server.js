@@ -9,7 +9,7 @@ export const GET = async ( { url, locals } ) => {
             const { gis_pool } = locals,
                 sql = `select stopdesc as value, 'BUSSTOP' as type, round(ST_X(shape)::NUMERIC,4) as x, round(ST_Y(shape)::NUMERIC,4) as y, 
                         round(ST_X(ST_Transform(shape, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(shape, 4326))::NUMERIC,4) as lat,
-                        stopdesc as busstop, routes
+                        stopdesc as busstop, routes, stopdesc as srch_key
                         from cats_busstops_pt
                         where stopdesc ~* $$${name}$$
                         LIMIT 5`,

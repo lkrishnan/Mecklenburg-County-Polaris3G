@@ -24,20 +24,7 @@ export const GET = async ( { url, locals, fetch } ) => {
                                 ELSE '' 
                             END as value, 
                             'ROAD' as type,
-                            regexp_replace(admkey, '\\s*:.....', ', ') || 
-                            CASE 
-                                WHEN municipality = 'CHAR' THEN 'CHARLOTTE' 
-                                WHEN municipality = 'CORN' THEN 'CORNELIUS'
-                                WHEN municipality = 'DAVI' THEN 'DAVIDSON'
-                                WHEN municipality = 'HUNT' THEN 'HUNTERSVILLE'
-                                WHEN municipality = 'MATT' THEN 'MATTHEWS'
-                                WHEN municipality = 'MINT' THEN 'MINT HILL'
-                                WHEN municipality = 'PINE' THEN 'PINEVILLE'
-                                WHEN municipality = 'STAL' THEN 'STALLINGS'
-                                WHEN municipality = 'MECK' THEN 'MECKLENBURG'
-                                ELSE '' 
-                            END as road, 
-                    preaddrnum as prefix, streetname as stname, streettype as sttype, addrnumsuf as suffix, municipality as juris, countystcode as stcode
+                            countystcode as srch_key
                     FROM streetfile_tb
                     WHERE regexp_replace(admkey, '\\s*:.....', ', ') ||
                         CASE

@@ -59,17 +59,17 @@ export const GET = async ( { url, locals } ) => {
 
                 },
                 sql = {
-                    "lastname": `SELECT top 5 CASE ${getCaseBlock( 'lastname' )} END as value, 'OWNERLAST' as type, CASE ${getCaseBlock( 'lastname' )} END as lastname
+                    "lastname": `SELECT top 5 CASE ${getCaseBlock( 'lastname' )} END as value, 'OWNERLAST' as type, CASE ${getCaseBlock( 'lastname' )} END as srch_key
                                     FROM Assess50Mecklenburg.dbo.Polaris_Owners as ownr
                                     WHERE ${filter.join( " and " )}
                                     GROUP BY CASE ${getCaseBlock( 'lastname' )} END`,
 
-                    "firstname": `SELECT top 5 CASE ${getCaseBlock( 'firstname' )} END as value, 'OWNERFIRST' as type, CASE ${getCaseBlock( 'firstname' )} END as firstname
+                    "firstname": `SELECT top 5 CASE ${getCaseBlock( 'firstname' )} END as value, 'OWNERFIRST' as type, CASE ${getCaseBlock( 'firstname' )} END as srch_key
                                     FROM Assess50Mecklenburg.dbo.Polaris_Owners as ownr
                                     WHERE ${filter.join( " and " )}
                                     GROUP BY CASE ${getCaseBlock( 'firstname' )} END`,
 
-                    "fullname": `SELECT top 5 CASE ${getCaseBlock( 'fullname' )} END as value,'OWNER' as type, CASE ${getCaseBlock( 'lastname' )} END as lastname, CASE ${getCaseBlock( 'firstname' )} END as firstname
+                    "fullname": `SELECT top 5 CASE ${getCaseBlock( 'fullname' )} END as value,'OWNER' as type, CASE ${getCaseBlock( 'fullname' )} END as srch_key
                                 FROM Assess50Mecklenburg.dbo.Polaris_Owners as ownr
                                 WHERE ${filter.join( " and " )}
                                 GROUP BY CASE ${getCaseBlock( 'fullname' )} END, CASE ${getCaseBlock( 'lastname' )} END, CASE ${getCaseBlock( 'firstname' )} END`

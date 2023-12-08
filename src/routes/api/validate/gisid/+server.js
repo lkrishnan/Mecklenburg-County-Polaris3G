@@ -9,7 +9,7 @@ export const GET = async ( { url, locals } ) => {
 
         if( gisid ){ //use parcels layer
             const { gis_pool } = locals,
-                sql = `select pid as value, 'GISID' as type, pid as gisid 
+                sql = `select pid as value, 'GISID' as type, pid as srch_key 
                         from parcels_py 
                         where pid ~* '${gisid}' and shape is not null
                         group by pid

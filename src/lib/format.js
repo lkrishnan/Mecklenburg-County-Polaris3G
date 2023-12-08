@@ -48,7 +48,7 @@ const arrayToNumList = ( arr ) => {
 			b = new Date( "03/01/1990" ),
 			msDateA = Date.UTC( a.getFullYear( ), a.getMonth( ) + 1, a.getDate( ) ),
 			msDateB = Date.UTC( b.getFullYear( ), b.getMonth( ) + 1, b.getDate( ) ),
-			legal_ref_arr = legal_ref.split( "-" ),
+			legal_ref_arr = ( legal_ref ? legal_ref.split( "-" ) : [ ] ),
 			zeroPad = ( num, places ) => {
 				var zero = places - num.toString( ).length + 1;
 				return Array( + ( zero > 0 && zero ) ).join( "0" ) + num;
@@ -80,15 +80,17 @@ const arrayToNumList = ( arr ) => {
 		return deed
 
 	},
-	formatLandArea = ( size, unit, gis_acres ) => {
+	formatLandArea = ( size, unit, gis_sqft ) => {
 		let landarea = ""
 		
-		if( size && unit && unit.length > 0 )
-			landarea = `${parseFloat(size).toFixed( 3 )} ${unit}`
-		else if( gis_acres )
-			landarea = `${parseFloat( gis_acres ).toFixed( 3 )} Acres (GIS Calc)`
+		unit = ( unit ?? "" )
+		
+		if( size && unit.length > 0 )
+			landarea = `${parseFloat(size).toFixed( 3 )} ${( unit === "SQUARE FEET" ? "SQ FT" : unit )}`
+		else if( gis_sqft )
+			landarea = `${(parseFloat( gis_sqft )/43650).toFixed( 3 )} Acres (GIS Calc)`
 
-		return landarea
+		return ( landarea.length ? landarea : "NA" )
 
 	},
 
@@ -155,6 +157,25 @@ const arrayToNumList = ( arr ) => {
         
     },
 
+	formatOwnersAsHTML2 = ( owners ) => {
+		let temp = owners.reduce( ( html, owner, i ) => {
+			html += `${( i > 0 ? "<br/>" : "" )} ${parseInt ( i + 1 )}. ${formatFullName2( owner )}`
+				
+			return html
+
+		}, "<br/>" )
+
+        return temp
+        
+    },
+
+	formatFullName2 = ( obj, comma=true ) => {
+		let fullname = "" + ( comma ? Object.values( obj ).join( ", " ) : Object.values( obj ).reverse( ).join( " " ) )
+
+		return fullname
+
+	},
+
 	formatArrAsHTML = rows => {
 		let temp = rows.reduce( ( html, row, i ) => {
 			if( row && row.trim( ).length > 0 )
@@ -184,6 +205,11 @@ const arrayToNumList = ( arr ) => {
 
 	},
 
+	formatAcres = ( sqft, short_form=true )  => {
+		return (sqft/43650).toFixed( 2 ) + ( short_form ? " AC" : " acres" )
+
+	},
+
     formatUCWords = str => {
 		//  discuss at: http://phpjs.org/functions/ucwords/
 		// original by: Jonas Raoni Soares Silva (http://www.jsfromhell.com)
@@ -210,7 +236,7 @@ const arrayToNumList = ( arr ) => {
 	},
 	
 	formatMoney = ( num, mixin={} ) => {
-  		if( num === null || isNaN( num ) ) 
+  		if( num === null || isNaN( num ) )
 			return "N/A"
 
   		return parseFloat( num ).toLocaleString( "en-US", { style: "currency", currency: "USD", ...mixin, } )
@@ -221,6 +247,15 @@ const arrayToNumList = ( arr ) => {
   		let date = new Date( dateString )
   		
 		return date.toLocaleDateString( "en-US" )
+
+	},
+
+	formatFEMADate = dte => {
+		let frmt_date = new Date( dte )
+		
+		frmt_date.setDate( frmt_date.getDate( ) + 1 )
+
+		return String( frmt_date.getMonth( ) + 1 ).padStart( 2, "0" ) + "/" + String( frmt_date.getDate() ).padStart( 2, "0" ) + "/" + frmt_date.getFullYear( )
 
 	},
 
@@ -246,6 +281,27 @@ const arrayToNumList = ( arr ) => {
 
         return { attribs: attribs, dropdown_items: dropdown_items }
 
-	}
+	},
 
-export { arrayToNumList, concatArr, formatAddr, formatLandArea, formatLegalDesc, formatOwnersAsHTML, formatUCWords, formatDeed, formatCommas, formatMoney, formatDate, formatFullName, formatDecimal, formatArrAsHTML, formatIdentifyResult }
+
+	formatStatePlane = coords => {
+		if( ( ( coords[ 0 ] >= 1384251 && coords[ 0 ] <= 1537013 ) && ( coords[ 1 ] >= 460978 && coords[ 1 ] <= 660946 ) ) ) 
+			return `${coords[ 0 ]},${coords[ 1 ]}`
+
+		else if( ( coords[ 1 ] >= 1384251 && coords[ 1 ] <= 1537013 ) && ( coords[ 0 ] >= 460978 && coords[ 0 ] <= 660946 ) )
+			return `${coords[ 1 ]},${coords[ 0 ]}`
+				
+	},
+
+	formatLatLng = coords => {
+		if( ( coords[ 0 ] >= 34.9991000096838 && coords[ 0 ] <= 35.5560858870075 ) && ( coords[ 1 ] >= -81.0562802910356 && coords[ 1 ] <= -80.5567016747919 ) )
+			return `${coords[ 0 ]},${coords[ 1 ]}`
+
+		else if( ( coords[ 1 ] >= 34.9991000096838 && coords[ 1 ] <= 35.5560858870075 ) && ( coords[ 0 ] >= -81.0562802910356 && coords[ 0 ] <= -80.5567016747919 ) )
+			return `${coords[ 1 ]},${coords[ 0 ]}`
+				
+	},
+
+	formatPercentage = ( val, total ) => `${formatDecimal( ( val / total ) * 100, 2 )}%`
+
+export { arrayToNumList, concatArr, formatAddr, formatLandArea, formatLegalDesc, formatOwnersAsHTML, formatUCWords, formatDeed, formatCommas, formatMoney, formatDate, formatFullName, formatDecimal, formatArrAsHTML, formatIdentifyResult, formatOwnersAsHTML2, formatFullName2, formatStatePlane, formatLatLng, formatPercentage, formatFEMADate, formatAcres }

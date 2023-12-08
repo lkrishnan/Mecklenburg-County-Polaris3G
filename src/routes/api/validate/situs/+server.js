@@ -27,7 +27,7 @@ export const GET = async ( { url, locals } ) => {
                     } )
                     .filter( n => n ),
 
-                    sql = `SELECT TOP 5 parcels.location_address as value, 'SITUS' as type, parcels.ParcelID as pid, parcels.AssessorMap as gisid, parcels.location_address as fulladdress
+                    sql = `SELECT TOP 5 parcels.location_address as value, 'SITUS' as type, parcels.location_address as srch_key
                             FROM Assess50Mecklenburg.dbo.Polaris_AllParceldata as parcels
                             WHERE ${filter.join( " and " )}`,
 

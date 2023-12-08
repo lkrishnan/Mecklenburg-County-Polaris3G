@@ -9,7 +9,7 @@ export const GET = async ( { url, locals } ) => {
 
         if( pid ){ //use cama tables
             const { assess_pool } = locals,
-                sql = `SELECT parcels.ParcelID as value, 'PID' as type, parcels.ParcelID as pid, parcels.AssessorMap as gisid
+                sql = `SELECT parcels.ParcelID as value, 'PID' as type, parcels.ParcelID as srch_key
                         FROM Assess50Mecklenburg.dbo.Polaris_AllParceldata as parcels 
                         where parcels.ParcelID like '${pid}%'`,
                 result  = await assess_pool.query( sql )

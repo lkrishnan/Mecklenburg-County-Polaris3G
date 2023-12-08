@@ -36,18 +36,23 @@
     </div>
 
     <!-- Search Row -->
-    <AutoComplete placeholder="Enter address / parcel# /owner / landmark" minchar="3" spinner={spinner} go={true} nomatch={nomatch} {items} padding="md:px-2 px-12 py-1 md:pr-1 pr-11"
-        on:hit={handleHit} on:brute={handleBrute} on:query={handleQuery} on:open={handleOpen} />
+    <AutoComplete 
+        placeholder="Enter address / parcel# /owner / landmark" 
+        minchar="3" spinner={spinner} go={true} nomatch={nomatch} {items} 
+        padding="md:px-2 px-12 py-1 md:pr-1 pr-11"
+        on:hit={handleHit} on:brute={handleBrute} on:query={handleQuery} on:open={handleOpen} 
+        
+    />
     
 </div>
 
 <script>
     import { getAPIURL } from "$lib/api"
     import { goto } from "$app/navigation"
-    import AutoComplete from "$lib/components/search/AutoComplete.svelte"
-    import { last_hit } from '$lib/store'
+    import AutoComplete from "$lib/components/AutoComplete.svelte"
     import { srchstr2qrystr, icon } from "$lib/utils"
-    import { validateCNumber, validateAddress, validateOwnerName, validateNumeric, validateAtleast7, validateIntersection, validateLatLng, validateStatePlane } from "$lib/validate" 
+    import { formatStatePlane, formatLatLng } from "$lib/format"
+    import { validateCNumber, validateAddress, validateOwnerName, validateNumeric, validateAtleast7, validateIntersection, validateLatLng, validateStatePlane, validateTaxPID } from "$lib/validate" 
     import { createEventDispatcher } from "svelte"
     	
     export let leftdrawer = leftdrawer
@@ -77,33 +82,36 @@
     const dispatch = createEventDispatcher( ),
     
         handleHit = event => {
-            last_hit.set( { ...event.detail, page: 1, view: "ownership" } )
-            goto( `/${event.detail.type.toLowerCase( )}/${srchstr2qrystr( event.detail.value )}` )
+            goto( `/${event.detail.type.toLowerCase( )}/${srchstr2qrystr( event.detail.srch_key.toString( ) )}` )
 
         },
 
         handleBrute = event => {
             const srch_str = event.detail
+
             let hit
 
-            if( validateStatePlane( srch_str ) ){
-                const xy = srch_str.split( "," ).map( coord => parseFloat( coord.trim( ) ).toFixed( 4 ) )
-                
-                hit = { value: `${xy[ 0 ]},${xy[ 1 ]}`, type: "XY", x: xy[ 0 ], y: xy[ 1 ], page: 1, view: "ownership" }
+            if( validateTaxPID( srch_str ) )
+                hit = { type: "PID", srch_key: srch_str }
+            
+            else if( validateCNumber( srch_str ) )
+                hit = { type: "GISID", srch_key: srch_str }
+            
+            else if( validateStatePlane( srch_str ) ){
+                const xy = formatStatePlane( srch_str.split( "," ).map( coord => parseFloat( coord.trim( ) ).toFixed( 4 ) ) )
+                hit = { type: "XY", srch_key: xy }
 		        
             }else if( validateLatLng( srch_str ) ){
-                const latlng = srch_str.split( "," ).map( coord => parseFloat( coord.trim( ) ).toFixed( 4 ) )
-                
-                hit = { value: `${latlng[ 0 ]},${latlng[ 1 ]}`, type: "LATLNG", lat: latlng[ 0 ], lng: latlng[ 1 ], page: 1, view: "ownership" }
+                const latlng = formatLatLng( srch_str.split( "," ).map( coord => parseFloat( coord.trim( ) ).toFixed( 4 ) ) )
+                hit = { type: "LATLNG", srch_key: latlng }
 		        
             }
 
-            // propogate hit
-            if( hit ){
-                last_hit.set( hit )
-                goto( `/${hit.type.toLowerCase( )}/${srchstr2qrystr( hit.value ) }` )
+            //standardized address search needs to be added
 
-            }
+            // propogate hit
+            if( hit )
+                goto( `/${hit.type.toLowerCase( )}/${srchstr2qrystr( hit.srch_key ) }` )
             
         },
 
@@ -157,5 +165,13 @@
             context_menu_open = false
 
         }
+
+    $: if( is_open ){
+        dispatch( "open", { open: true } )
+
+    }else{
+        dispatch( "open", { open: false } )
+
+    }
 
 </script>

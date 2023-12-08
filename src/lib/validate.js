@@ -51,7 +51,13 @@ validateIntersection = str => {
 },
 
 validateOwnerName = str => {
-    return ( str.match( /^[A-Za-z]+\s*(,)\s*[A-Za-z]+$/ ) ? true : false )
+    //return ( str.match( /^[A-Za-z]+\s*(,)\s*[A-Za-z]+$/ ) ? true : false )
+    return ( str.match( /^[A-Za-z@~`!@#$%^&*()_=+\\\\';:\"\\/?>.<,-]+\s*(,)\s*[A-Za-z@~`!@#$%^&*()_=+\\\\';:\"\\/?>.<,-]+$/ ) ? true : false )
+
+},
+
+validateName = str => {
+    return ( str.match( /^[A-Z@~`!@#$%^&*()_=+\\\\';:\"\\/?>.<,-]*$/i ) ? true : false )
 
 },
 
@@ -128,4 +134,4 @@ validateForm = fields => {
 
 export { validateStreetName, validateNumeric, validateAlphaNumeric, validateSpChar, validateAtleast7, validateCNumber, validateTaxPID, 
     validateGISID, validateOnlyAlpha, validateOwnerName, validateIntersection, validateAddress, 
-    validateCountyYear, validateLatLng, validateStatePlane, validateRings, validateForm  }
+    validateCountyYear, validateLatLng, validateStatePlane, validateRings, validateForm, validateName  }

@@ -15,9 +15,7 @@ export const GET = async ( { url, locals, fetch } ) => {
             const addr_array = addr.split( " " )
             
             if( validateNumeric( addr_array[ 0 ] ) ){
-                sql = `select full_address as value, 'ADDRESS' as type, cast(num_addr as text) as matid, num_parent_parcel as matpid, full_address as address,
-                        round(ST_X(shape)::NUMERIC,4) as x, round(ST_Y(shape)::NUMERIC,4) as y, 
-                        round(ST_X(ST_Transform(shape, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(shape, 4326))::NUMERIC,4) as lat
+                sql = `select full_address as value, 'ADDRESS' as type, cast(num_addr as text) as srch_key
                         from masteraddress_pt 
                         where ${( validateNumeric( addr_array[ 0 ] ) ? "txt_street_number = '" + addr_array[ 0 ] + "' and " : "" )}soundex(substring(full_address from 1 for ${addr.length})) = soundex($$'${addr}'$$)` 
 
@@ -29,9 +27,7 @@ export const GET = async ( { url, locals, fetch } ) => {
                 //throw new Error( "Invalid House number and/or street name" )
     
         }else if( fulladdr ){
-            sql = `select full_address as value, 'ADDRESS' as type, cast(num_addr as text) as matid, num_parent_parcel as matpid, full_address as address,
-                    round(ST_X(shape)::NUMERIC,4) as x, round(ST_Y(shape)::NUMERIC,4) as y, 
-                    round(ST_X(ST_Transform(shape, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(shape, 4326))::NUMERIC,4) as lat
+            sql = `select full_address as value, 'ADDRESS' as type, cast(num_addr as text) as srch_key
                     from masteraddress_pt
                     where full_address = '${fulladdr}'`
 

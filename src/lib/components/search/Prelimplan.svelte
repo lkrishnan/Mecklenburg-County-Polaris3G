@@ -1,85 +1,98 @@
-<div class="p-2">
-    <form class="p-2" on:submit|preventDefault={handleGo}>
-        <div class="mb-4">
-            <label class="block text-sm font-bold mb-2" for="situs_addr">
-                Preliminary Plans
-            </label>
-            <Selecto on:hit={handleHit} items={items} selected={selected}/>
+<div class="relative w-full rounded border-primero">
+    <div class="md:flex hidden flex-row items-center p-2">
+        <div class="grow font-bold text-lg">
+            {heading}
+        </div>
+        <div class="flex">
+            <button 
+                class="p-1 rounded-full group relative transition-colors duration-150 hover:text-segundo"
+                on:click="{(event)=>{dispatch( "close", { close: false } )}}"
+            >
+                {@html icon( "close", 24, 24 )}
+            </button>
             
         </div>
         
-        <div>
-            <button class="bg-pop border-2 border-pop text-lienzo hover:text-pop font-semibold hover:bg-lienzo py-1.5 px-3 rounded focus:outline-none focus:shadow-outline" type="submit">
-                Go
-            </button>
+    </div>
+
+    {#if list.length > 0}
+        <div class="bg-lienzo">
+            <Selecto items={list} bind:selected={selected} on:hit={handleHit} on:open={handleOpen}/>
         </div>
-    </form>
+        
+        
+    {:else}
+        <div class="flex items-center p-2 gap-2 text-pop">
+            {@html icon( "alert", 48, 48 )}
+            <h1>Search Unavailable</h1>
+        </div>
+
+    {/if}
            
 </div>
     
 <script>
-    import { onMount} from "svelte"
+    import { createEventDispatcher } from "svelte"
+    import { fade, fly } from "svelte/transition"
     import { json2URL } from "$lib/utils"
-    import { messenger, searchdrawer } from "$lib/store"
-
+    import { messenger } from "$lib/store"
+    import { icon } from "$lib/utils"
     import overlays_data from "$lib/data/overlays"
     import Selecto from "$lib/components/Selecto.svelte"
 
-    let items= [ ],
-        selected = 0,
-        hit
+    export let heading = ""
+    export let list = [ ]
 
-    onMount( async () => {
-        const params = {
-                table: "preliminary_plans_ln",
-                columns: "projname, projname as value, projname as label",
-                group: "projname",
-                sort: "projname",
-                filter: "projname is not NULL",
+    let selected = 0,
+    is_open = false
 
-            },
-            response = await fetch( `/api/query/gis?${json2URL( params )}` )
-        
-        items = await response.json( )
+    const dispatch = createEventDispatcher( ),
 
-        if( items.length > 0 )
-            hit = items[ selected ]
-					
-    } )
+        handleHit = async event => {
+            const hit =  event.detail
 
-    const handleHit = event => {
-            hit =  event.detail
-
-        },
-        handleGo = async event => {
-            const params = {
+            if( hit.value ){
+                const params = {
                     table: "preliminary_plans_ln",
                     columns: "ST_XMin(ST_Extent(shape)) as xmin, ST_YMin(ST_Extent(shape)) as ymin, ST_XMax(ST_Extent(shape)) as xmax, ST_YMax(ST_Extent(shape)) as ymax",
-                    filter: `projname = '${hit.value}'`,
+                    filter: `projname = '${list[ selected ].value}'`,
 
                 },
                 response = await fetch( `/api/query/gis?${json2URL( params )}` ),
                 rows = await response.json( )
 
-            if( rows.length > 0 ){
-                const group_idx = overlays_data.findIndex( item => item.id === "lnddvlpmnt" ),
-                    lyr_idx = overlays_data[ group_idx ].children.findIndex( item => item.id === "prelimplans" )
+                if( rows.length > 0 ){
+                    const group_idx = overlays_data.findIndex( item => item.id === "lnddvlpmnt" ),
+                        lyr_idx = overlays_data[ group_idx ].children.findIndex( item => item.id === "prelimplans" )
 
+                    //set checkboxes in overlay list
+                    overlays_data[ group_idx ].children[ lyr_idx ].checked = true
+                    overlays_data[ group_idx ].checked = ( overlays_data[ group_idx ].children.filter(item => item.checked).length === overlays_data[ group_idx ].children.length )
 
-                //set checkboxes in overlay list
-                overlays_data[ group_idx ].children[ lyr_idx ].checked = true
-                overlays_data[ group_idx ].checked = ( overlays_data[ group_idx ].children.filter(item => item.checked).length === overlays_data[ group_idx ].children.length )
+                    messenger.set( [
+                        { type: "zoom_to_extent", extent: rows[ 0 ] },
+                        { type: "toggle_layer", layers: [ { group_idx: group_idx, lyr_idx: lyr_idx, visible: true } ] }
 
-                messenger.set( [
-                    { type: "zoom_to_extent", extent: rows[ 0 ] },
-                    { type: "toggle_layer", layers: [ { group_idx: group_idx, lyr_idx: lyr_idx, visible: true } ] }
+                    ] )
 
-                ] )
+                }
 
             }
 
-            searchdrawer.set( false )
+        },
+
+        handleOpen = event => {
+            is_open  = event.detail.open
 
         }
+
+    //Reactives
+    $: if( is_open ){
+        dispatch( "open", { open: true } )
+
+    }else{
+        dispatch( "open", { open: false } )
+
+    }
 
 </script>

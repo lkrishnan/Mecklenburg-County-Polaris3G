@@ -13,7 +13,8 @@ export const GET = async ( { url, locals, fetch } ) => {
         if( street1 || street2 ){
             const sql = `select replace( streets, '_', ' & ' ) as value, 'INTERSECTION' as type, replace( streets, '_', ' & ' ) as intersection,
                             round(ST_X(shape)::NUMERIC,4) as x, round(ST_Y(shape)::NUMERIC,4) as y, 
-                            round(ST_X(ST_Transform(shape, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(shape, 4326))::NUMERIC,4) as lat
+                            round(ST_X(ST_Transform(shape, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(shape, 4326))::NUMERIC,4) as lat,
+                            replace( streets, '_', ' & ' ) as srch_key
                             from streetintersections_pt
                             where controltype in ( 3, 5 )${ street1 ? ` and streets ~* '\w*${street1}\w*'` : `` }${ street2 ? ` and streets ~* '\w*${street2}\w*'` : `` }
                             LIMIT 5`,

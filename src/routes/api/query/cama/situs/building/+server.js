@@ -151,7 +151,6 @@ export const GET = async ( { url, locals } ) => {
         }
        
     }catch( err ){
-        console.log( err )
         response = genError( { "message": err.message, "code": err.code } )
         status = 500
 

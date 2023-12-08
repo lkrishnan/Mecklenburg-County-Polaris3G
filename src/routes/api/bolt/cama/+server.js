@@ -1,16 +1,14 @@
-import { genError, getInvalidParams } from "$lib/api.js"
-import { removeArrayDups, json2URL, arrHasAllElems } from "$lib/utils.js"
+import {genError, getInvalidParams} from "$lib/api"
 import { concatArr } from "$lib/format"
+import {getAnlyzAllowedParams} from "$lib/formhelp"
+import { removeArrayDups, json2URL, arrHasAllElems, filterObj } from "$lib/utils"
 import { Decimal128 } from "mongodb"
 
 /** @type {import('./main/$types').RequestHandler} */
 export const GET = async ( { url, locals, fetch } ) => {
     let response, status = 200
     
-    const allowed = [ "juris", "neigh_code", "stcode", "buffer", "rings", "nearby", "xy", "latlng", "gisid", 
-        "pid", "assessproid", "lastname", "firstname", "situs_address", 
-        "market_value", "sale_price", "sale_date", "land_size_acreage", "land_size_no_acreage", "parcel_acreage",
-        "prop_use", "sq_ft", "year_built", "bedroom", "fullbath", "exterior_frame", "story_type", "page", "limit" ],
+    const allowed = getAnlyzAllowedParams( ),
         str2ArrOfStr = val => ( val.indexOf( "," ) > -1 ? { $in: val.toUpperCase( ).split( "," ) } : val.toUpperCase( ) ),
         str2ArrOfInt = val => ( val.indexOf( "," ) > -1 ? { $in: val.split( "," ).map( item => parseInt( item ) ) } : parseInt( val ) ),
         rangeInt = val => { const arr = val.split( "|" ); return { $gte: parseInt( arr[ 0 ] ), $lte: parseInt( arr[ 1 ] ) }; },
@@ -28,7 +26,6 @@ export const GET = async ( { url, locals, fetch } ) => {
         }, 
 
         getIntersectingGISIDs = async spatial_filter => {
-            console.log( spatial_filter )
             const response = await fetch( `/api/query/gis/parcel_geom?${spatial_filter[ 0 ]}=${spatial_filter[ 1 ]}&geom=0` ),
                 rows = await response.json( )
 
@@ -65,22 +62,22 @@ export const GET = async ( { url, locals, fetch } ) => {
                 gisids += ( gisids.length > 0 ? "," : "" ) + await getIntersectingGISIDs( [ "xy", params.xy ] )
 
             if( params?.latlng )
-                gisids += ( gisids.length > 0 ? "," : "" ) + await getIntersectingGISIDs( [ "xy", params.latlng ] )
+                gisids += ( gisids.length > 0 ? "," : "" ) + await getIntersectingGISIDs( [ "latlng", params.latlng ] )
 
             if( params?.gisid )
                 gisids += ( gisids.length > 0 ? "," : "" ) + params.gisid
 
-            if( gisids.length > 0 ){
-                console.log( gisids )
+            if( gisids.length > 0 )
                 filter.push( { gisid: str2ArrOfStr( gisids ) } )
 
-            }
-            
             if( params?.pid )
                 filter.push( { pid: str2ArrOfStr( params.pid ) } )
             
             if( params?.assessproid )
                 filter.push( { assessproid: str2ArrOfInt( params.assessproid ) } )
+
+            if( params?.matid )
+                filter.push( { "mat.matid": params.matid } )
 
             // owner filter
             if( params?.lastname && params?.firstname )
@@ -90,7 +87,7 @@ export const GET = async ( { url, locals, fetch } ) => {
             else if( params?.firstname )
                 filter.push( { "owner.firstname": params.firstname.toUpperCase( ) } )
 
-            if( params?.situs_address )
+            if( params?.situs )
                 filter.push( { "situs": params.situs } )
 
             if( params?.market_value )
@@ -115,9 +112,11 @@ export const GET = async ( { url, locals, fetch } ) => {
 
             // building filter
             if( params?.prop_use ){
-                if( params.prop_use != "Vacant Land" ){
+                if( params.prop_use === "Vacant Land" ){
+                    filter.push( { bldg: null } )
+                    
+                }else{
                     let bldg_filter = { }
-    
                     bldg_filter.property_use = params.prop_use
     
                     if( params?.sq_ft )
@@ -170,7 +169,11 @@ export const GET = async ( { url, locals, fetch } ) => {
                 //const temp = await cama.find( fnd ).sort( { pid: 1 } ).skip( ( params.page - 1 ) * 20 ).limit( parseInt( params.limit ) ).explain( "executionStats" )
                 //response = temp
 
-            }else
+            }
+            else if( !!Object.keys( filterObj( params, [ "page", "limit" ], false ) ).length ) //doing this to accomdate spatial queries to get gisid
+                response = [ ]
+            
+            else
                 throw new Error( "no paramater(s) sent" )
             
         }else

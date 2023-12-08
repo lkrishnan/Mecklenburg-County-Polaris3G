@@ -14,7 +14,7 @@ const getRings = ( geomtxt ) => {
             .map( coord => {
                 return coord.split( "," ).map( point => {
                     const coords = point.split( "&" );
-        
+                  
                     return [ parseFloat( coords[ 0 ].trim( ) ), parseFloat( coords[ 1 ].trim( ) ) ] 
                     
                 } )

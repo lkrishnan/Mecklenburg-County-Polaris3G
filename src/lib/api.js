@@ -2,15 +2,19 @@ import * as query from "@arcgis/core/rest/query"
 import Query from "@arcgis/core/rest/support/Query"
 import Point from "@arcgis/core/geometry/Point"
 import SpatialReference from "@arcgis/core/geometry/SpatialReference"
+import { json2URL } from "$lib/utils"
 
-const genError = err => {
-    return { "statusCode":500, "error": "Internal Server Error", ...err }
-        
-    },
+const genError = err => ( { "statusCode":500, "error": "Internal Server Error", ...err } ),
     getInvalidParams = ( params, allowed ) => {
-        return Array.from( params )
+        if( Array.from( params ).length > 0 )
+            return Array.from( params )
                 .map( param => ( allowed.includes( param[ 0 ] ) ? null :  `${param[ 0 ]}=${param[ 1 ]}` ) )
                 .filter( n => n )
+        
+        else
+            return Object.keys( params )
+                    .map( param => ( allowed.includes( param ) ? null : param ) )
+                    .filter( n => n )
 
     },
     getErrorMsg = ( params, allowed ) => {
@@ -72,6 +76,9 @@ const genError = err => {
             case "road": 
                 return `/api/validate/road?name=${srch_str}`
 
+            case "stcode": 
+                return `/api/validate/road?name=${srch_str}`
+
             case "school": 
                 return `/api/validate/facility/school?name=${srch_str}`
                 
@@ -97,6 +104,41 @@ const genError = err => {
         
         return rows
      
-    }
+    },
 
-export { genError, getInvalidParams, getErrorMsg, getAPIURL, idLayer }
+    getUSNG = async ( lat, lng, fetch=null ) => {
+        const usng_resp = await fetch( `/api/query/usng?lat=${lat}&lng=${lng}` ),
+            usng_json = await usng_resp.json( )
+
+        return usng_json.usng
+
+    },
+
+    getProjCoords = async ( x, y, in_epsg, out_epsg, fetch=null ) => {
+        const proj_resp = await fetch( `/api/query/gis/project?x=${x}&y=${y}&in_epsg=${in_epsg}&out_epsg=${out_epsg}` ),
+            proj_rows = await proj_resp.json( )
+
+        if( out_epsg === "4326" )
+            return ( proj_rows.length > 0 ? { lat: proj_rows[ 0 ].y, lng: proj_rows[ 0 ].x } : { lat: null, lng: null } )
+
+        else if( out_epsg === "2264" ) 
+            return ( proj_rows.length > 0 ? proj_rows[ 0 ] : { x: null, y: null } )
+
+
+    },
+
+    getPOI = async ( poi, fetch=null ) => {
+        let _poi = { 
+            ...poi,
+            ...( poi?.x && poi?.y ? { } : await getProjCoords( poi.lng, poi.lat, "4326", "2264", fetch ) ),
+            ...( poi?.lat && poi?.lng ? { } : await getProjCoords( poi.x, poi.y, "2264", "4326", fetch ) ),
+    
+        }
+
+        _poi.usng = ( _poi.lat && _poi.lng ? await getUSNG( _poi.lat, _poi.lng, fetch ) : null )
+    
+        return _poi
+
+    }
+    
+export {genError, getInvalidParams, getErrorMsg, getAPIURL, idLayer, getProjCoords, getUSNG, getPOI}

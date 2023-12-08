@@ -7,14 +7,14 @@ export const GET = async ( { url, locals, fetch } ) => {
     try{
         const x = url.searchParams.get( "x" ) ?? null,
             y = url.searchParams.get( "y" ) ?? null,
-            in_epsg = url.searchParams.get( "epsg" ) ?? "2264",
-            out_epsg = url.searchParams.get( "epsg" ) ?? "4326"
+            in_epsg = url.searchParams.get( "in_epsg" ) ?? "2264",
+            out_epsg = url.searchParams.get( "out_epsg" ) ?? "4326"
 
         if( x && y ){ 
             const { gis_pool } = locals,
                 sql = `select ST_X(ST_Transform(ST_GeomFromText('POINT(${x} ${y})',${in_epsg}),${out_epsg}) ) As x, ST_Y(ST_Transform(ST_GeomFromText('POINT(${x} ${y})',${in_epsg}),${out_epsg}) ) As y`,
                 result = await gis_pool.query( sql )
-        
+
             response = result.rows
 
         }else{
