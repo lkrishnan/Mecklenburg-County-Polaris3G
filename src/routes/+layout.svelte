@@ -1,6 +1,6 @@
-<svelte:head>
+<!--<svelte:head>
 	{@html webManifest}
-</svelte:head>
+</svelte:head>-->
 
 <svelte:window bind:innerWidth={screen_size} />
 
@@ -105,7 +105,7 @@
     import "../app.css"
     
 	import {onMount} from "svelte"
-	import {pwaInfo} from "virtual:pwa-info"
+	//import {pwaInfo} from "virtual:pwa-info"
 	import {slide} from "svelte/transition"
 	import {page} from "$app/stores"
 	import {getPrelimPlans, getEnggrids, getAnlyzFieldsInit, getAnlyzDropDowns} from "$lib/formhelp"
@@ -203,6 +203,9 @@
         },
 
 		handleRouteChange = ( route, _datadrawer ) => {
+			if( route === "/" )
+				messenger.set( [ { type: "clear_all_graphics" } ] )
+
 			btns.sidepanel = { 
 					...btns.sidepanel, 
 					icon: ( _datadrawer ? "doublearrowup" : "doublearrowdown" ), 
@@ -214,7 +217,7 @@
 		}
 
 	onMount( async ( ) => {
-		pwaInfo && ( ReloadPrompt = ( await import( "$lib/components/ReloadPrompt.svelte" ) ).default )
+		//pwaInfo && ( ReloadPrompt = ( await import( "$lib/components/ReloadPrompt.svelte" ) ).default )
 
 		//Subscriptions
 		messenger.subscribe( msgs => { 
@@ -255,6 +258,6 @@
 	
 	$: offset.set( $page.route.id.match( /(prop)|identify/ig ) && screen_size > 768 && _datadrawer ? ( widths.strip + widths.datos ) : ( screen_size > 768 ? widths.strip : 0 ) )
 
-	$: webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : ""
+	//$: webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : ""
 			
 </script>

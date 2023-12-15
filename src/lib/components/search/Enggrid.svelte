@@ -68,12 +68,11 @@
 
 //Reactives
 $: if( is_open ){
-dispatch( "open", { open: true } )
+    dispatch( "open", { open: true } )
 
 }else{
-dispatch( "open", { open: false } )
+    dispatch( "open", { open: false } )
 
 }
-
 
 </script>

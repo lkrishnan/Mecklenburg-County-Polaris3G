@@ -6,7 +6,7 @@
 		<div 
 			class="relative flex w-full px-2 pb-2 gap-2 justify-between shadow-b-lg md:sticky md:top-[{_button_bar_offset}px] bg-luz" transition:slide="{{duration: 1200, axis: 'y'}}"
 		>
-			<div class="flex w-[90px]">
+			<div class="flex w-[90px] gap-1">
 				{#if _results.length > 1 && _idx > -1 }
 					<button 
 						class="p-2 border-2 border-pop bg-lienzo text-pop rounded group relative hover:bg-pop hover:text-lienzo hover:fill-lienzo"
@@ -15,6 +15,21 @@
 						{@html icon( "arrowback", 24, 24 )}
 						<span class="bg-primero text-lienzo py-1 px-2 rounded-xl pointer-events-none absolute top-[44px] left-0 w-max opacity-0 transition-opacity group-hover:opacity-100 text-sm">
 							Back
+						</span>
+							
+					</button>
+
+				{/if}
+
+				<!-- Redo Analysis -->
+				{#if _hit.type === "analysis" }
+					<button 
+						class="p-2 border-2 border-primero bg-lienzo rounded group relative hover:bg-segundo hover:text-lienzo hover:fill-lienzo"
+						on:click="{handleRedo}"
+					>
+						{@html icon( "tune", 24, 24 )}
+						<span class="bg-primero text-lienzo py-1 px-2 rounded-xl pointer-events-none absolute {screen_size > 768 ? 'top-[48px]' : 'bottom-[44px]'} left-0 w-max opacity-0 transition-opacity group-hover:opacity-100 text-sm">
+							Redo Market Analysis
 						</span>
 							
 					</button>
@@ -47,7 +62,7 @@
 			<div class="flex w-[90px] gap-1 justify-end">
 				{#if _results.length > 1 && _idx < 0 && _datadrawer }
 					<a
-						href="{`/report/summary/${_view}?${json2URL(filterObj( _hit, [ "type", "page" ], false ) )}`}"
+						href="{`/pdf/summary/${_view}?${json2URL(filterObj( _hit, [ "type", "page" ], false ) )}`}"
 						class="flex items-center flex-col rounded shadow-md border-2 border-primero bg-lienzo p-1 hover:bg-segundo hover:text-lienzo tooltiplink"
 						target="_blank"
 						rel="noreferrer"
@@ -58,23 +73,24 @@
 							
 						</div>
 
-				</a>
+					</a>
 
-				{/if}
-				<!-- Redo Analysis -->
-				{#if _hit.type === "analysis" }
-					<button 
-						class="p-2 border-2 border-primero bg-lienzo rounded group relative hover:bg-segundo hover:text-lienzo hover:fill-lienzo"
-						on:click="{handleRedo}"
+					<a
+						href="{`/csv/${_view}?${json2URL(filterObj( _hit, [ "type", "page" ], false ) )}`}"
+						class="flex items-center flex-col rounded shadow-md border-2 border-primero bg-lienzo p-1 hover:bg-segundo hover:text-lienzo tooltiplink"
+						target="_blank"
+						rel="noreferrer"
+						data-title="Download as CSV"
 					>
-						{@html icon( "tune", 24, 24 )}
-						<span class="bg-primero text-lienzo py-1 px-2 rounded-xl pointer-events-none absolute {screen_size > 768 ? 'top-[48px]' : 'bottom-[44px]'} right-0 w-max opacity-0 transition-opacity group-hover:opacity-100 text-sm">
-							Redo Market Analysis
-						</span>
+						<div class="rounded-full p-1">
+							{@html icon( "csv", 28, 28 )}
 							
-					</button>
+						</div>
+
+					</a>
 
 				{/if}
+				
 			</div>
 
 		</div>

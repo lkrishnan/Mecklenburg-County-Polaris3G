@@ -1,5 +1,5 @@
 <table class="w-full text-left mb-2">
-    <thead class="text-sm font-normal">
+    <thead class="text-sm font-normal {title.length > 0 ? '' : 'hidden'}">
         <tr class="border-b border-primero">
             <th class="px-4 py-2">
                 {title}
@@ -11,7 +11,7 @@
             <tr>
                 <td class="px-4 py-2">
                     <a 
-                        class="text-{color} underline underline-offset-4 hover:text-primero" 
+                        class="text-{color} underline underline-offset-4 hover:text-signify" 
                         href='{link.url}' 
                         target='_blank' 
                         rel='noreferrer'

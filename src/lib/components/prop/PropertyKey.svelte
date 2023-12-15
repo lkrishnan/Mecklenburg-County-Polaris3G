@@ -90,7 +90,7 @@
         <thead class="text-sm font-normal">
             <tr class="border-b border-primary">
                 <th class="px-4 py-2">
-                    Mailing Address
+                    Mailing Address (Tax Bill)
                 </th>
             </tr>
         </thead>
@@ -104,29 +104,39 @@
     </table>
 
      <!-- Buttons -->
-     <div class="p-2 mb-4 border-y border-primero">
-        <QuickButtons btns={btns} justify="center" on:click={handleClick}/>
+     <div class="mb-4 border-y border-primero">
+        <div class="p-2">
+            <QuickButtons btns={btns} justify="center" on:click={handleClick}/>
+        </div>
         
-        {#if show_buffer_srch}
-            <form in:fly="{{ y: -50, duration: 2000 }}" out:fly="{{ y: -50, duration: 2000 }}" 
-                class="p-2" 
-                on:submit|preventDefault={handleBuffer}
-            >
-                <div class="flex flex-row gap-4">
-                    <input 
-                        type="text" 
-                        class="border {fields.buffer.error ? 'border-pop' : 'border-primero' } text-sm rounded block w-full p-2.5" placeholder="Buffer Size (0 - 5280) ft." 
-                        bind:value="{fields.buffer.val}"
-                    />
-                    <button class="bg-pop border border-pop text-lienzo hover:text-pop font-semibold hover:bg-lienzo py-1.5 px-3 rounded focus:outline-none focus:shadow-outline" type="submit">
-                        Go
-                    </button>
+        {#if show}
+            <div in:fly="{{ y: -50, duration: 2000 }}" out:fly="{{ y: -50, duration: 2000 }}">
+                {#if last_quick_btn === "circle"}
+                    <form class="p-2" 
+                        on:submit|preventDefault={handleBuffer}
+                    >
+                        <div class="flex flex-row gap-4">
+                            <input 
+                                type="text" 
+                                class="border {fields.buffer.error ? 'border-pop' : 'border-primero' } text-sm rounded block w-full p-2.5" placeholder="Buffer Size (0 - 5280) ft." 
+                                bind:value="{fields.buffer.val}"
+                            />
+                            <button class="bg-pop border border-pop text-lienzo hover:text-pop font-semibold hover:bg-lienzo py-1.5 px-3 rounded focus:outline-none focus:shadow-outline" type="submit">
+                                Go
+                            </button>
 
-                </div>
-                
-                <p class="{fields.buffer.error ? '' : 'hidden' } mt-2 ml-2 text-pop text-xs italic">{fields.buffer.error}</p>
-            </form>
+                        </div>
+                        
+                        <p class="{fields.buffer.error ? '' : 'hidden' } mt-2 ml-2 text-pop text-xs italic">{fields.buffer.error}</p>
+                    </form>
+                {:else if last_quick_btn === "agent"}
+                    <!-- Issues -->
+                    <LinkList links={issues} title="Report Issues" />
 
+                {/if}
+
+            </div>
+            
         {/if}
 
     </div>
@@ -136,18 +146,16 @@
 
     <!-- Links -->
     <LinkList links={links} />
-        
-    <!-- Issues -->
-    <LinkList links={issues} title="Report Issues" color="pop" />
-    
+            
 </div>
 
 <script>
-    import { onMount } from "svelte"
-    import { goto } from "$app/navigation"
-    import { fly } from "svelte/transition"
-    import { srchstr2qrystr } from "$lib/utils"
-    import { validateForm, validateNumeric } from "$lib/validate"
+    import {onMount} from "svelte"
+    import {goto} from "$app/navigation"
+    import {fly} from "svelte/transition"
+    import {messenger} from "$lib/store.js"    
+    import {srchstr2qrystr} from "$lib/utils"
+    import {validateForm, validateNumeric} from "$lib/validate"
     import BuildingPhoto from "$lib/components/BuildingPhoto.svelte"
     import Heading from "$lib/components/Heading.svelte"
     import LinkList from "$lib/components/LinkList.svelte"
@@ -171,13 +179,14 @@
     let photo = { photo_url: null, photo_date: null, },
         links = [ ],
         issues = [ 
-            { label: "Wrong Ownership or Parcel", url: "https://mecklenburgcountync-563955.workflowcloud.com/forms/d024bf6c-b9b0-4cf5-a7d9-7ac376f0370c" },
+            { label: "Wrong Property Information or Map", url: "https://mecklenburgcountync-563955.workflowcloud.com/forms/d024bf6c-b9b0-4cf5-a7d9-7ac376f0370c" },    
             { label: "Wrong Mailing Address", url: "https://mecklenburgcountync-563955.workflowcloud.com/forms/0314aa67-0083-4905-9b29-a571be01717e" },
+            { label: "Address or Road Issues", url: "https://meckgov.maps.arcgis.com/apps/webappviewer/index.html?id=0068439ff27f430abe04082770d2bfea" },
             { label: "Other Website Issues", url: "https://mecklenburgcountync-563955.workflowcloud.com/forms/7e935f44-bba6-4a6c-9887-de89bae68c8c" }
 
         ],
         btns = [ ],
-        show_buffer_srch = false,
+        last_quick_btn = null,
         fields = {
             buffer: { 
                 val: null,
@@ -190,7 +199,8 @@
             },
 
         },
-        mounted = false
+        mounted = false,
+        show = false
 
         const handleHit = event => {
             goto( `/address/${srchstr2qrystr( event.detail.matid )}` )
@@ -198,9 +208,23 @@
         },
 
         handleClick = event => {
-            if( event.detail.icon === "circle" )
-                show_buffer_srch = !show_buffer_srch
-            
+            switch( event.detail.icon ){
+                case "zoomin":
+                    messenger.set( [ { type: "zoom_to_parcel_graphic" } ] )    
+                    break
+
+                case "uncheck":
+                    goto( `/` )    
+                    break
+
+                case "circle": case "agent":
+                    show = true
+                    break
+                
+            }
+
+            last_quick_btn = event.detail.icon
+                            
         },
         
         handleBuffer = ( ) => {
@@ -219,10 +243,11 @@
         handleInfoChange = async ( _pid, _gisid, _matid, _address, _mats, _lat, _lng, _x, _y, _mailing_addr, _owners , _mounted ) => {
             if( _mounted ){
                 btns = [ 
-                        ...( _pid ? [ { label: "Prop Report", icon: "pdf", link: `/report/prop?pid=${_pid + (_matid ? "&matid="+_matid : "" )}`, width: "48px"  } ] : [ ] ),
+                        { label: "Property Report", icon: "pdf", link: `/pdf/detail?pid=${_pid + (_matid ? "&matid="+_matid : "" )}`, width: "48px" },
+                        { label: "Report Issues", icon: "agent", width: "48px" },
+                        { label: "Unselect Prop", icon: "uncheck", width: "48px" },
                         ...( _gisid ? [ { label: "Buffer Search", icon: "circle", width: "48px" }, { label: "ZoomTo Prop", icon: "zoomin", width: "48px" } ] : [ ] ),
-                        { label: "Unselect Prop", icon: "uncheck", width: "48px" }
-
+                     
                     ]
 
                 links = [ 
@@ -244,6 +269,8 @@
 
                 }else
                     photo = { photo_url: null, photo_date: null, }
+
+                show = false
 
             }
             
