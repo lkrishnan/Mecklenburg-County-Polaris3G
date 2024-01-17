@@ -1,6 +1,16 @@
-<div class="p-2 text-sm">
+<div class="px-2 pb-2 text-sm">
     <div class="mb-4 border border-primero bg-luz rounded shadow-lg">
         <Heading title="Identify Location" iconname="pushpin" />
+        {#if _mobile && _dual }
+        <button 
+            class="absolute top-0 right-0 mx-3 my-1 p-1.5 fill-lienzo rounded-full group hover:bg-lienzo hover:text-primero hover:fill-primero"
+            on:click="{dual.set( !_dual )}"
+        >
+            {@html icon( "expandless", 24, 24 )}
+                
+        </button>
+    
+    {/if}
         <InfoTable infos={infos} />
     </div>
     
@@ -26,14 +36,22 @@
 
 <script>
 	/** @type {import('./$types').LayoutData} */
+    
+    import {goto} from "$app/navigation"
+    import {messenger, mobile, dual} from "$lib/store"
+    import {icon} from "$lib/utils"
+
     import Heading from "$lib/components/Heading.svelte"
     import InfoTable from "$lib/components/InfoTable.svelte"
     import Selecto from "$lib/components/Selecto.svelte"
-    import { goto } from "$app/navigation"
-    import { messenger } from "$lib/store"
 
     export let data
 
+    //Store Variables
+    let _mobile,
+        _dual
+
+    //Other Variables
     let items= [ 
             { id: "juris", value: "juris", label: "Jurisdictions" },         
             { id: "mat", value: "mat", label: "Master Address Table" },
@@ -72,6 +90,9 @@
         goto( `/identify/${data.x},${data.y}/${event.detail.value}` )
 
     }
+
+    dual.subscribe( value => { _dual = value })
+    mobile.subscribe( value => { _mobile = value })
 
     //reactives
     $: if( data ){

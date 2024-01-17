@@ -2,104 +2,284 @@
 	{@html webManifest}
 </svelte:head>-->
 
-<svelte:window bind:innerWidth={screen_size} />
+<svelte:window bind:innerWidth={viewport_width} bind:innerHeight={viewport_height} />
 
 <Map />
 
-<div class="flex bg-luz { screen_size > 768 ? 'fixed left-0 top-0 z-40 h-full flex-col p-2 gap-0.5' : 'sticky bottom-0 w-full justify-center p-2 gap-2' } shadow-lg">
-	{#each Object.keys( btns ) as btn, i}
-		{#if btns[ btn ].show }
-			<button 
-				class="{ screen_size <= 768 && btns[ btn ].tool === 'hamburger' ? 'hidden' : '' } p-1 border bg-luz border-luz rounded group relative hover:bg-segundo hover:border-segundo hover:text-lienzo hover:fill-lienzo"
-				on:click="{(event)=>{handleClick(btns[ btn ].tool, i)}}"
-			>
-				{@html icon( btns[ btn ].icon, 26, 26 )}
-					<span class="bg-segundo text-lienzo py-1 px-2 rounded-xl pointer-events-none absolute md:top-[4px] md:left-12 -top-10 -left-[45px] w-max opacity-0 transition-opacity group-hover:opacity-100 text-sm">
-						{btns[ btn ].tooltip}
+{#if _mobile !== undefined}
+	{#if leftdrawer}
+		<div 
+			transition:slide="{{duration: 500, axis: ( _mobile ? 'y' : 'x' )}}" 
+			class="absolute z-40 left-0 w-full md:w-72 bottom-0 md:top-0 flex flex-col bg-luz border-t md:border-r shadow-lg transition-all duration-1000 transform"
+		>
+				<div class="flex flex-row items-center p-2">
+					<div class="grow font-bold text-2xl">
+						Polaris
+					</div>
+					<div class="flex">
+						<button 
+							class="p-1 rounded-full group relative transition-colors duration-150 hover:text-segundo"
+							on:click="{(event)=>{leftdrawer=false}}"
+						>
+							{@html icon( "close", 24, 24 )}
+						</button>
 						
-					</span>
-								
-			</button>
+					</div>
+					
+				</div>
 
-		{/if}
+				{#if _mobile}
+					<div class="flex justify-center gap-2">
+						{#each Object.keys( btns ) as btn, i}
+							{#if btns[ btn ].show }
+								<button 
+									class="p-1 rounded group relative hover:bg-segundo hover:border-segundo hover:text-lienzo hover:fill-lienzo"
+									on:click="{(event)=>{handle.click(btns[ btn ].tool, i)}}"
+								>
+									{@html icon( btns[ btn ].icon, 28, 28 )}
+										<span class="bg-segundo text-lienzo py-1 px-2 rounded-xl pointer-events-none absolute md:top-[4px] md:left-12 top-10 -left-[45px] w-max opacity-0 transition-opacity group-hover:opacity-100 text-sm">
+											{btns[ btn ].tooltip}
+											
+										</span>
+													
+								</button>
 
-	{/each}
-</div>
+							{/if}
 
-{#if leftdrawer}
-	<div transition:slide="{{duration: 500, axis: 'x'}}" class="md:w-[{widths.datos-200}px] absolute md:left-14 left-0 top-0 z-20 flex flex-col h-full bg-lienzo md:border-r md:border-primero transition-all duration-1000 transform">
-		<div class="flex flex-row items-center p-2">
-			<div class="grow font-bold text-2xl">
-				Polaris 3G
-			</div>
-			<div class="flex">
-				<button 
-					class="p-1 border bg-lienzo border-lienzo rounded-full group relative transition-colors duration-150 hover:bg-luz hover:fill-segundo"
-					on:click="{(event)=>{leftdrawer=false}}"
-				>
-					{@html icon( "close", 24, 24 )}
-				</button>
-				
-			</div>
+						{/each}
+
+					</div>
+
+				{/if}
+
+				<div>
+					{#each Object.keys( left_btns ) as btn, i}
+						{#if left_btns[ btn ].show }
+							{#if left_btns[ btn ].link}
+								<a 
+									class="flex flex-col p-2  hover:bg-suave hover:text-lienzo hover:fill-lienzo"
+									href='{left_btns[ btn ].link}' 
+									target='_blank' 
+									rel='noreferrer'
+								>
+									<div class="flex flex-row gap-2 items-center text-sm">
+										{@html icon( left_btns[ btn ].icon, 24, 24 )}
+										{@html left_btns[ btn ].label}
+									</div>
+									
+								</a>
+							{:else}
+								<button 
+									class="w-full p-1 rounded hover:bg-segundo hover:text-lienzo hover:fill-lienzo"
+								>
+									<div class="flex flex-row gap-2 items-center text-sm">
+										{@html icon( left_btns[ btn ].icon, 24, 24 )}
+										{@html left_btns[ btn ].label}
+									</div>
+													
+								</button>
+							
+							{/if}
+
+						{/if}
+
+					{/each}
+					
+				</div>
 			
+
 		</div>
-	</div>
-	
-{/if}
 
-{#if btns.analysis.open}
-	<Analysis 
-		heading={btns.analysis.tooltip} 
-		fields={btns.analysis.fields}
-		list={btns.analysis.list}
-		gisid={btns.analysis.gisid}
-		neigh_code={btns.analysis.neigh_code}
-		on:close={event=>{btns.analysis.open = event.detail.open; btns.analysis.fields = event.detail.fields;}} 
-
-	/>
-
-{/if}
-
-<div class="absolute z-10 md:left-[52px] left-0 top-0 md:w-[408px] w-full overflow-auto scrollbar
-		{ search_active ? 'h-full' : '' }
-		{ ( $page.route.id.match( /(prop)|identify/ig ) && _datadrawer ) ? 'shadow-lg h-full bg-luz' : '' }"
->
-	<div class="bg-luz pb-2 { ( $page.route.id.match( /((prop)|identify)/ig ) && _datadrawer ) ? '' : 'rounded-br-lg' }">
-		<div class="{_search === 'main' ? 'flex' :'hidden'}">
-			<Seal />
-		</div>
-		<div class="sticky top-0 p-2 z-50 bg-luz">
-			{#if _search === "main"}
-				<MainSearch leftdrawer={leftdrawer} on:leftdrawer={handleLeftDrawer} on:open={handleOpen} />
+		<div class="absolute left-0 top-0 z-30 h-full w-full bg-suave opacity-80">
 			
-			{:else if _search === "owner"}
-				<Owner heading={btns.owner.tooltip} on:close={event=>{search.set("main")}} on:open={handleOpen} />
-			
-			{:else if _search === "situs"}
-				<Situs heading={btns.situs.tooltip} on:close={event=>{search.set("main")}} on:open={handleOpen} />
-				
-			{:else if _search === "prelimplan"}
-				<Prelimplan heading={btns.prelimplan.tooltip} list={btns.prelimplan.list} on:close={event=>{search.set("main")}} on:open={handleOpen}/>
-				
-			{:else if _search === "enggrid"}
-				<Enggrid heading={btns.enggrid.tooltip} list={btns.enggrid.list} on:close={event=>{search.set("main")}} on:open={handleOpen}/>
-			
-			{/if}
 		</div>
 		
-	
-		<main>
+	{/if}
+
+	<div class="hidden md:flex absolute left-0 top-0 z-20 h-full flex-col p-2 gap-0.5 bg-luz shadow-lg">
+		{#each Object.keys( btns ) as btn, i}
+			{#if btns[ btn ].show }
+				<button 
+					class="p-1 rounded group relative hover:bg-segundo hover:border-segundo hover:text-lienzo hover:fill-lienzo"
+					on:click="{(event)=>{handle.click(btns[ btn ].tool, i)}}"
+				>
+					{@html icon( btns[ btn ].icon, 26, 26 )}
+						<span class="bg-segundo text-lienzo py-1 px-2 rounded-xl pointer-events-none absolute md:top-[4px] md:left-12 -top-10 -left-[45px] w-max opacity-0 transition-opacity group-hover:opacity-100 text-sm">
+							{btns[ btn ].tooltip}
+							
+						</span>
+									
+				</button>
+
+			{/if}
+
+		{/each}
+	</div>
+
+	{#if btns.analysis.open}
+		<Analysis 
+			heading={btns.analysis.tooltip} 
+			fields={btns.analysis.fields}
+			list={btns.analysis.list}
+			gisid={btns.analysis.gisid}
+			neigh_code={btns.analysis.neigh_code}
+			on:close={event=>{btns.analysis.open = event.detail.open; btns.analysis.fields = event.detail.fields;}} 
+
+		/>
+
+	{/if}
+
+	<div 
+		class="absolute z-10 left-0 md:left-[50px] top-0 w-full md:w-[408px] overflow-auto scrollbar
+				{ ( $page.route.id.match( /(prop)|identify/ig ) && _datadrawer && ( _mobile ? !_dual : true ) ) || search_active ? 'h-full' : ''}
+				{ ( $page.route.id.match( /(prop)|identify/ig ) && _datadrawer && ( _mobile ? !_dual : true ) ) ? 'bg-luz' : ''}
+				{ search_active && _mobile ? 'bg-lienzo' : '' }"
+	>
+
+		<div 
+			class="{( $page.route.id.match( /(prop)|identify/ig ) && _datadrawer ) ? `` : `border-r-2` }"
+				
+		>
+			<Banner />
+
+		</div>
+			
+		<div class="sticky { _mobile ? ( _dual ? '' : 'bg-luz' ) : 'bg-luz' } top-0 z-50 p-2 {( $page.route.id.match( /(prop)|identify/ig ) && _datadrawer ) ? `` : (_mobile ? `` : `border-b-2 border-r-2 rounded-br-lg` ) }">
+			{#if _search === "main"}
+				<MainSearch 
+					leftdrawer={leftdrawer} 
+					hide_items={_mobile && true}
+					value={search_value}
+					is_open={search_active}
+					on:error={handle.search_error}
+					on:items={handle.search_items}
+					on:leftdrawer={handle.left_drawer} 
+					on:open={handle.open} 
+					on:reset={handle.search_error}
+
+				/>
+
+			{:else if _search === "owner"}	
+				<Owner 
+					leftdrawer={leftdrawer} 
+					hide_items={_mobile && true}
+					value={search_value}
+					is_open={search_active}
+					on:close={event=>{search.set("main")}} 
+					on:error={handle.search_error}
+					on:items={handle.search_items}
+					on:leftdrawer={handle.left_drawer} 
+					on:open={handle.open} 
+					on:reset={handle.search_error}
+					  
+				/>
+
+			{:else if _search === "situs"}
+				<Situs 
+					leftdrawer={leftdrawer} 
+					hide_items={_mobile && true}
+					value={search_value}
+					is_open={search_active}
+					on:close={event=>{search.set("main")}} 
+					on:error={handle.search_error}
+					on:items={handle.search_items}
+					on:leftdrawer={handle.left_drawer}
+					on:open={handle.open}
+					on:reset={handle.search_error}
+
+				/>
+
+			{:else if _search === "prelimplan"}
+				<Prelimplan 
+					leftdrawer={leftdrawer} 
+					list={btns.prelimplan.list}
+					selected={btns.prelimplan.selected}
+					hide_items={_mobile && true}
+					open={search_active}
+					pad="pl-9"
+					on:close={event=>{search.set("main")}} 
+					on:leftdrawer={handle.left_drawer}
+					on:open={handle.open}
+					
+				/>
+
+			{:else if _search === "enggrid"}
+				<Enggrid 
+					leftdrawer={leftdrawer} 
+					list={btns.enggrid.list}
+					selected={btns.enggrid.selected}
+					hide_items={_mobile && true}
+					open={search_active}
+					pad="pl-9"
+					on:close={event=>{search.set("main")}} 
+					on:leftdrawer={handle.left_drawer}
+					on:open={handle.open}
+					
+				/>
+
+			{/if}
+
+			{#if search_error.length > 0}
+				<div class="flex flex-row gap-1 items-center text-pop text-xs italic bg-luz pt-2 px-2 pb-2 md:pb-0">
+					{@html icon( "alert", 24, 24 )} {search_error}
+				</div>
+			{/if}
+
+		</div>
+
+		<div class="{search_active & _mobile ? 'h-full bg-lienzo': 'hidden' }">
+			<ul>
+				{#if !search_nomatch}
+					{#each search_results as result, i}
+						<li>
+							<div 
+								on:click="{()=>handle.search_pick( i )}" 
+								on:keydown="{()=>handle.search_pick( i )}"
+								role="button" 
+								tabindex=-1
+								class="text-todo border-t border-suave py-4 px-2 text-sm overflow-ellipsis overflow-hidden whitespace-nowrap hover:bg-luz hover:cursor-pointer"
+							>
+								{#if [ "owner", "situs", "main" ].includes( _search )}
+									<span class="font-bold pr-1 text-segundo">{result.type}:</span>
+
+								{/if}
+								{@html result.label}
+
+
+							</div>
+							
+						</li>
+							
+					{/each}
+
+				{:else}
+					<li class="text-pop font-semibold text-sm py-2 px-2">No matches found</li>
+
+				{/if}
+
+			</ul>
+						
+		</div>
+		
+		<main 
+			class="{(search_active || ( !_datadrawer && $page.status < 404 ) && _mobile ) ? 'hidden' : ''} 
+					{( _mobile && _dual ? ( $page.status < 404 ? 'fixed h-2/4 bottom-0 w-full' : 'fixed bottom-0 w-full' ) : '' )}"
+			on:touchmove={handle.touch_move}
+			on:touchend={handle.touch_end}
+			on:touchstart={handle.touch_start}
+		>
 			<slot />
+
 		</main>
 
 	</div>
 
-</div>
+{/if}
 
-{#if ReloadPrompt}
+<!--{#if ReloadPrompt}
 	<svelte:component this={ReloadPrompt} />
 
-{/if}
+{/if}-->
 
 <script>
     import "../app.css"
@@ -107,10 +287,14 @@
 	import {onMount} from "svelte"
 	//import {pwaInfo} from "virtual:pwa-info"
 	import {slide} from "svelte/transition"
+	import {goto} from "$app/navigation"
 	import {page} from "$app/stores"
+	import {offset, messenger, search, datadrawer, mobile, dual} from "$lib/store"
+	import {getPrelimPlan} from "$lib/api"
+	import {formatSearchResults} from "$lib/format"
 	import {getPrelimPlans, getEnggrids, getAnlyzFieldsInit, getAnlyzDropDowns} from "$lib/formhelp"
-	import {offset, messenger, search, datadrawer} from "$lib/store"
-	import {icon} from "$lib/utils"
+	import {getToggleLayerList} from "$lib/mapping"
+	import {srchstr2qrystr, icon} from "$lib/utils"
 	
 	import Analysis from "$lib/components/search/Analysis.svelte"
 	import Enggrid from "$lib/components/search/Enggrid.svelte"
@@ -118,111 +302,217 @@
 	import Map from "$lib/components/Map.svelte"
 	import Owner from "$lib/components/search/Owner.svelte"
 	import Prelimplan from "$lib/components/search/Prelimplan.svelte"
-	import Seal from "$lib/components/Banner.svelte"
+	import Banner from "$lib/components/Banner.svelte"
 	import Situs from "$lib/components/search/Situs.svelte"
 	
-	let ReloadPrompt,
-		screen_size,	
-		leftdrawer = false,
+	//let ReloadPrompt,
+
+	//Store Variables
+	let _offset,
+		_search,
+		_datadrawer,
+		_mobile,
+		_dual
+
+	//Other Variables
+	let leftdrawer = false,
 		btns =  {
 			hamburger: { icon: "hamburger", tool: "hamburger", tooltip: "Hidden Menu", show: true },
-			analysis: { 
-					icon: "labresearch", 
-					tool: "analysis", 
-					tooltip: "Market Analysis", 
-					open: false, 
-					list: null, 
-					gisid: null, 
-					neigh_code: null,
-					initstate: null,
-					fields: null, 
-					show: true
-				},
+			main: { icon: "search", tool: "main", tooltip: "Main Search", show: true },
 			owner: { icon: "person", tool: "owner", tooltip: "Owner Search", show: true },
 			situs: { icon: "locationcity", tool: "situs", tooltip: "Situs Address Search", show: true },
-			prelimplan: { icon: "architecture", tool: "prelimplan", tooltip: "Preliminary Plan Search", list: null, show: true },
-			enggrid: { icon: "grid", tool: "enggrid", tooltip: "Engineering Grid Search", list: null, show: true },
-			sidepanel: { icon: "doublearrowdown", tool: "sidepanel", tooltip: "Expand side panel", show: false },
+			analysis: { 
+				icon: "labresearch", tool: "analysis", tooltip: "Market Analysis", show: true,
+				open: false, 
+				list: null, 
+				gisid: null, 
+				neigh_code: null,
+				initstate: null,
+				fields: null, 
+				
+			},
+			prelimplan: { icon: "architecture", tool: "prelimplan", tooltip: "Preliminary Plan Search", list: null, selected: 0, show: true },
+			enggrid: { icon: "grid", tool: "enggrid", tooltip: "Engineering Grid Search", list: null, selected: 0, show: true },
+			sidepanel: { icon: "expandless", tool: "sidepanel", tooltip: "Expand side panel", show: false
+			},
 
 		},
+		left_btns = {
+			tutorials: { icon: "link", label: "Tutorials", link: "https://www.youtube.com/playlist?list=PLB4an5GfqfkM7vvP2Obv4bUzKNmWFr5Q5", show: true },
+			tips: { icon: "link", label: "Quick Tips", link: "/pdf/POLARIS3GQUICKTIPS.pdf", show: true },
+			report_propinfo_map: { icon: "agent", label: "Report bad Prop Info/Map", link: "https://mecklenburgcountync-563955.workflowcloud.com/forms/d024bf6c-b9b0-4cf5-a7d9-7ac376f0370c", show: true },
+			report_mail_addr: { icon: "agent", label: "Report bad Mail Address", link: "https://mecklenburgcountync-563955.workflowcloud.com/forms/0314aa67-0083-4905-9b29-a571be01717e", show: true },
+			report_address_road: { icon: "agent", label: "Report Address or Road issues", link: "https://meckgov.maps.arcgis.com/apps/webappviewer/index.html?id=0068439ff27f430abe04082770d2bfea", show: true },
+			report_other_issues: { icon: "agent", label: "Report Other issues", link: "https://mecklenburgcountync-563955.workflowcloud.com/forms/7e935f44-bba6-4a6c-9887-de89bae68c8c", show: true },
+			moreapps: { icon: "link", tool: "moreapps", label: "More Apps", link: "https://maps.mecklenburgcountync.gov/polarisapps/", show: true },
+						
+		},
+		route,
 		search_active = false,
-		_offset,
-		_search = "main",
-		_route,
-		_datadrawer = true
+		search_error = "",
+		search_nomatch = false,
+		search_results = [ ],
+		search_value = "",
+		touch_moved = false,
+		touch_startY,
+		touch_endY,
+		viewport_width,
+		viewport_height
 			
 	const widths = { strip: 50, datos: 406 },
-		
-		handleClick = async ( tool, idx ) => {
-			switch( tool ){
-				case "hamburger": 
-					leftdrawer = !leftdrawer
-					break
 
-				case "analysis":
-					if( !btns.analysis.list )
-						btns.analysis.list = await getAnlyzDropDowns( )
+		handle = {
+			click: async ( tool, idx ) => {
+				switch( tool ){
+					case "hamburger": 
+						leftdrawer = !leftdrawer
+						break
 
-					btns.analysis.fields = getAnlyzFieldsInit( btns.analysis.list, btns.analysis.gisid, btns.analysis.neigh_code )
-					btns.analysis.open = !btns.analysis.open
-					break
+					case "analysis":
+						if( !btns.analysis.list )
+							btns.analysis.list = await getAnlyzDropDowns( )
 
-				case "owner": case "situs":
-					search.set( search === tool ? "main" : tool )
-					break
-				
-				case "prelimplan":
-					if( !btns.prelimplan.list )
-						btns.prelimplan.list = await getPrelimPlans( )		
+						btns.analysis.fields = getAnlyzFieldsInit( btns.analysis.list, btns.analysis.gisid, btns.analysis.neigh_code )
+						btns.analysis.open = !btns.analysis.open
+						search_error = ""
+						break
 
-					search.set( search === tool ? "main" : tool )
-					break
-
-				case "enggrid":
-					if( !btns.enggrid.list )
-						btns.enggrid.list = await getEnggrids( )		
-
-					search.set( search === tool ? "main" : tool )
+					case "owner": case "situs": case "main":
+						search.set( tool )
+						search_value = ""
+						search_error = ""
+						search_results.length = 0
+						break
 					
-					break
+					case "prelimplan":
+						if( !btns.prelimplan.list )
+							btns.prelimplan.list = await getPrelimPlans( )		
 
-				case "sidepanel":
-					_datadrawer = !_datadrawer
-					datadrawer.set( _datadrawer )
-					break
+						search.set( tool )
+						search_error = ""
+						search_results.length = 0
+						break
 
-			}
+					case "enggrid":
+						if( !btns.enggrid.list )
+							btns.enggrid.list = await getEnggrids( )		
 
-		}, 
-	
-		handleLeftDrawer = event => { leftdrawer  = event.detail.leftdrawer },
+						search.set( tool )
+						search_error = ""
+						search_results.length = 0						
+						break
 
-		handleOpen = event => {
-            search_active  = event.detail.open
-
-        },
-
-		handleRouteChange = ( route, _datadrawer ) => {
-			if( route === "/" )
-				messenger.set( [ { type: "clear_all_graphics" } ] )
-
-			btns.sidepanel = { 
-					...btns.sidepanel, 
-					icon: ( _datadrawer ? "doublearrowup" : "doublearrowdown" ), 
-					tooltip: ( _datadrawer ? "Collapse side panel" : "Expand side panel" ), 
-					show: ( route.match( /(prop)|identify/ig ) ? true : false )
+					case "sidepanel":
+						datadrawer.set( !_datadrawer )
+						break
 
 				}
 
-		}
+			}, 
 
+			left_drawer: event => { 
+				leftdrawer  = event.detail.leftdrawer 
+
+			},
+
+			open: event => {
+				search_active  = event.detail.open
+
+				if( search_active && [ "prelimplan", "enggrid" ].includes( _search ) && search_results.length === 0 )
+					search_results = btns[_search].list
+
+			},
+
+			search_error: event =>{
+				search_error = event.detail.msg
+
+			},
+
+			search_items: event => {
+				search_nomatch = event.detail.nomatch
+				search_results = formatSearchResults( event.detail.items, event.detail.srch_str )
+				
+			},
+
+			search_pick: async i => {
+				const hit = search_results[ i ]
+
+				if( hit.value ){
+					if( [ "owner", "situs", "main" ].includes( _search ) ){
+						goto( `/${hit.type.toLowerCase( )}/${srchstr2qrystr( String( hit.srch_key ) ) }` )
+						search_value = hit.value
+						search_active = false
+						search_error = "" 
+
+					}else if( _search === "prelimplan" ){
+						const rows = await getPrelimPlan( hit.value )
+
+						if( rows.length > 0 ){
+							messenger.set( [
+									{ type: "zoom_to_extent", extent: rows[ 0 ] },
+									{ type: "toggle_layer", layers: getToggleLayerList( "lnddvlpmnt", "prelimplans" ) }
+
+								] )
+
+						}
+
+
+						
+					}else if( _search === "enggrid" ){
+						messenger.set( [
+								{ type: "zoom_to_extent", extent: { xmin: hit.xmin, ymin: hit.ymin, xmax: hit.xmax, ymax: hit.ymax } },
+								{ type: "toggle_layer", layers: getToggleLayerList( "lnddvlpmnt", "enggrid" ) }
+
+							] )
+						
+					}
+
+				}
+				
+			},
+
+			touch_start: event => {
+				if( event.changedTouches[ 0 ].screenY !== undefined )
+					touch_startY = event.changedTouches[ 0 ].screenY
+		
+			},
+
+			touch_move: event => {
+				touch_moved = true
+			
+			},
+
+			touch_end: event => {
+				if( touch_moved ){
+					
+					if( event.changedTouches[ 0 ].screenY !== undefined )
+						touch_endY = event.changedTouches[ 0 ].screenY
+
+					if( touch_startY > touch_endY )
+						dual.set( !_dual )
+
+					else if( touch_startY < touch_endY && !_dual ) 
+						dual.set( !_dual )
+					
+					else if( touch_startY < touch_endY && _dual ) 
+						datadrawer.set( !_datadrawer )
+
+					touch_moved = false	
+										
+				}
+			
+			}
+
+		}
+	
+	//Events
 	onMount( async ( ) => {
 		//pwaInfo && ( ReloadPrompt = ( await import( "$lib/components/ReloadPrompt.svelte" ) ).default )
 
 		//Subscriptions
 		messenger.subscribe( msgs => { 
             msgs.forEach( msg => { 
-                switch( msg.type ){
+				switch( msg.type ){
                     case "set_gisid_anlyz_buffer":
                         btns.analysis.gisid = msg.gisid
 
@@ -234,7 +524,17 @@
                         break
 
 					case "redo_analysis":
-						btns.analysis.open = !btns.analysis.open
+						if( btns.analysis.list )
+							btns.analysis.open = !btns.analysis.open
+						else
+							handle.click( "analysis" )
+
+						break
+
+					case "scroll_to_top":
+						
+						//the_top.scrollIntoView(  )
+
 						break
 
                 }
@@ -246,18 +546,38 @@
 		offset.subscribe( value => { _offset = value } )
 		search.subscribe( value => { _search = value } )
 		datadrawer.subscribe( value => { _datadrawer = value } )
+		
 
 	} )
-	
+
+	mobile.subscribe( value => { _mobile = value } )
+	dual.subscribe( value => { _dual = value } )
 
 	//Reactives
 	$: if( $page.route.id )
-		_route = $page.route.id
-	
-	$: { handleRouteChange( _route, _datadrawer ) }
-	
-	$: offset.set( $page.route.id.match( /(prop)|identify/ig ) && screen_size > 768 && _datadrawer ? ( widths.strip + widths.datos ) : ( screen_size > 768 ? widths.strip : 0 ) )
+		route = $page.route.id
 
-	//$: webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : ""
+	$: mobile.set( viewport_width <= 768 )
+
+	$: offset.set( { 
+			left: ( !_mobile && route.match( /(prop)|identify/ig ) && _datadrawer ? 452 : (mobile ? -6 : 46 ) ), 
+			bottom: ( _mobile && _dual && route.match( /(prop)|identify/ig ) ? viewport_height/2 : 0 ), 
+			top: ( _mobile && _dual ? 50 : 0 ) 
+		} )
+
+	$: btns.sidepanel = { 
+			...btns.sidepanel, 
+			icon: ( _datadrawer ? "expandless" : "expandmore" ), 
+			tooltip: ( _datadrawer ? "Collapse side panel" : "Expand side panel" ), 
+			show: ( route.match( /(prop)|identify/ig ) ? true : false )
+
+		}
+
+	$: btns.hamburger = { ...btns.hamburger, show: !_mobile }
+	
+	$: if( route === "/" )
+		messenger.set( [ { type: "clear_all_graphics" } ] )
+
+	
 			
 </script>

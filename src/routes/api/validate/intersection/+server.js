@@ -1,5 +1,5 @@
-import { error } from "@sveltejs/kit"
-import { json2URL } from "$lib/utils"
+import {error} from "@sveltejs/kit"
+import {json2URL} from "$lib/utils"
 
 /** @type {import('./$types').RequestHandler} */
 export const GET = async ( { url, locals, fetch } ) => {

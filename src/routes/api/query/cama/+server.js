@@ -1,5 +1,5 @@
-import { json2URL } from "$lib/utils"
-import { genError, getErrorMsg } from "$lib/api.js"
+import {json2URL, unEscape} from "$lib/utils"
+import {genError, getErrorMsg} from "$lib/api.js"
 
 /** @type {import('../$types').RequestHandler} */
 export const GET = async ( { url, locals, fetch, params } ) => {
@@ -16,21 +16,7 @@ export const GET = async ( { url, locals, fetch, params } ) => {
             conn = "assess_pool"
             
         if( table ){
-            sql = `SELECT ${columns}
-                    
-                    FROM ${table}
-                    
-                    -- Optional Filter
-                    ${filter ? `WHERE ${filter}` : '' }
-
-                    -- Optional Group
-                    ${group ? `GROUP BY ${group}` : '' }
-              
-                    -- Optional sort
-                    ${sort ? `ORDER BY ${sort}` : '' }
-              
-                    -- Optional limit
-                    ${limit ? `LIMIT ${limit}` : '' }`
+            sql = unEscape( `SELECT ${limit ? `TOP ${limit}` : '' } ${columns} FROM ${table} ${filter ? `WHERE ${filter}` : '' } ${group ? `GROUP BY ${group}` : '' } ${sort ? `ORDER BY ${sort}` : '' }` )
 
             result = await locals[ conn ].query( sql )
             response = result.recordset

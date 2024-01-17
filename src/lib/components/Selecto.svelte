@@ -6,7 +6,7 @@
         on:blur="{(event)=>{ ( debounce( e => { open = false }, 200 ) )( ) }}"
         on:keydown="{(event)=>onKeyDown(event)}"
     >
-        <span class="flex items-center">
+        <span class="flex items-center {pad}">
             {#if items.length > 0 }
                 <span class="block">{items[ selected ].label}</span>
             {:else}
@@ -17,19 +17,21 @@
         
         <span class="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
             {@html icon( "unfold", 24, 24 )}
-        </span>
-    </button>
 
-    <div class="{open ? 'absolute z-20 mt-1' : 'hidden'} w-full border border-primero">
+        </span>
+
+    </button>
+    
+    <div class="{open && !hide_items ? 'absolute z-20 mt-1' : 'hidden'} w-full border border-primero">
         <ul 
             bind:this={element} 
-            class="bg-lienzo shadow-lg md:max-h-[200px] overflow-y-auto scrollbar"
+            class="bg-lienzo shadow-lg md:max-h-[350px] overflow-y-auto scrollbar"
             on:focus={(event)=>{ arrowCounter = -1 }}
             on:mouseover={(event)=>{ arrowCounter = -1 }}
         >
             {#each items as item, i}
                 <li 
-                    class="relative py-1.5 pl-1.5 pr-9 text-sm overflow-ellipsis overflow-hidden whitespace-nowrap hover:bg-luz hover:cursor-pointer { i === arrowCounter ? ' bg-segundo text-lienzo' : '' }"
+                    class="relative py-2 pl-2 pr-9 text-sm overflow-ellipsis overflow-hidden whitespace-nowrap hover:bg-luz hover:cursor-pointer { i === arrowCounter ? ' bg-segundo text-lienzo' : '' }"
                 >
                     <span
                         class="font-normal ml-1.5 block truncate"
@@ -49,7 +51,9 @@
                     {/if}
                 </li>
             {/each}
+
         </ul>
+
     </div>
     
 </div>
@@ -59,13 +63,15 @@
     import {icon} from "$lib/utils"
 
     // variables
-    let open = false,
-        element
+    let element
 
      // component props
 	export let items = [ ]
     export let selected = -1
     export let arrowCounter = -1
+    export let pad = ""
+    export let open = false
+    export let hide_items = false
 
     const dispatch = createEventDispatcher( ),
             close = ( idx = -1 ) => { // handle dropdown selection
@@ -117,12 +123,6 @@
 
 
     //reactives
-    $: if( open ){
-        dispatch( "open", { open: true } )
-
-    }else{
-        dispatch( "open", { open: false } )
-
-    }
+    $: dispatch( "open", { open: open } )
 
 </script>

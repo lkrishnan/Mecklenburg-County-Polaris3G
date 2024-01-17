@@ -93,7 +93,7 @@
                 ...( qol_code ? [ { label: "Quality of Life Dashboard", url: `https://mcmap.org/qol/#1/${qol_code}` } ] : [ ] ),
                 { label: "Demographic Analyzer", url: `http://maps.co.mecklenburg.nc.us/meckdemo/?pid=${_pid}` },
                 ...( _address ? [ { label: "Google Directions", url: `http://maps.google.com/maps?daddr=${_address}&saddr=+` } ] : [ ] ),
-                { label: "Zoning Designations PDF", url: `https://polaris3g.mecklenburgcountync.gov/data/ZoningDesignations.pdf` }
+                { label: "Zoning Designations PDF", url: `/pdf/ZoningDesignations.pdf` }
 
             ]
 

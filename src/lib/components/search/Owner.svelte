@@ -1,173 +1,167 @@
-<div class="relative w-full bg-luz rounded border-primero">
-    <div class="md:flex hidden flex-row items-center p-2">
-        <div class="grow font-bold text-lg">
-            {heading}
-        </div>
-        <div class="flex">
-            <button 
-                class="p-1 border border-luz rounded-full group relative transition-colors duration-150 hover:text-segundo"
-                on:click="{(event)=>{dispatch( "close", { close: false } )}}"
-            >
-                {@html icon( "close", 24, 24 )}
-            </button>
+<div class="relative flex flex-col gap-2">
+    <!-- Last Name --> 
+    <div class="border border-primero bg-lienzo rounded">
+        <!-- Left Buttons -->
+        <div class = "absolute z-10 left-[0px] my-1 ml-1.5">
+            {#if _results_count > 1 && _results_index > -1 }
+                <button 
+                    class="inline-flex items-center justify-center w-8 h-8 transition-colors duration-150 rounded-full text-lienzo bg-pop hover:bg-segundo focus:shadow-outline"
+                    on:click="{(event)=>{results_index.set( -1 )}}"
+                >
+                    {@html icon( "arrowback", 28, 28 )}
+                </button>
+
+            {:else if _mobile && !_dual }
+                <button 
+                    class="inline-flex items-center justify-center w-8 h-8 transition-colors duration-150 rounded-full fill-primero hover:fill-segundo hover:bg-luz focus:shadow-outline"
+                    on:click="{(event)=>{dual.set( !_dual )}}"
+                >
+                    {@html icon( "expandmore", 28, 28 )}
+                </button>
+
+            {:else if _mobile }
+                <button 
+                    class="md:hidden inline-flex items-center justify-center w-8 h-8 transition-colors duration-150 rounded-full fill-primero hover:fill-segundo hover:bg-luz focus:shadow-outline"
+                    on:click="{(event)=>{dispatch( "leftdrawer", { leftdrawer: !leftdrawer } )}}"
+                >
+                    {@html icon( "hamburger", 28, 28 )}
+                </button>
+        
+            {:else}
+                <div class="hidden md:inline-flex items-center justify-center w-8 h-8">
+                    {@html icon( "search", 28, 28 )}
+                </div>
+        
+            {/if}
             
         </div>
-        
-    </div>
-
-    <form class="px-2 pt-2" on:submit|preventDefault={validate}>
-        <div class="flex w-full bg-luz gap-2 pb-2" >
-            <div class="grow border bg-lienzo {fields.lastname.error ? 'border-pop' : 'border-todo' } rounded" id="lastname">
-                <AutoComplete placeholder="Last Name / Business Name" minchar={fields.lastname.minchar} go={false}
-                    bind:spinner={fields.lastname.spinner}  bind:nomatch={fields.lastname.nomatch} 
-                    bind:items={fields.lastname.items} bind:str={fields.lastname.val}
-                    padding="pl-3 pr-2 py-2" buttonsize="8" 
-                    on:query={event => {handleQuery( event, "lastname" ) }}
-                    on:open={handleOpen}/>
-            </div>
-            <div class="w-[46px]" />
-                
-        </div>
-
-        <p class="{fields.lastname.error ? '' : 'hidden' } mb-2 ml-2 text-pop text-xs italic">{fields.lastname.error}</p>
        
-        <div class="flex w-full bg-lienzo gap-2" id="firstname">
-            <div class="grow border {fields.firstname.error ? 'border-pop' : 'border-todo' } rounded">
-                <AutoComplete placeholder="First Name" minchar={fields.firstname.minchar} go={false} 
-                    bind:spinner={fields.firstname.spinner} bind:nomatch={fields.firstname.nomatch} 
-                    bind:items={fields.firstname.items} bind:str={fields.firstname.val}
-                    padding="pl-3 pr-2 py-2" buttonsize="8"
-                    on:query={event => {handleQuery( event, "firstname" ) }}
-                    on:open={handleOpen}/>
-            </div>
-            
-            <button
-                id="go"
-                class="bg-pop border border-pop text-lienzo hover:text-pop font-semibold hover:bg-lienzo py-1.5 px-3 rounded focus:outline-none focus:shadow-outline" 
-                type="submit">
-                Go
-            </button>
-            
-        </div>
-        
-        <p class="{fields.firstname.error ? '' : 'hidden' } mt-2 ml-2 text-pop text-xs italic">{fields.firstname.error}</p>
-        
-    </form>
+        <AutoComplete 
+                placeholder="Enter Full / Last / First / Business Name" 
+                {minchar} {spinner} go={false} {nomatch} {items} {hide_items} {value} {is_open}
+                padding="pl-10 py-1 pr-1"
+                buttonsize="8"
+                on:brute={handle.brute} 
+                on:hit={handle.hit}  
+                on:open={handle.open}
+                on:query={handle.query}  
+                
+            />
 
+    </div>
+   
 </div>
 
-
 <script>
-    import { createEventDispatcher } from "svelte"
-    import { fade, fly } from "svelte/transition"
-    import { goto } from "$app/navigation"
-    import { validateForm } from "$lib/validate" 
-    import { json2URL, srchstr2qrystr, icon } from "$lib/utils"
+    import {createEventDispatcher} from "svelte"
+    import {mobile, results_count, results_index, dual} from "$lib/store"
+    import {getAPIURL} from "$lib/api"
+    import {srchstr2qrystr, icon} from "$lib/utils"
+    import {validateOwnerName, validateName} from "$lib/validate"
+    import {goto} from "$app/navigation"
+
     import AutoComplete from "$lib/components/AutoComplete.svelte"
 
-    export let heading = ""
-        	
-    let fields = {
-            firstname: { val: null,
-                rules: [
-                        v => ( v && v.trim( ).length > 75 ? "First Name must be within 75 characters" : null ),
-                    ], 
-                minchar: 2,
-                items: [ ],
-                nomatch: false,
-                spinner: false,
+    export let leftdrawer = false
+    export let hide_items = false
+    export let value = ""
+    export let is_open = false
 
-            },
-            lastname: { 
-                val: null,
-                rules: [
-                        v => ( !v ? "Last Name is required" : null ),
-                        v => ( v.trim( ).length > 75 ? "Last Name must be within 75 characters" : null ),
-                    ],
-                minchar: 2,
-                items: [ ],
-                nomatch: false,
-                spinner: false,
-  
-            },
+    //Store Variables
+    let _mobile,
+        _results_count,
+		_results_index,
+        _dual
 
-        },
-        is_open = false
-        
+
+    let items = [ ],
+        nomatch = false,
+        spinner = false
+       
+
     const dispatch = createEventDispatcher( ),
+        minchar = 3,
 
-        validate = ( event ) => {
-            if( event.submitter.id === "go" ){
+        handle = {
+            brute: event => {
+                let hit
 
-                const verdict = validateForm( fields )
-                fields = verdict.fields
+                const srch_str = event.detail
 
-                if( verdict.valid ){
-                    let attribs = { },
-                        type,
-                        value
+               if( items.length > 0 )
+                    hit = items[ 0 ]
 
-                    Object.keys( fields ).forEach( field => {
-                        if( fields[ field ].val )
-                            attribs[ field ] = fields[ field ].val
+                // propogate hit
+                if( hit )
+                    hit_it( hit.type, hit.value )
 
-                    } )
+                else
+                    dispatch( "error", { msg: "Enter a Valid Search String!" } )
 
-                    if( attribs.hasOwnProperty( "lastname" ) && attribs.hasOwnProperty( "firstname" ) ){
-                        type = "OWNER"
-                        value = attribs.lastname + ", " + attribs.firstname
+            },
+            
+            hit: event => {
+                hit_it( event.detail.type, event.detail.value )
 
-                    }else if( attribs.hasOwnProperty( "lastname" ) ){
-                        type = "OWNERLAST"
-                        value = attribs.lastname
+            },
 
-                    }
-                    
-                    goto( `/${type.toLowerCase( )}/${srchstr2qrystr( value ) }` )
+            query: async ( event ) => { // fetch matches
+                let jsons
 
-                }
-            }
+                const srch_str = event.detail.trim( )
 
-        },
-        
-        handleQuery = async ( event, field ) => { // fetch matches
-            // Fetch Results
-            fields[ field ].spinner = true
+                if( srch_str.length >= minchar ){
+                    const urls = [
+                            //...( validateOwnerName( srch_str ) ? [ getAPIURL( "owner", srch_str ) + "&exact=0" ] : ( validateName( srch_str ) ? [ getAPIURL( "owner", srch_str ) + "&exact=0" ] : [ ] ) ),
 
-            const srch_str = event.detail.trim( ),
-                getArgs = ( ) => {
-                    const args = { 
-                            get: field,
-                            ...( fields.lastname.val && { lastname: fields.lastname.val } ),
-                            ...( fields.firstname.val && { firstname: fields.firstname.val } ),
+                            //owner name - fullname
+                            ...( validateOwnerName( srch_str ) ? [ getAPIURL( "owner", srch_str ) + "&exact=0" ] : [ ] ),
                             
-                        }
+                            //owner name - last
+                            ...( validateName( srch_str ) ? [ getAPIURL( "ownerlast", srch_str ) + "&exact=0" ] : [ ] ),
 
-                    return args
+                            //owner name - first
+                            ...( validateName( srch_str ) ? [ getAPIURL( "ownerfirst", srch_str ) + "&exact=0" ] : [ ] ),
+                    
+                        ]
 
-                },
-                response = await fetch( `/api/validate/owner?${json2URL( getArgs( ) )}` ), 
-                json = ( response.ok ? await response.json( ) : [ ] )
+                    // Fetch Results
+                    spinner = true
+                    jsons = await Promise.all( urls.map( url => fetch( url ).then( resp => resp.json( ) ) ) )
+                    items = [ ].concat( ...jsons )
 
-            fields[ field ] = { ...fields[ field ], items:json, spinner: false, nomatch: false, error: '' }
+                }else
+                    items.length = 0
 
-            if( fields[ field ].items.length === 0 ) 
-                fields[ field ].nomatch = true
+                nomatch = ( items.length === 0 )
+
+                if( _mobile )
+                    dispatch( "items", { items: items, srch_str: srch_str, nomatch: nomatch } )
+
+                spinner = false
+
+            },
+
+            open: event => {
+                is_open  = event.detail.open
+
+            },
 
         },
 
-        handleOpen = event => {
-            is_open  = event.detail.open
+        hit_it = ( type, value ) => {
+            dispatch( "reset", { msg: "" } )
+            goto( `/${type.toLowerCase( )}/${srchstr2qrystr( value ) }` )
 
         }
 
+    //Subscriptions
+    dual.subscribe( value => { _dual = value } )
+    mobile.subscribe( value => { _mobile = value } )
+    results_count.subscribe( value => { _results_count = value } )
+    results_index.subscribe( value => { _results_index = value } )
+
     //Reactives
-    $: if( is_open ){
-        dispatch( "open", { open: true } )
-
-    }else{
-        dispatch( "open", { open: false } )
-
-    }
+    $:dispatch( "open", { open: is_open } )
 
 </script>

@@ -1,5 +1,5 @@
-import { genError, getInvalidParams } from "$lib/api.js"
-import { arrHasAllElems } from "$lib/utils.js"
+import {genError, getInvalidParams} from "$lib/api.js"
+import {arrHasAllElems} from "$lib/utils.js"
 
 /** @type {import('./$types').RequestHandler} */
 export const GET = async ( { url, locals } ) => {

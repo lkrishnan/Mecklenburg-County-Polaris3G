@@ -48,7 +48,7 @@ export const GET = async ( {url, locals, fetch } ) => {
             title: "", headers : [ 
                 { label: "No", headerColor:"#ffffff", headerAlign:"center" }, 
                 { label: "Parcel ID", headerColor:"#ffffff", headerAlign:"center" }, 
-                { label: "Postal Address (max 3)", renderer: value => value, headerColor:"#ffffff", headerAlign:"center" }, 
+                { label: "Address on Property (max 3)", renderer: value => value, headerColor:"#ffffff", headerAlign:"center" },
                 { label: "Owner Name", renderer: value => value, headerColor:"#ffffff", headerAlign:"center" }, 
                 
             ],
@@ -108,7 +108,7 @@ export const GET = async ( {url, locals, fetch } ) => {
             doc
                 .fontSize( 10 )
                 .font( "Helvetica-Bold" )
-                .text( "POLARIS 3G PROPERTY DEED REPORT", margin, margin, { height : header_height, align: "center" } )
+                .text( "POLARIS 3G PROPERTY OWNERSHIP REPORT", margin, margin, { height : header_height, align: "center" } )
                 .fontSize( 9 )
                 .font( "Helvetica" )
                 .text( `Date Printed: ${formatDate( new Date( ) )}`, { align: "center" } )

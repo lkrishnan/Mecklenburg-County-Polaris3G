@@ -1,3 +1,4 @@
+import { null2empty } from "$lib/utils"
 import { validateNumeric } from "$lib/validate"
 
 const arrayToNumList = ( arr ) => {
@@ -176,14 +177,14 @@ const arrayToNumList = ( arr ) => {
 
 	},
 
-	formatArrAsHTML = rows => {
+	formatArrAsHTML = ( rows, start="<br/>", offset=0 ) => {
 		let temp = rows.reduce( ( html, row, i ) => {
 			if( row && row.trim( ).length > 0 )
-				html += `${( i > 0 ? "<br/>" : "" )} ${parseInt ( i + 1 )}. ${row}`
+				html += `${( i > 0 ? "<br/>" : "" )} ${parseInt ( i + offset + 1 )}. ${row}`
 			
 			return html
 
-		}, "<br/>" )
+		}, start )
 
 		return temp
 
@@ -302,6 +303,24 @@ const arrayToNumList = ( arr ) => {
 				
 	},
 
-	formatPercentage = ( val, total ) => `${formatDecimal( ( val / total ) * 100, 2 )}%`
+	formatPercentage = ( val, total ) => `${formatDecimal( ( val / total ) * 100, 2 )}%`,
 
-export { arrayToNumList, concatArr, formatAddr, formatLandArea, formatLegalDesc, formatOwnersAsHTML, formatUCWords, formatDeed, formatCommas, formatMoney, formatDate, formatFullName, formatDecimal, formatArrAsHTML, formatIdentifyResult, formatOwnersAsHTML2, formatFullName2, formatStatePlane, formatLatLng, formatPercentage, formatFEMADate, formatAcres }
+	formatSearchResults = ( items, srch_str ) =>{ // format results
+		const regExpEscape = s => s.replace( /[-\\^$*+?.()|[\]{}]/g, "\\$&" ) // regular expression to highlight search string in autocomplete results
+            
+		return items.filter( item => item.value ).map( item => {
+				const text = typeof item !== "string" ? item.value : item
+
+				return {
+					value: item.value || item,
+					type: item.type,
+					srch_key: item.srch_key,
+					label: null2empty( srch_str ) === '' ? text : text.replace( RegExp( regExpEscape( null2empty( srch_str ).trim( ) ), "i" ), "<span class='text-gray-700 font-bold'>$&</span>" )
+					
+				}
+
+			} )
+
+	}
+
+export { arrayToNumList, concatArr, formatAddr, formatLandArea, formatLegalDesc, formatOwnersAsHTML, formatUCWords, formatDeed, formatCommas, formatMoney, formatDate, formatFullName, formatDecimal, formatArrAsHTML, formatIdentifyResult, formatOwnersAsHTML2, formatFullName2, formatStatePlane, formatLatLng, formatPercentage, formatFEMADate, formatAcres, formatSearchResults }

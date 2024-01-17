@@ -1,5 +1,4 @@
 import * as query from "@arcgis/core/rest/query"
-import Query from "@arcgis/core/rest/support/Query"
 import Point from "@arcgis/core/geometry/Point"
 import SpatialReference from "@arcgis/core/geometry/SpatialReference"
 import { json2URL } from "$lib/utils"
@@ -59,10 +58,13 @@ const genError = err => ( { "statusCode":500, "error": "Internal Server Error", 
 
             case "owner": 
                 const comma_split = srch_str.split( "," ).map( item => item.trim( ) )
-                return `/api/validate/owner?get=fullname&lastname=${comma_split[ 0 ]}&firstname=${comma_split[ 1 ]}`
+                return `/api/validate/owner?get=fullname&lastname=${encodeURIComponent( comma_split[ 0 ] )}&firstname=${(comma_split.length > 1 ? encodeURIComponent( comma_split[ 1 ] ) : "" )}`
+
+            case "ownerfirst":
+                return `/api/validate/owner?get=firstname&firstname=${encodeURIComponent( srch_str )}`
 
             case "ownerlast":
-                return `/api/validate/owner?get=lastname&lastname=${srch_str}`
+                return `/api/validate/owner?get=lastname&lastname=${encodeURIComponent( srch_str )}`
 
             case "park": 
                 return `/api/validate/facility/park?name=${srch_str}`
@@ -106,6 +108,20 @@ const genError = err => ( { "statusCode":500, "error": "Internal Server Error", 
      
     },
 
+    getPrelimPlan = async projname => {
+        const params = {
+                table: "preliminary_plans_ln",
+                columns: "ST_XMin(ST_Extent(shape)) as xmin, ST_YMin(ST_Extent(shape)) as ymin, ST_XMax(ST_Extent(shape)) as xmax, ST_YMax(ST_Extent(shape)) as ymax",
+                filter: `projname = '${projname}'`,
+
+            },
+            response = await fetch( `/api/query/gis?${json2URL( params )}` ),
+            rows = await response.json( )
+
+        return rows
+
+    },
+
     getUSNG = async ( lat, lng, fetch=null ) => {
         const usng_resp = await fetch( `/api/query/usng?lat=${lat}&lng=${lng}` ),
             usng_json = await usng_resp.json( )
@@ -141,4 +157,4 @@ const genError = err => ( { "statusCode":500, "error": "Internal Server Error", 
 
     }
     
-export {genError, getInvalidParams, getErrorMsg, getAPIURL, idLayer, getProjCoords, getUSNG, getPOI}
+export {genError, getInvalidParams, getErrorMsg, getAPIURL, idLayer, getProjCoords, getUSNG, getPOI, getPrelimPlan}

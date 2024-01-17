@@ -49,7 +49,7 @@ export const GET = async ( {url, locals, fetch } ) => {
                 { label: "No", headerColor:"#ffffff", headerAlign:"center" }, 
                 { label: "Parcel ID", headerColor:"#ffffff", headerAlign:"center" }, 
                 { label: "Owner Name", renderer: value => value, headerColor:"#ffffff", headerAlign:"center" }, 
-                { label: "Mailing Address", headerColor:"#ffffff", headerAlign:"center" }, 
+                { label: "Tax Bill Address", headerColor:"#ffffff", headerAlign:"center" }, 
                 { label: "Legal Desc", headerColor:"#ffffff", headerAlign:"center" }, 
                 { label: "Deed", headerColor:"#ffffff", headerAlign:"center" },
                 { label: "Land Area", headerColor:"#ffffff", headerAlign:"center" },

@@ -1,23 +1,47 @@
 <div class="relative w-full rounded border-primero">
-    <div class="md:flex hidden flex-row items-center p-2">
-        <div class="grow font-bold text-lg">
-            {heading}
-        </div>
-        <div class="flex">
-            <button 
-                class="p-1 rounded-full group relative transition-colors duration-150 hover:text-segundo"
-                on:click="{(event)=>{dispatch( "close", { close: false } )}}"
-            >
-                {@html icon( "close", 24, 24 )}
-            </button>
+    {#if list.length > 0}
+        <!-- Left Buttons -->
+        <div class = "absolute z-10 left-[0px] my-1 ml-1">
+            {#if _results_count > 1 && _results_index > -1 }
+                <button 
+                    class="inline-flex items-center justify-center w-10 h-10 transition-colors duration-150 rounded-full fill-primero hover:fill-segundo hover:bg-luz focus:shadow-outline"
+                    on:click="{(event)=>{results_index.set( -1 )}}"
+                >
+                    {@html icon( "arrowback", 28, 28 )}
+                </button>
+
+            {:else if _mobile && !_dual }
+                <button 
+                    class="inline-flex items-center justify-center w-10 h-10 transition-colors duration-150 rounded-full fill-primero hover:fill-segundo hover:bg-luz focus:shadow-outline"
+                    on:click="{(event)=>{dual.set( !_dual )}}"
+                >
+                    {@html icon( "expandmore", 28, 28 )}
+                </button>
+
+            {:else if _mobile }
+                <button 
+                    class="md:hidden inline-flex items-center justify-center w-10 h-10 transition-colors duration-150 rounded-full fill-primero hover:fill-segundo hover:bg-luz focus:shadow-outline"
+                    on:click="{(event)=>{dispatch( "leftdrawer", { leftdrawer: !leftdrawer } )}}"
+                >
+                    {@html icon( "hamburger", 28, 28 )}
+                </button>
+            
+            {:else}
+                <div class="hidden md:inline-flex items-center justify-center w-10 h-10">
+                    {@html icon( "arrowselect", 28, 28 )}
+                </div>
+            
+            {/if}
             
         </div>
-        
-    </div>
 
-    {#if list.length > 0}
         <div class="bg-lienzo">
-            <Selecto items={list} bind:selected={selected} on:hit={handleHit} on:open={handleOpen}/>
+            <Selecto 
+				items={list} {pad} bind:selected={selected} {hide_items} {open}
+				on:hit={handleHit} on:open={handleOpen}
+				
+			/>
+			
         </div>
         
         
@@ -32,19 +56,26 @@
 </div>
     
 <script>
-    import { createEventDispatcher } from "svelte"
-    import { fade, fly } from "svelte/transition"
-    import { json2URL } from "$lib/utils"
-    import { messenger } from "$lib/store"
-    import { icon } from "$lib/utils"
-    import overlays_data from "$lib/data/overlays"
+    import {createEventDispatcher} from "svelte"
+    import {mobile, results_count, results_index, dual, messenger} from "$lib/store"
+    import {getPrelimPlan} from "$lib/api"
+    import {getToggleLayerList} from "$lib/mapping"
+    import {icon} from "$lib/utils"
+	
     import Selecto from "$lib/components/Selecto.svelte"
 
-    export let heading = ""
     export let list = [ ]
+    export let pad = ""
+    export let leftdrawer = false
+    export let hide_items = false
+    export let open = false
+    export let selected = 0 
 
-    let selected = 0,
-    is_open = false
+    //Store Variables
+    let _mobile,
+        _results_count,
+		_results_index,
+        _dual
 
     const dispatch = createEventDispatcher( ),
 
@@ -52,26 +83,12 @@
             const hit =  event.detail
 
             if( hit.value ){
-                const params = {
-                    table: "preliminary_plans_ln",
-                    columns: "ST_XMin(ST_Extent(shape)) as xmin, ST_YMin(ST_Extent(shape)) as ymin, ST_XMax(ST_Extent(shape)) as xmax, ST_YMax(ST_Extent(shape)) as ymax",
-                    filter: `projname = '${list[ selected ].value}'`,
-
-                },
-                response = await fetch( `/api/query/gis?${json2URL( params )}` ),
-                rows = await response.json( )
+                const rows = await getPrelimPlan( hit.value )
 
                 if( rows.length > 0 ){
-                    const group_idx = overlays_data.findIndex( item => item.id === "lnddvlpmnt" ),
-                        lyr_idx = overlays_data[ group_idx ].children.findIndex( item => item.id === "prelimplans" )
-
-                    //set checkboxes in overlay list
-                    overlays_data[ group_idx ].children[ lyr_idx ].checked = true
-                    overlays_data[ group_idx ].checked = ( overlays_data[ group_idx ].children.filter(item => item.checked).length === overlays_data[ group_idx ].children.length )
-
                     messenger.set( [
                         { type: "zoom_to_extent", extent: rows[ 0 ] },
-                        { type: "toggle_layer", layers: [ { group_idx: group_idx, lyr_idx: lyr_idx, visible: true } ] }
+                        { type: "toggle_layer", layers: getToggleLayerList( "lnddvlpmnt", "prelimplans" ) }
 
                     ] )
 
@@ -82,17 +99,17 @@
         },
 
         handleOpen = event => {
-            is_open  = event.detail.open
+            open  = event.detail.open
 
         }
 
+    //Subscriptions
+    dual.subscribe( value => { _dual = value } )
+    mobile.subscribe( value => { _mobile = value } )
+    results_count.subscribe( value => { _results_count = value } )
+    results_index.subscribe( value => { _results_index = value } )
+
     //Reactives
-    $: if( is_open ){
-        dispatch( "open", { open: true } )
-
-    }else{
-        dispatch( "open", { open: false } )
-
-    }
+    $: dispatch( "open", { open: open } )
 
 </script>

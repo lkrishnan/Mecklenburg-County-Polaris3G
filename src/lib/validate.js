@@ -1,77 +1,29 @@
-import { filterObj } from "$lib/utils"
+import {filterObj} from "$lib/utils"
 
-const validateStreetName = str => { //needs improvmeent
-    //return ( str.match( /^(\d*\s*[A-Z]+)$/ ) ? true : false )
-    return ( str.match( /^(?:[A-Za-z]+[ -]?)+[A-Za-z]$/ ) ? true : false )
-},
+const validateNumeric = str => ( str.match( /^\d+$/ ) ? true : false ),
 
-validateNumeric = str => {
-    return ( str.match( /^\d+$/ ) ? true : false )
+validateAlphaNumeric = str => ( str.match( /^[a-zA-Z0-9 ]*$/ ) ? true : false ),
 
-},
+validateSpChar = str => ( str.match( /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/ ) ? true : false ),
 
-validateAlphaNumeric = str => {
-    return ( str.match( /^[a-zA-Z0-9 ]*$/ ) ? true : false )
+validateTaxPID = str => ( str.match( /^[0-2]\d{2}-{0,1}\d{3}-{0,1}\d{1}([A-Za-z0-9])$/ ) ? true : false ),
 
-},
+validateTaxPIDMin7 = str => ( str.match( /^[0-2]\d{2}-{0,1}\d{3}-{0,1}\d{1}?([A-Za-z0-9])?$/ ) ? true : false ),
 
-validateSpChar = str => {
-    return ( str.match( /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/ ) ? true : false )
+validateGISID = str => ( str.match( /^[0-2]\d{4}(A|C|I|L|M|N|R|S|W|X|[0-9])\d{2}$/ ) ? true : false ),
 
-},
+validateCNumber = str => ( str.match( /^[0-2]\d{4}(C|c)\d{2}$/ ) ? true : false ),
 
-validateAtleast7= str => {
-    return ( ( str.match( /^[0-2]\d{6}[0-9]?([A-Z])?$/ ) || str.match( /^[0-2]\d{2}-\d{3}-\d{1}[0-9]?([A-Z])?$/ ) ) ? true : false ) 
+validateIntersection = str => ( str.match( /^(\w+\s*){3}(AND|&)(\s*\w+){3}$/ ) ? true : false ),
 
-},
+validateOwnerName = str => ( str.replace(/\s/g, "" ).match( /^[A-Za-z0-9@&~`()_=+\';:\"\\\/?>.<-]+(,)[A-Za-z0-9@&~`()_=+\';:\"\\\/?>.<-]+$/ ) ? true : false ),
 
-validateCNumber = str => {
-    return ( str.match( /^[0-2]\d{4}(C|c)\d{2}$/ ) ? true : false )
-
-},
-
-validateTaxPID = str => {
-    return ( str.match( /^[0-2]\d{7}([A-Z])?$/ ) ? true : false )  
-
-},
-
-validateGISID = str => {
-    return ( str.match( /^[0-2]\d{4}(A|C|I|L|M|N|R|S|W|X|[0-9])\d{2}$/ ) ? true : false )
-
-},
-
-validateOnlyAlpha = str => {
-    return ( str.match( /^[a-z]+$/i ) ? true : false )
-
-},
-
-validateIntersection = str => {
-    return ( str.match( /^(\w+\s*){3}(AND|&)(\s*\w+){3}$/ ) ? true : false )
-
-},
-
-validateOwnerName = str => {
-    //return ( str.match( /^[A-Za-z]+\s*(,)\s*[A-Za-z]+$/ ) ? true : false )
-    return ( str.match( /^[A-Za-z@~`!@#$%^&*()_=+\\\\';:\"\\/?>.<,-]+\s*(,)\s*[A-Za-z@~`!@#$%^&*()_=+\\\\';:\"\\/?>.<,-]+$/ ) ? true : false )
-
-},
-
-validateName = str => {
-    return ( str.match( /^[A-Z@~`!@#$%^&*()_=+\\\\';:\"\\/?>.<,-]*$/i ) ? true : false )
-
-},
+validateName = str => ( str.replace(/\s/g, "" ).match( /^[A-Za-z0-9@&~`()_=+\';:\"\\\/?>.<-]+$/ ) ? true : false ),
 
 validateAddress = str => {
     const space_split = str.split( " " )
 
     return ( validateNumeric( space_split[ 0 ] ) ? true : false )
-
-},
-
-validateCountyYear = yr => {
-    yr = parseInt( yr );
-        
-    return ( ( !isNaN( yr ) && ( yr >= 0 && yr <= new Date( ).getFullYear( ) ) ) ? true : false )
 
 },
     
@@ -100,9 +52,7 @@ validateStatePlane = inp => {
 
 },
 
-validateRings = arr => {
-    return ( arr.flat( ).filter( item => !validateStatePlane( item ) ).length > 0 ? false : true )
-},
+validateRings = arr => ( arr.flat( ).filter( item => !validateStatePlane( item ) ).length > 0 ? false : true ),
 
 validateForm = fields => {
     let valid = true
@@ -132,6 +82,5 @@ validateForm = fields => {
 
 }
 
-export { validateStreetName, validateNumeric, validateAlphaNumeric, validateSpChar, validateAtleast7, validateCNumber, validateTaxPID, 
-    validateGISID, validateOnlyAlpha, validateOwnerName, validateIntersection, validateAddress, 
-    validateCountyYear, validateLatLng, validateStatePlane, validateRings, validateForm, validateName  }
+export {validateNumeric, validateAlphaNumeric, validateSpChar, validateCNumber, validateTaxPID, 
+    validateGISID, validateOwnerName, validateIntersection, validateAddress, validateLatLng, validateStatePlane, validateRings, validateForm, validateName, validateTaxPIDMin7}

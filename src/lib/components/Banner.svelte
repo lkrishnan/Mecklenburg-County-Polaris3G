@@ -1,5 +1,5 @@
-<div class="flex flex-row w-full px-2 pt-2">
-    <div class="flex items-center grow font-bold text-4xl">Polaris 3G</div>
+<div class="hidden md:flex flex-row w-full px-2 pt-2 bg-luz">
+    <div class="flex items-center grow font-bold text-4xl">Polaris</div>
     
     <svg
         version="1.1"

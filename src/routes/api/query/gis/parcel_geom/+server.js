@@ -1,5 +1,6 @@
-import { genError, getInvalidParams } from "$lib/api.js"
-import { json2URL, arrHasAllElems } from "$lib/utils.js"
+import {genError, getInvalidParams} from "$lib/api"
+import {getGeomAsTxt} from "$lib/mapping"
+import {json2URL, arrHasAllElems, isJSON } from "$lib/utils"
 
 /** @type {import('./validate/$types').RequestHandler} */
 export const GET = async ( { url, locals, fetch } ) => {
@@ -63,7 +64,7 @@ export const GET = async ( { url, locals, fetch } ) => {
                 sql = `SELECT pid as gisid, ${params.geom == 1? "ST_AsText( shape ) as geom,": "" } ST_Area( shape ) As sqft, round(ST_x(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_x, round(ST_y(ST_PointOnSurface(shape))::NUMERIC,4) as centroid_y,
                         round(ST_x(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lon, round(ST_y(ST_PointOnSurface(ST_transform(shape,4326)))::NUMERIC,4) as centroid_lat
                         FROM parcels_py 
-                        WHERE ST_DWithin(shape, ST_GeomFromText('${params.rings}',2264), 0 )
+                        WHERE ST_DWithin(shape, ST_GeomFromText('${ ( isJSON( params.rings ) ? getGeomAsTxt( JSON.parse(params.rings) ) : params.rings )}',2264), 0 )
                         AND shape is not null`
 
             }else if( params?.nearby ){

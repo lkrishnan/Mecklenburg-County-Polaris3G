@@ -1,4 +1,4 @@
-import {mkConfig, generateCsv, download} from "export-to-csv"
+import {mkConfig, generateCsv} from "export-to-csv"
 import {genError, getInvalidParams} from "$lib/api"
 import {formatDate, formatLandArea, formatFullName2, formatDeed} from "$lib/format"
 import {getAnlyzAllowedParams} from "$lib/formhelp"

@@ -1,6 +1,6 @@
-import { json2URL } from "$lib/utils"
-import { genError, getErrorMsg } from "$lib/api.js"
-import { validateNumeric } from "$lib/validate.js"
+import {json2URL} from "$lib/utils"
+import {genError, getErrorMsg} from "$lib/api.js"
+import {validateNumeric} from "$lib/validate.js"
 
 /** @type {import('./$types').RequestHandler} */
 export const GET = async ( { url, locals, fetch } ) => {

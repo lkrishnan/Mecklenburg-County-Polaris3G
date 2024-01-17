@@ -1,177 +1,188 @@
 <div class="relative w-full bg-lienzo border-2 rounded border-primero">
-    <!-- Hamburger Button -->
-    <div class = "md:hidden absolute z-10 left-[0px] my-1 ml-1">
-        <button 
-            class="inline-flex items-center justify-center w-10 h-10 transition-colors duration-150 rounded-full fill-primero hover:fill-segundo hover:bg-luz focus:shadow-outline"
-            on:click="{(event)=>{dispatch( "leftdrawer", { leftdrawer: !leftdrawer } )}}"
-        >
-            {@html icon( "hamburger", 28, 28 )}
-        </button>
-    </div>
-    <div class = "md:hidden absolute z-1 right-[0px] my-1 mr-1">
-        <button 
-            class="inline-flex items-center justify-center w-10 h-10 transition-colors duration-150 rounded-full fill-primero hover:fill-segundo hover:bg-luz focus:shadow-outline"
-            on:click="{(event)=>{context_menu_open = !context_menu_open;}}"
-        >
-            {@html icon( "morevert", 28, 28 )}
-        </button>
+    <!-- Left Buttons -->
+    <div class = "absolute z-10 left-[0px] my-1 ml-1">
+        {#if _results_count > 1 && _results_index > -1 }
+            <button 
+                class="inline-flex items-center justify-center w-10 h-10 transition-colors duration-150 rounded-full text-lienzo bg-pop hover:bg-segundo focus:shadow-outline"
+                on:click="{(event)=>{results_index.set( -1 )}}"
+            >
+                {@html icon( "arrowback", 28, 28 )}
+            </button>
 
-        <div class="{context_menu_open ? 'absolute' : 'hidden'} right-0 z-1 mt-2 origin-top-right rounded-md bg-lienzo shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-            <ul class="bg-lienzo shadow-lg rounded-b-md border-t" >
-                {#each content_menu_list as item, i}
-                    <li>
-                        <div 
-                            on:click="{()=>handleContextChoice(item.value)}" 
-                            on:keydown="{()=>handleContextChoice(item.value)}" 
-                            role="button"
-                            tabindex="-1"
-                            class="text-todo py-2 text-sm overflow-ellipsis overflow-hidden whitespace-nowrap hover:bg-luz hover:cursor-pointer last:rounded-b-md">
-                            <span class="pr-1">{item.text}</span>
-                        </div>
-                    </li>
-                {/each}
-            </ul>
-        </div>
+        {:else if _mobile && !_dual }
+            <button 
+                class="inline-flex items-center justify-center w-10 h-10 transition-colors duration-150 rounded-full fill-primero hover:fill-segundo hover:bg-luz focus:shadow-outline"
+                on:click="{(event)=>{dual.set( !_dual )}}"
+            >
+                {@html icon( "expandmore", 28, 28 )}
+            </button>
+
+        {:else if _mobile }
+            <button 
+                class="md:hidden inline-flex items-center justify-center w-10 h-10 transition-colors duration-150 rounded-full fill-primero hover:fill-segundo hover:bg-luz focus:shadow-outline"
+                on:click="{(event)=>{dispatch( "leftdrawer", { leftdrawer: !leftdrawer } )}}"
+            >
+                {@html icon( "hamburger", 28, 28 )}
+            </button>
+        
+        {:else}
+            <div class="hidden md:inline-flex items-center justify-center w-10 h-10">
+                {@html icon( "search", 28, 28 )}
+            </div>
+        
+        {/if}
         
     </div>
-
+    
     <!-- Search Row -->
     <AutoComplete 
         placeholder="Enter address / parcel# /owner / landmark" 
-        minchar="3" spinner={spinner} go={true} nomatch={nomatch} {items} 
-        padding="md:px-2 px-12 py-1 md:pr-1 pr-11"
-        on:hit={handleHit} on:brute={handleBrute} on:query={handleQuery} on:open={handleOpen} 
+        {minchar} {spinner} go={false} {nomatch} {items} {hide_items} {value} {is_open}
+        padding="px-12 py-1 pr-1"
+        on:hit={handle.hit} on:brute={handle.brute} on:query={handle.query} on:open={handle.open} 
         
     />
     
 </div>
 
 <script>
-    import { getAPIURL } from "$lib/api"
-    import { goto } from "$app/navigation"
-    import AutoComplete from "$lib/components/AutoComplete.svelte"
-    import { srchstr2qrystr, icon } from "$lib/utils"
-    import { formatStatePlane, formatLatLng } from "$lib/format"
-    import { validateCNumber, validateAddress, validateOwnerName, validateNumeric, validateAtleast7, validateIntersection, validateLatLng, validateStatePlane, validateTaxPID } from "$lib/validate" 
-    import { createEventDispatcher } from "svelte"
+    import {getAPIURL} from "$lib/api"
+    import {goto} from "$app/navigation"
+    import {mobile, results_count, results_index, dual} from "$lib/store"
+    import {srchstr2qrystr, icon} from "$lib/utils"
+    import {formatStatePlane, formatLatLng} from "$lib/format"
+    import {validateCNumber, validateAddress, validateOwnerName, validateNumeric, validateTaxPIDMin7, validateIntersection, validateLatLng, validateStatePlane, validateTaxPID, validateName} from "$lib/validate" 
+    import {createEventDispatcher} from "svelte"
+	
+	import AutoComplete from "$lib/components/AutoComplete.svelte"
     	
-    export let leftdrawer = leftdrawer
-
+    export let leftdrawer = false
+    export let hide_items = false
+    export let value = ""
+    export let is_open = false
         	
-    // variables
+    //Store Variables
+    let _mobile,
+        _results_count,
+		_results_index,
+        _dual
+
+    //Other Variables
     let items = [ ],
         nomatch = false,
-        spinner = false,
-        is_open = false,
-        context_menu_open = false,
-        content_menu_list = [ 
-            { text: "Other Search", value: "other_search" },
-            { text: "Market Analysis", value: "market_analysis" },
-            { text: "Identify", value: "identify" }
-
-        ],
-        jump_to_open = false,
-		jump_to_items = [
-			{ idx: 0, label: "Other Search", selected: false },
-			{ idx: 1, label: "Market Analysis", selected: false },
-			{ idx: 2, label: "Identify", selected: false },
-
-		]
-
-    // constants
-    const dispatch = createEventDispatcher( ),
-    
-        handleHit = event => {
-            goto( `/${event.detail.type.toLowerCase( )}/${srchstr2qrystr( event.detail.srch_key.toString( ) )}` )
-
-        },
-
-        handleBrute = event => {
-            const srch_str = event.detail
-
-            let hit
-
-            if( validateTaxPID( srch_str ) )
-                hit = { type: "PID", srch_key: srch_str }
-            
-            else if( validateCNumber( srch_str ) )
-                hit = { type: "GISID", srch_key: srch_str }
-            
-            else if( validateStatePlane( srch_str ) ){
-                const xy = formatStatePlane( srch_str.split( "," ).map( coord => parseFloat( coord.trim( ) ).toFixed( 4 ) ) )
-                hit = { type: "XY", srch_key: xy }
-		        
-            }else if( validateLatLng( srch_str ) ){
-                const latlng = formatLatLng( srch_str.split( "," ).map( coord => parseFloat( coord.trim( ) ).toFixed( 4 ) ) )
-                hit = { type: "LATLNG", srch_key: latlng }
-		        
-            }
-
-            //standardized address search needs to be added
-
-            // propogate hit
-            if( hit )
-                goto( `/${hit.type.toLowerCase( )}/${srchstr2qrystr( hit.srch_key ) }` )
-            
-        },
-
-        handleOpen = event => {
-            is_open  = event.detail.open
-
-        },
-
-        handleQuery = async event => { // fetch matches
-            let jsons
-
-            const srch_str = event.detail.trim( ),
-                urls = [
-                    //address
-                    ...( validateAddress( srch_str ) ? [ `/api/validate/address?addr=${srch_str}` ] : [ ] ),
-                    //gisid
-                    ...( validateCNumber( srch_str ) ? [ `/api/validate/gisid?gisid=${srch_str}` ] : [ ] ),
-                    //pid
-                    ...( validateAtleast7 ? [ `/api/validate/pid?pid=${srch_str}` ] : [ ] ),
-                    //road
-                    `/api/validate/road?name=${srch_str}`,
-                    //intersection
-                    ...( validateIntersection( srch_str ) ? [ getAPIURL( "intersection", srch_str ) ] : [ ] ),
-                    //facilities
-                    ...( ( validateNumeric( srch_str ) || validateCNumber( srch_str ) ) ? [ ] : [ 
-                        `/api/validate/facility/park?name=${srch_str}`,
-                            `/api/validate/facility/library?name=${srch_str}`,
-                            `/api/validate/facility/school?name=${srch_str}`,
-                            `/api/validate/facility/business?name=${srch_str}`,
-                            `/api/validate/facility/busstop?name=${srch_str}`,
-                            `/api/validate/facility/lightrail?name=${srch_str}`,
-
-                        ] ),
-                    //owner name - fullname
-                    ...( validateOwnerName( srch_str ) ? [ getAPIURL( "owner", srch_str ) + "&exact=0" ] : [ ] ),
-            
-                ]
-
-            // Fetch Results
-            spinner = true
-            jsons = await Promise.all( urls.map( url => fetch( url ).then( resp => resp.json( ) ) ) )
-            spinner = false
-            nomatch = false
-            items = [ ].concat( ...jsons )
-                        
-            if( items.length === 0 ) nomatch = true
-
-        },
+        spinner = false
         
-        handleContextChoice = where => {
-            context_menu_open = false
+    // Constants
+    const dispatch = createEventDispatcher( ),
+        minchar = 3,
+    
+        handle = {
+            hit: event => {
+                dispatch( "reset", { msg: "" } )
+                goto( `/${event.detail.type.toLowerCase( )}/${srchstr2qrystr( event.detail.srch_key.toString( ) )}` )
 
+            },
+
+            brute: event => {
+                const srch_str = event.detail
+
+                let hit
+
+                if( validateTaxPID( srch_str ) )
+                    hit = { type: "PID", srch_key: srch_str }
+                
+                else if( validateCNumber( srch_str ) )
+                    hit = { type: "GISID", srch_key: srch_str }
+                
+                else if( validateStatePlane( srch_str ) ){
+                    const xy = formatStatePlane( srch_str.split( "," ).map( coord => parseFloat( coord.trim( ) ).toFixed( 4 ) ) )
+                    hit = { type: "XY", srch_key: xy }
+                    
+                }else if( validateLatLng( srch_str ) ){
+                    const latlng = formatLatLng( srch_str.split( "," ).map( coord => parseFloat( coord.trim( ) ).toFixed( 4 ) ) )
+                    hit = { type: "LATLNG", srch_key: latlng }
+                    
+                }
+                                
+                //standardized address search needs to be added
+
+                // propogate hit
+                if( hit ){
+                    dispatch( "reset", { msg: "" } )
+                    goto( `/${hit.type.toLowerCase( )}/${srchstr2qrystr( hit.srch_key ) }` )
+
+                }else
+                    dispatch( "error", { msg: "Enter a Valid Search String!" } )
+                    
+            },
+
+            open: event => {
+                is_open  = event.detail.open    
+
+            },
+
+            query: async event => { // fetch matches
+                let jsons
+
+                const srch_str = event.detail.trim( )
+
+                if( srch_str.length >= minchar ){
+                    const urls = [
+                            //address
+                            ...( validateAddress( srch_str ) ? [ `/api/validate/address?addr=${srch_str}` ] : [ ] ),
+                            //gisid
+                            ...( validateCNumber( srch_str ) ? [ `/api/validate/gisid?gisid=${srch_str}` ] : [ ] ),
+                            //pid
+                            ...( validateTaxPIDMin7 ? [ `/api/validate/pid?pid=${srch_str}` ] : [ ] ),
+                            //road
+                            `/api/validate/road?name=${srch_str}`,
+                            //intersection
+                            ...( validateIntersection( srch_str ) ? [ getAPIURL( "intersection", srch_str ) ] : [ ] ),
+                            //facilities
+                            ...( ( validateNumeric( srch_str ) || validateCNumber( srch_str ) ) ? [ ] : [ 
+                                `/api/validate/facility/park?name=${srch_str}`,
+                                    `/api/validate/facility/library?name=${srch_str}`,
+                                    `/api/validate/facility/school?name=${srch_str}`,
+                                    `/api/validate/facility/business?name=${srch_str}`,
+                                    `/api/validate/facility/busstop?name=${srch_str}`,
+                                    `/api/validate/facility/lightrail?name=${srch_str}`,
+
+                                ] ),
+                            //owner name - fullname
+                            ...( validateOwnerName( srch_str ) ? [ getAPIURL( "owner", srch_str ) + "&exact=0" ] : [ ] ),
+
+                            //owner name - last
+                            ...( validateName( srch_str ) ? [ getAPIURL( "ownerlast", srch_str ) + "&exact=0" ] : [ ] ),
+                    
+                        ]
+
+                    // Fetch Results
+                    spinner = true
+                    jsons = await Promise.all( urls.map( url => fetch( url ).then( resp => resp.json( ) ) ) )
+                    items = [ ].concat( ...jsons )
+
+                }else
+                    items.length = 0
+
+                nomatch = ( items.length === 0 )
+
+                if( _mobile )
+                    dispatch( "items", { items: items, srch_str: srch_str, nomatch: nomatch } )
+
+                spinner = false
+                
+            }
+            
         }
 
-    $: if( is_open ){
-        dispatch( "open", { open: true } )
+    //Subscriptions
+    dual.subscribe( value => { _dual = value } )
+    mobile.subscribe( value => { _mobile = value } )
+    results_count.subscribe( value => { _results_count = value } )
+    results_index.subscribe( value => { _results_index = value } )
 
-    }else{
-        dispatch( "open", { open: false } )
+    //Reactives
+    $:dispatch( "open", { open: is_open } )
 
-    }
 
 </script>

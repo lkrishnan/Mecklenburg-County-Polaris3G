@@ -1,8 +1,9 @@
 import {genError, getInvalidParams} from "$lib/api"
-import { concatArr } from "$lib/format"
+import {concatArr} from "$lib/format"
 import {getAnlyzAllowedParams} from "$lib/formhelp"
-import { removeArrayDups, json2URL, arrHasAllElems, filterObj } from "$lib/utils"
-import { Decimal128 } from "mongodb"
+import {getGeomAsTxt} from "$lib/mapping"
+import {removeArrayDups, json2URL, arrHasAllElems, filterObj, isJSON} from "$lib/utils"
+import {Decimal128} from "mongodb"
 
 /** @type {import('./main/$types').RequestHandler} */
 export const GET = async ( { url, locals, fetch } ) => {
@@ -30,6 +31,7 @@ export const GET = async ( { url, locals, fetch } ) => {
                 rows = await response.json( )
 
             return rows.reduce( ( acc, row ) => acc + ( acc.length > 0 ? "," : "" ) + row.gisid, "" )
+
         }
                 
     try{
@@ -55,8 +57,11 @@ export const GET = async ( { url, locals, fetch } ) => {
             if( params?.rings )
                 gisids += ( gisids.length > 0 ? "," : "" ) + await getIntersectingGISIDs( [ "rings", params.rings ] )
 
-            if( params?.nearby )
+            if( params?.nearby ){
+                
                 gisids += ( gisids.length > 0 ? "," : "" ) + await getIntersectingGISIDs( [ "nearby", params.nearby ] )
+
+            }
 
             if( params?.xy )
                 gisids += ( gisids.length > 0 ? "," : "" ) + await getIntersectingGISIDs( [ "xy", params.xy ] )

@@ -1,3 +1,5 @@
+import overlays_data from "$lib/data/overlays"
+
 const getRings = ( geomtxt ) => {
     return geomtxt
             .replace( /(\d+)(\s+)(\d+)/g, "$1&$3" )
@@ -75,6 +77,19 @@ getGeomAsTxt = rings => {
 
     } ).join( "," ) + ")"
 	
+},
+
+getToggleLayerList = ( group_name, lyr_name ) => {
+    const group_idx = overlays_data.findIndex( item => item.id === group_name ),
+    lyr_idx = overlays_data[ group_idx ].children.findIndex( item => item.id === lyr_name )
+
+    //set checkboxes in overlay list
+    overlays_data[ group_idx ].children[ lyr_idx ].checked = true
+    overlays_data[ group_idx ].checked = ( overlays_data[ group_idx ].children.filter(item => item.checked).length === overlays_data[ group_idx ].children.length )
+
+    return [ { group_idx: group_idx, lyr_idx: lyr_idx, visible: true } ]
+
 }
 
-export { getGeom, getRings, getPath, getGeomAsTxt }
+
+export { getGeom, getRings, getPath, getGeomAsTxt, getToggleLayerList }

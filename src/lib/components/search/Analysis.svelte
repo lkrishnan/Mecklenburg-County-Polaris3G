@@ -1,14 +1,14 @@
 <div
-    in:fly="{{ y: -180, duration: 1200 }}" out:fade 
-    class="absolute z-20 left-14 top-0 h-full p-2 md:w-[408px] border-r-2 bg-lienzo border-primero overflow-auto scrollbar"
+    in:fly="{_mobile ? { y: -180, duration: 1200 } : { x: -180, duration: 1200 }}" out:fly="{_mobile ? { y: 180, duration: 1200 } : { x: -180, duration: 1200 }}"
+    class="absolute z-20 left-0 md:left-[50px] top-0 h-full w-full md:w-[408px] bg-luz md:border-l overflow-auto scrollbar"
 >
-    <div class="flex flex-row items-center p-4">
-        <div class="grow font-bold text-lg">
+    <div class="flex flex-row items-center p-2 bg-primero text-lienzo">
+        <div class="grow text-md font-bold">
             {heading}
         </div>
         <div class="flex">
             <button 
-                class="p-1 border bg-lienzo border-lienzo rounded-full group relative transition-colors duration-150 hover:bg-luz hover:fill-segundo"
+                class="p-1 transition-colors duration-150 focus:shadow-outline rounded-full hover:text-primero hover:bg-lienzo"
                 on:click="{(event)=>{dispatch( "close", { close: false } )}}"
             >
                 {@html icon( "close", 24, 24 )}
@@ -17,6 +17,7 @@
         </div>
         
     </div>
+
 
     {#if show}
         <form class="p-2" 
@@ -29,8 +30,8 @@
                     Property Use
                 </label>
 
-                <Seleccionar
-                    on:hit={event=>handleHit( event, "prop_use" )} 
+                <Selecto 
+                    on:hit={event=>handleHit( event, "prop_use" )}  
                     bind:items={fields.prop_use.items} 
                     bind:selected={fields.prop_use.selected} 
 
@@ -44,7 +45,7 @@
                     Narrow Search By
                 </label>
 
-                <Seleccionar 
+                <Selecto 
                     on:hit={event=>handleHit( event, "narrow" )} 
                     bind:items={fields.narrow.items} 
                     bind:selected={fields.narrow.selected} 
@@ -60,7 +61,7 @@
                         Jurisdiction
                     </label>
 
-                    <Seleccionar
+                    <Selecto
                         on:hit={event=>handleHit( event, "juris" )} 
                         bind:items={fields.juris.items} 
                         bind:selected={fields.juris.selected} 
@@ -75,7 +76,7 @@
                         Appraisal Neighborhood Code
                     </label>
 
-                    <Seleccionar
+                    <Selecto
                         on:hit={event=>handleHit( event, "neigh_code" )} 
                         bind:items={fields.neigh_code.items} 
                         bind:selected={fields.neigh_code.selected} 
@@ -91,12 +92,27 @@
                     </label>
 
                     <div class="w-full bg-lienzo border {fields.stcode.error ? 'border-pop' : 'border-todo' } rounded" id="street_name">
-                        <AutoComplete placeholder="Required" minchar={fields.stcode.minchar} go={false}
-                            bind:spinner={fields.stcode.spinner}  bind:nomatch={fields.stcode.nomatch} 
-                            bind:items={fields.stcode.items} bind:str={fields.stcode.val}
+                        <!--<AutoComplete 
+                            placeholder="Required" 
+                            minchar={fields.stcode.minchar} spinner={fields.stcode.spinner}
+                            go={false} nomatch={fields.stcode.nomatch} 
+                            items={fields.stcode.items}
+                            value={fields.stcode.val} 
                             padding="pl-3 pr-2 py-2" buttonsize="8" 
+                            on:hit={event=>{handleHit( event, "stcode" )}}
                             on:query={event =>{handleQuery( event, "stcode" )}}
-                            on:hit={event=>{handleHit( event, "stcode" )}}/>
+
+                            />-->
+
+                        <AutoComplete 
+                            placeholder="Required" 
+                            minchar={stcode_minchar} spinner={stcode_spinner} go={false} nomatch={stcode_nomatch} items={stcode_items} hide_items={false} is_open={false}
+                            value={fields.stcode.value}
+                            padding="pl-3 pr-2 py-2" buttonsize="8"
+                            on:hit={event=>{handleHit( event, "stcode" )}}
+                            on:query={event =>{handleQuery( event, "stcode" )}}
+
+                        />
                     </div>
                     <p class="{fields.stcode.error ? '' : 'hidden' } mt-2 ml-2 text-pop text-xs italic">{fields.stcode.error}</p>
                 </div>
@@ -127,7 +143,7 @@
                     <span class="text-oro font-normal">(Not all parcels are assessed by acres)</span>
                 </label>
 
-                <Seleccionar
+                <Selecto
                     on:hit={event=>handleHit( event, "parcel_acreage" )} 
                     bind:items={fields.parcel_acreage.items} 
                     bind:selected={fields.parcel_acreage.selected} 
@@ -385,7 +401,7 @@
                             Bedrooms
                         </label>
 
-                        <Seleccionar
+                        <Selecto
                             on:hit={event=>handleHit( event, "bedroom" )} 
                             bind:items={fields.bedroom.items} 
                             bind:selected={fields.bedroom.selected} 
@@ -399,7 +415,7 @@
                             Full Baths
                         </label>
 
-                        <Seleccionar
+                        <Selecto
                             on:hit={event=>handleHit( event, "fullbath" )} 
                             bind:items={fields.fullbath.items} 
                             bind:selected={fields.fullbath.selected} 
@@ -413,7 +429,7 @@
                             Exterior Frame
                         </label>
 
-                        <Seleccionar
+                        <Selecto
                             on:hit={event=>handleHit( event, "exterior_frame" )} 
                             bind:items={fields.exterior_frame.items} 
                             bind:selected={fields.exterior_frame.selected} 
@@ -427,7 +443,7 @@
                             Story Type
                         </label>
 
-                        <Seleccionar
+                        <Selecto
                             on:hit={event=>handleHit( event, "exterior_frame" )} 
                             bind:items={fields.story_type.items} 
                             bind:selected={fields.story_type.selected} 
@@ -465,48 +481,66 @@
     
     {/if}
     
-
 </div>
 
 <script>
-    import { createEventDispatcher } from "svelte"
-    import { fade, fly } from "svelte/transition"
-    import { onMount} from "svelte"
-    import { goto } from "$app/navigation"
-    import { getAPIURL } from "$lib/api"
-    import { formatCommas } from "$lib/format"
+    //Svelte Libraries
+    import {createEventDispatcher} from "svelte"
+    import {fly} from "svelte/transition"
+    import {onMount} from "svelte"
+    import {goto} from "$app/navigation"
+
+    //Store
+    import {mobile} from "$lib/store"
+
+    //Custom Libraries
+    import {getAPIURL} from "$lib/api"
+    import {formatCommas} from "$lib/format"
     import {getAnlyzFieldsInit} from "$lib/formhelp"
-    import { messenger } from "$lib/store"
-    import { icon, json2URL, filterObj } from "$lib/utils"
-    import { validateForm, validateNumeric } from "$lib/validate"
+    import {icon, json2URL, filterObj} from "$lib/utils"
+    import {validateForm} from "$lib/validate"
     import AutoComplete from "$lib/components/AutoComplete.svelte"
     import DoubleRangeSlider from "$lib/components/DoubleRangeSlider.svelte"
-    import Seleccionar from "$lib/components/Seleccionar.svelte"
+    import Selecto from "$lib/components/Selecto.svelte"
 
     export let heading = ""
     export let fields = null
     export let list = null 
     export let gisid = null
     export let neigh_code = null
-        
+
+    //Store Variables
+	let _mobile
+			
+    // Other Variables
     let show = true,
         bldg_info = true,
         bed_bath_info = true
-    
 
+    //STCODE Autocomplete
+    let stcode_items = [ ],
+        stcode_nomatch = false,
+        stcode_spinner = false
+    
     const dispatch = createEventDispatcher( ),
+        stcode_minchar = 3,
     
         handleQuery = async ( event, field ) => { // fetch matches
-            // Fetch Results
-            fields[ field ].spinner = true
+            const srch_str = event.detail.trim( )
 
-            const response = await fetch( `${getAPIURL( field, fields[ field ].val )}` ), 
-                json = ( response.ok ? await response.json( ) : [ ] )
+            if( srch_str.length >= stcode_minchar ){
+                // Fetch Results
+                stcode_spinner = true
 
-            fields[ field ] = { ...fields[ field ], items:json, spinner: false, nomatch: false }
+                const response = await fetch( `${getAPIURL( field, srch_str )}` )
+                    
+                stcode_items = ( response.ok ? await response.json( ) : [ ] )
+                
+            }else
+                stcode_items.length = 0
 
-            if( fields[ field ].items.length === 0 ) 
-                fields[ field ].nomatch = true
+            stcode_nomatch = ( stcode_items.length === 0 )
+            stcode_spinner = false
 
         }, 
         
@@ -523,7 +557,8 @@
                     break
 
                 case "stcode":
-                    fields[ field ].value = event.detail.srch_key
+                    fields[ field ].val = event.detail.srch_key
+                    fields[ field ].value = event.detail.value
                     break
 
                 case "parcel_acreage":
@@ -579,10 +614,7 @@
 
                 Object.keys( fields ).forEach( field => {
                     if( fields[ field ].use ){
-                        if( fields[ field ].hasOwnProperty( "value" ) && fields[ field ].value )
-                            query_params[ field ] = fields[ field ].value
-
-                        else if( fields[ field ].hasOwnProperty( "val" ) && fields[ field ].val )
+                        if( fields[ field ].hasOwnProperty( "val" ) && fields[ field ].val )
                             query_params[ field ] = fields[ field ].val
 
                         else if( fields[ field ].hasOwnProperty( "min" ) && fields[ field ].hasOwnProperty( "max" ) && fields[ field ].min && fields[ field ].max ){
@@ -606,6 +638,8 @@
             fields = getAnlyzFieldsInit( list, gisid, neigh_code )
 
         }
+
+    mobile.subscribe( value => { _mobile = value } )
  
     onMount( ( ) => {
         //show = !Object.values( list ).filter( val => val.length === 0 ).length

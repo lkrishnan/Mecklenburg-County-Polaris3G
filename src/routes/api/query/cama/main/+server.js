@@ -1,6 +1,6 @@
-import { genError, getInvalidParams } from "$lib/api.js"
-import { removeArrayDups, json2URL, arrHasAllElems } from "$lib/utils.js"
-import { concatArr } from "$lib/format"
+import {genError, getInvalidParams} from "$lib/api.js"
+import {removeArrayDups, json2URL, arrHasAllElems} from "$lib/utils.js"
+import {concatArr} from "$lib/format"
 
 /** @type {import('./$types').RequestHandler} */
 export const GET = async ( { url, locals, fetch } ) => {

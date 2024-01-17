@@ -1,4 +1,4 @@
-import { genError, getInvalidParams } from "$lib/api.js"
+import {genError, getInvalidParams} from "$lib/api.js"
 
 /** @type {import('./$types').RequestHandler} */
 export const GET = async ( { url, locals } ) => {
@@ -50,9 +50,9 @@ export const GET = async ( { url, locals } ) => {
                                     ELSE NULL`
 
                         case "fullname":
-                            return `WHEN ( ownr.Owner1LastName like '${lastname}%' AND ownr.Owner1FirstName like '${firstname}%' ) THEN LTRIM(RTRIM(ownr.Owner1LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner1FirstName))
-                                    WHEN ( ownr.Owner2LastName like '${lastname}%' AND ownr.Owner2FirstName like '${firstname}%' ) THEN LTRIM(RTRIM(ownr.Owner2LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner2FirstName))
-                                    WHEN ( ownr.Owner3LastName like '${lastname}%' AND ownr.Owner3FirstName like '${firstname}%' ) THEN LTRIM(RTRIM(ownr.Owner3LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner3FirstName))
+                            return `WHEN ( ownr.Owner1LastName like '${lastname}%' AND ownr.Owner1FirstName like '${firstname}%' AND LEN(LTRIM(RTRIM(ownr.Owner1FirstName)))>0 ) THEN LTRIM(RTRIM(ownr.Owner1LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner1FirstName))
+                                    WHEN ( ownr.Owner2LastName like '${lastname}%' AND ownr.Owner2FirstName like '${firstname}%' AND LEN(LTRIM(RTRIM(ownr.Owner2FirstName)))>0  ) THEN LTRIM(RTRIM(ownr.Owner2LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner2FirstName))
+                                    WHEN ( ownr.Owner3LastName like '${lastname}%' AND ownr.Owner3FirstName like '${firstname}%' AND LEN(LTRIM(RTRIM(ownr.Owner3FirstName)))>0  ) THEN LTRIM(RTRIM(ownr.Owner3LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner3FirstName))
                                     ELSE NULL`
 
                     }               

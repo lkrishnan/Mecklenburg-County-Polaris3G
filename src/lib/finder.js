@@ -19,17 +19,10 @@ export default async function finder( filter, fetch=null ){
                     ...( r?.mat ? r.mat[ ( filter?.matid ? r.mat.findIndex( m => m.matid === filter.matid ) : 0 ) ] : { } )
                 } ) )
 
-            if( rows.length > 0 ){
-                // Add Graphic
-                /*if( filter?.buffer )
-                    messenger.set( [ { type: "add_buffer_graphic", gisid: filter.gisid, buffer: filter.buffer } ] )
-
-                else if( filter?.stcode ) 
-                    messenger.set( [ { type: "add_road_graphic", stcode: filter.stcode } ] )*/
-
+            if( rows.length > 0 )
                 return rows
 
-            }else
+            else
                 return [ ]
 
         }else

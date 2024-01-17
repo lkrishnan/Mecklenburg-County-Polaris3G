@@ -94,17 +94,17 @@ const getPrelimPlans = async ( ) => {
 
             stcode: {
                 val: null,
-                value: null,
+                value: "",
                 rules: [
                     v => ( v ? null : "Street Name is required" ),
-                    v => ( v.trim( ).length > 0 && v.trim( ).length < 76 ? null : "Street Name must be within 75 characters" ),
                 ], 
-                minchar: 2,
+                minchar: 3,
                 items: [ ],
                 nomatch: false,
                 spinner: false,
                 select_ctrl: false,
                 use: false,
+                is_open: false,
 
             },
 
@@ -375,8 +375,11 @@ const getPrelimPlans = async ( ) => {
     
                 },
                 land_size_acreage: {
-                    table: "(SELECT parcels.LandSize FROM dbo.Polaris_AllParceldata as parcels WHERE parcels.LandUnitDescription in ( 'ACRE', 'CALC AREA', 'SMALL ACRE' ) UNION SELECT parcels.LandSize/43560 FROM dbo.Polaris_AllParceldata as parcels WHERE parcels.LandUnitDescription in ( 'SQUARE FEET' )) as np",
-                    columns: "min(np.LandSize) as land_size_min, max(np.LandSize) as land_size_max",
+                    //table: "(SELECT parcels.LandSize FROM dbo.Polaris_AllParceldata as parcels WHERE parcels.LandUnitDescription in ( 'ACRE', 'CALC AREA', 'SMALL ACRE' ) UNION SELECT parcels.LandSize/43560 FROM dbo.Polaris_AllParceldata as parcels WHERE parcels.LandUnitDescription in ( 'SQUARE FEET' )) as np",
+                    //columns: "min(np.LandSize) as land_size_min, max(np.LandSize) as land_size_max",
+                    table: "dbo.Polaris_AllParceldata",
+                    columns: "min(LandSize/(IIF(LandUnitDescription in ( 'SQUARE FEET' ), 43560, 1))) as land_size_min, max(LandSize/(IIF(LandUnitDescription in ( 'SQUARE FEET' ), 43560, 1))) as land_size_max",
+                    filter: "LandUnitDescription in ( 'ACRE', 'CALC AREA', 'SMALL ACRE', 'SQUARE FEET' )"
     
                 },
                 land_size_no_acreage: {

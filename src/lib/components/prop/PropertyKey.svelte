@@ -1,6 +1,28 @@
 <div class="mb-4 border border-primero bg-luz rounded shadow-lg">
-    <Heading title="Property Key" iconname="key" />
+    <Heading title="Property Key" iconname="key"  />
 
+    {#if _mobile && _dual }
+        <div class="absolute top-0 right-0 mx-3 my-1">
+            <button 
+                class="p-1.5 fill-lienzo rounded-full group hover:bg-lienzo hover:text-primero hover:fill-primero"
+                on:click="{dual.set( !_dual )}"
+            >
+                {@html icon( "expandless", 24, 24 )}
+                    
+            </button>
+
+            <button 
+                class="p-1.5 fill-lienzo rounded-full group hover:bg-lienzo hover:text-primero hover:fill-primero"
+                on:click="{datadrawer.set( !_datadrawer )}"
+            >
+                {@html icon( "expandmore", 24, 24 )}
+                    
+            </button>
+            
+        </div>
+    
+    {/if}
+    
     <!-- PID and GISID -->
     <table class="w-full text-left mb-2">
         <thead>
@@ -90,7 +112,7 @@
         <thead class="text-sm font-normal">
             <tr class="border-b border-primary">
                 <th class="px-4 py-2">
-                    Mailing Address (Tax Bill)
+                    Tax Billing Address
                 </th>
             </tr>
         </thead>
@@ -110,7 +132,7 @@
         </div>
         
         {#if show}
-            <div in:fly="{{ y: -50, duration: 2000 }}" out:fly="{{ y: -50, duration: 2000 }}">
+            <div in:fly="{{ y: -50, duration: 750 }}" out:fly="{{ y: -50, duration: 750 }}">
                 {#if last_quick_btn === "circle"}
                     <form class="p-2" 
                         on:submit|preventDefault={handleBuffer}
@@ -153,8 +175,8 @@
     import {onMount} from "svelte"
     import {goto} from "$app/navigation"
     import {fly} from "svelte/transition"
-    import {messenger} from "$lib/store.js"    
-    import {srchstr2qrystr} from "$lib/utils"
+    import {messenger, mobile, dual, datadrawer} from "$lib/store.js"    
+    import {srchstr2qrystr, icon} from "$lib/utils"
     import {validateForm, validateNumeric} from "$lib/validate"
     import BuildingPhoto from "$lib/components/BuildingPhoto.svelte"
     import Heading from "$lib/components/Heading.svelte"
@@ -176,6 +198,12 @@
     export let mailing_addr = null
     export let owners = [ ]
 
+    //Store Variables
+    let _mobile,
+        _dual,
+        _datadrawer
+
+    //Other Variables
     let photo = { photo_url: null, photo_date: null, },
         links = [ ],
         issues = [ 
@@ -201,6 +229,8 @@
         },
         mounted = false,
         show = false
+        
+        
 
         const handleHit = event => {
             goto( `/address/${srchstr2qrystr( event.detail.matid )}` )
@@ -272,6 +302,8 @@
 
                 show = false
 
+                //ootha.scrollIntoView();
+
             }
             
         }
@@ -280,6 +312,10 @@
         mounted = true
         
     } )
+
+    dual.subscribe( value => { _dual = value })
+    mobile.subscribe( value => { _mobile = value })
+    datadrawer.subscribe( value => { _datadrawer = value } )
 
     //reactives
     $: { handleInfoChange( pid, gisid, matid, address, mats, lat, lng, x, y, mailing_addr, owners, mounted ) }
