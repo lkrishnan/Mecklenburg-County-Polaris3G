@@ -1,6 +1,6 @@
 {
-	"name": "Polaris3G",
-	"version": "0.0.1",
+	"name": "Polaris",
+	"version": "4.0",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
