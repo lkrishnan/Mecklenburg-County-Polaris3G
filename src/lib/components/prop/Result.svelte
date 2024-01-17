@@ -200,11 +200,3 @@
         }
 
 </script>
-
-<style>
-	svg { 
-        transition: transform 0.2s ease-in;
-        transform: rotate(0.25turn);
-    }
-    [aria-expanded=true] svg { transform: rotate(0.75turn); }
-</style>

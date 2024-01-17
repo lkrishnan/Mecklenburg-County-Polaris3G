@@ -262,7 +262,7 @@
 		</div>
 		
 		<main 
-			class="{(search_active || ( !_datadrawer && $page.status < 404 ) && _mobile ) ? 'hidden' : ''} 
+			class="{(( search_active || ( !_datadrawer && $page.status < 404 ) ) && _mobile ) ? 'hidden' : ''} 
 					{( _mobile && _dual ? ( $page.status < 404 ? 'fixed h-2/4 bottom-0 w-full' : 'fixed bottom-0 w-full' ) : '' )}"
 			on:touchmove={handle.touch_move}
 			on:touchend={handle.touch_end}
