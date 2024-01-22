@@ -1,4 +1,5 @@
-import {genError, getInvalidParams} from "$lib/api.js"
+import {genError, getInvalidParams} from "$lib/api"
+import {pg_escape} from "$lib/utils"
 
 /** @type {import('./validate/$types').RequestHandler} */
 export const GET = async ( { url, locals } ) => {
@@ -13,7 +14,7 @@ export const GET = async ( { url, locals } ) => {
                         round(ST_X(ST_Transform(shape, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(shape, 4326))::NUMERIC,4) as lat, 
                         company as name, address, city, state, (zip::INTEGER)::text as zip, company as srch_key
                         FROM businesswise_businesses_pt
-                        WHERE company ~* $$${name}$$
+                        WHERE company ~* $$${pg_escape( name )}$$
                         LIMIT 5`,
                 result = await gis_pool.query( sql )
 

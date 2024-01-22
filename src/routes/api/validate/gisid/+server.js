@@ -1,4 +1,4 @@
-import {genError} from "$lib/api.js"
+import {genError, getInvalidParams} from "$lib/api"
 
 /** @type {import('./validate/$types').RequestHandler} */
 export const GET = async ( { url, locals } ) => {

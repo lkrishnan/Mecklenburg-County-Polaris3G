@@ -1,5 +1,12 @@
 <div class="hidden md:flex flex-row w-full px-2 pt-2 bg-luz">
-    <div class="flex items-center grow font-bold text-4xl">Polaris</div>
+    <div class="flex grow items-center font-bold">
+        <div>
+            <span class="text-4xl">Polaris</span>
+            <span class="text-sm">v4.0</span>
+
+        </div>
+        
+</div>
     
     <svg
         version="1.1"

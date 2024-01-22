@@ -3,7 +3,7 @@
 import {error} from "@sveltejs/kit"
 import finder from "$lib/finder"
 import {qrystr2srchstr} from "$lib/utils"
-import {validateSpChar,validateAddress} from "$lib/validate" 
+import {validateSpChar, validateNumeric} from "$lib/validate" 
 
 export async function load( {fetch, params, route, url} ){
     const srch_str = qrystr2srchstr( params.key ),
@@ -11,8 +11,8 @@ export async function load( {fetch, params, route, url} ){
 
     if( srch_str.length === 0 )
         throw error( 404, { message: `Polaris 3G can't find anything. Enter a valid Address` } )
-    
-    if( !validateAddress( srch_str ) )
+
+    if( !validateNumeric( srch_str ) )
         throw error( 404, { message: `Polaris 3G can't find Address: ${srch_str}` } )
 
     const hit = { type: srch_type, matid: srch_str, page: 1 },

@@ -3,7 +3,7 @@
     <div class = "absolute z-10 left-[0px] my-1 ml-1">
         {#if _results_count > 1 && _results_index > -1 }
             <button 
-                class="inline-flex items-center justify-center w-10 h-10 transition-colors duration-150 rounded-full text-lienzo bg-pop hover:bg-segundo focus:shadow-outline"
+                class="inline-flex items-center justify-center w-10 h-10 transition-colors duration-150 rounded-full text-pop hover:text-segundo hover:bg-luz focus:shadow-outline"
                 on:click="{(event)=>{results_index.set( -1 )}}"
             >
                 {@html icon( "arrowback", 28, 28 )}
@@ -51,7 +51,7 @@
     import {mobile, results_count, results_index, dual} from "$lib/store"
     import {srchstr2qrystr, icon} from "$lib/utils"
     import {formatStatePlane, formatLatLng} from "$lib/format"
-    import {validateCNumber, validateAddress, validateOwnerName, validateNumeric, validateTaxPIDMin7, validateIntersection, validateLatLng, validateStatePlane, validateTaxPID, validateName} from "$lib/validate" 
+    import {validateCNumber, validateAddress, validateOwnerName, validateTaxPIDMin7, validateIntersection, validateLatLng, validateStatePlane, validateTaxPID, validateName, validateRoad} from "$lib/validate" 
     import {createEventDispatcher} from "svelte"
 	
 	import AutoComplete from "$lib/components/AutoComplete.svelte"
@@ -130,30 +130,33 @@
                     const urls = [
                             //address
                             ...( validateAddress( srch_str ) ? [ `/api/validate/address?addr=${srch_str}` ] : [ ] ),
+
+                            //pid
+                            ...( validateTaxPIDMin7( srch_str ) ? [ `/api/validate/pid?pid=${srch_str}` ] : [ ] ),
+
                             //gisid
                             ...( validateCNumber( srch_str ) ? [ `/api/validate/gisid?gisid=${srch_str}` ] : [ ] ),
-                            //pid
-                            ...( validateTaxPIDMin7 ? [ `/api/validate/pid?pid=${srch_str}` ] : [ ] ),
+                            
                             //road
-                            `/api/validate/road?name=${srch_str}`,
+                            ...( validateRoad( srch_str ) ?[ getAPIURL( "road", srch_str ) ] : [ ] ),
+
                             //intersection
                             ...( validateIntersection( srch_str ) ? [ getAPIURL( "intersection", srch_str ) ] : [ ] ),
-                            //facilities
-                            ...( ( validateNumeric( srch_str ) || validateCNumber( srch_str ) ) ? [ ] : [ 
-                                `/api/validate/facility/park?name=${srch_str}`,
-                                    `/api/validate/facility/library?name=${srch_str}`,
-                                    `/api/validate/facility/school?name=${srch_str}`,
-                                    `/api/validate/facility/business?name=${srch_str}`,
-                                    `/api/validate/facility/busstop?name=${srch_str}`,
-                                    `/api/validate/facility/lightrail?name=${srch_str}`,
 
-                                ] ),
                             //owner name - fullname
                             ...( validateOwnerName( srch_str ) ? [ getAPIURL( "owner", srch_str ) + "&exact=0" ] : [ ] ),
 
-                            //owner name - last
-                            ...( validateName( srch_str ) ? [ getAPIURL( "ownerlast", srch_str ) + "&exact=0" ] : [ ] ),
-                    
+                            ...( validateName( srch_str ) ?[ 
+                                    getAPIURL( "ownerlast", srch_str ) + "&exact=0", //owner name - last
+                                    getAPIURL( "park", srch_str ), //park
+                                    getAPIURL( "school", srch_str ), //school
+                                    getAPIURL( "library", srch_str ), //library
+                                    getAPIURL( "business", srch_str ), //busstop
+                                    getAPIURL( "lightrail", srch_str ), //lightrail
+                                    getAPIURL( "busstop", srch_str ), //busstop
+                                    
+                                ] : [ ] ),
+                            
                         ]
 
                     // Fetch Results

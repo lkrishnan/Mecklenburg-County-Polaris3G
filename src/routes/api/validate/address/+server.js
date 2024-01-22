@@ -1,5 +1,5 @@
-import {genError, getErrorMsg} from "$lib/api.js"
-import {validateNumeric} from "$lib/validate.js"
+import {genError, getErrorMsg} from "$lib/api"
+import {validateNumeric} from "$lib/validate"
 
 /** @type {import('./$types').RequestHandler} */
 export const GET = async ( { url, locals, fetch } ) => {

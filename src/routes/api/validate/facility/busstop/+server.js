@@ -1,3 +1,6 @@
+import {genError, getInvalidParams} from "$lib/api"
+import {pg_escape} from "$lib/utils"
+
 /** @type {import('./validate/$types').RequestHandler} */
 export const GET = async ( { url, locals } ) => {
     let response, status = 200
@@ -11,9 +14,9 @@ export const GET = async ( { url, locals } ) => {
                         round(ST_X(ST_Transform(shape, 4326))::NUMERIC,4) as lng, round(ST_Y(ST_Transform(shape, 4326))::NUMERIC,4) as lat,
                         stopdesc as busstop, routes, stopdesc as srch_key
                         from cats_busstops_pt
-                        where stopdesc ~* $$${name}$$
+                        where stopdesc ~* $$${pg_escape( name )}$$
                         LIMIT 5`,
-                        result = await gis_pool.query( sql )
+                result = await gis_pool.query( sql )
 
             response = result.rows
                 

@@ -1,9 +1,9 @@
-<div class="mb-4 border border-primero bg-luz  rounded shadow-lg">
+<div class="mb-4 border border-primero bg-luz rounded shadow-lg">
     <Heading title="Land Analysis" iconname="piechart" />
     
-    <div class="p-2 flex flex-col max-w-md">
+    <div class="flex flex-col p-2">
         <Selecto on:hit={handleHit} items={items} selected={selected} />
-        <div class="pt-2">
+        <div class="flex justify-center pt-2">
             {#if datasets.length > 0 }
                 <PieChart labels={labels} datasets={datasets} />
 

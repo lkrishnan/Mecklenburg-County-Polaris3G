@@ -1,4 +1,7 @@
-<canvas bind:this={chart_canvas} />
+<div class="max-w-[240px]">
+    <canvas bind:this={chart_canvas} />
+</div>
+
 
 <script>
     import { onMount } from "svelte"

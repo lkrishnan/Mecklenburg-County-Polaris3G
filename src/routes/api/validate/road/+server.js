@@ -1,5 +1,5 @@
-import {error} from "@sveltejs/kit"
-import {json2URL} from "$lib/utils"
+import {genError, getInvalidParams} from "$lib/api"
+import {pg_escape} from "$lib/utils"
 
 /** @type {import('./$types').RequestHandler} */
 export const GET = async ( { url, locals, fetch } ) => {
@@ -38,7 +38,7 @@ export const GET = async ( { url, locals, fetch } ) => {
                             WHEN municipality = 'STAL' THEN 'STALLINGS'
                             WHEN municipality = 'MECK' THEN 'MECKLENBURG'
                             ELSE ''
-                        END ~* $$${name}$$
+                        END ~* $$${pg_escape( name )}$$
                     LIMIT 5`,
                 result = await gis_pool.query( sql )
 

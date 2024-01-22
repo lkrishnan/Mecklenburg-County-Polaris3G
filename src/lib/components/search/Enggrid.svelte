@@ -4,7 +4,7 @@
         <div class = "absolute z-10 left-[0px] my-1 ml-1">
             {#if _results_count > 1 && _results_index > -1 }
                 <button 
-                    class="inline-flex items-center justify-center w-10 h-10 transition-colors duration-150 rounded-full fill-primero hover:fill-segundo hover:bg-luz focus:shadow-outline"
+                    class="inline-flex items-center justify-center w-10 h-10 transition-colors duration-150 rounded-full text-pop hover:text-segundo hover:bg-luz focus:shadow-outline"
                     on:click="{(event)=>{results_index.set( -1 )}}"
                 >
                     {@html icon( "arrowback", 28, 28 )}

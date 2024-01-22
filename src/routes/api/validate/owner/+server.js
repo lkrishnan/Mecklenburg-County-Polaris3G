@@ -1,4 +1,5 @@
-import {genError, getInvalidParams} from "$lib/api.js"
+import {genError, getInvalidParams} from "$lib/api"
+import {odbc_escape} from "$lib/utils"
 
 /** @type {import('./$types').RequestHandler} */
 export const GET = async ( { url, locals } ) => {
@@ -16,21 +17,21 @@ export const GET = async ( { url, locals } ) => {
             // Determine Filter
             if( lastname && firstname ){
                 if( exact > 0 )
-                    filter.push( `( ( ownr.Owner1LastName = '${lastname}' AND ownr.Owner1FirstName = '${firstname}' ) OR ( ownr.Owner2LastName = '${lastname}' AND ownr.Owner2FirstName = '${firstname}' ) OR ( ownr.Owner3LastName = '${lastname}' AND ownr.Owner3FirstName = '${firstname}' ) )` )
+                    filter.push( `( ( ownr.Owner1LastName = '${odbc_escape(lastname)}' AND ownr.Owner1FirstName = '${odbc_escape(firstname)}' ) OR ( ownr.Owner2LastName = '${odbc_escape(lastname)}' AND ownr.Owner2FirstName = '${odbc_escape(firstname)}' ) OR ( ownr.Owner3LastName = '${odbc_escape(lastname)}' AND ownr.Owner3FirstName = '${odbc_escape(firstname)}' ) )` )
                 else
-                    filter.push( `( ( ownr.Owner1LastName like '${lastname}%' AND ownr.Owner1FirstName like '${firstname}%' ) OR ( ownr.Owner2LastName like '${lastname}%' AND ownr.Owner2FirstName like '${firstname}%' ) OR ( ownr.Owner3LastName like '${lastname}%' AND ownr.Owner3FirstName like '${firstname}%' ) )` )
+                    filter.push( `( ( ownr.Owner1LastName like '${odbc_escape(lastname)}%' AND ownr.Owner1FirstName like '${odbc_escape(firstname)}%' ) OR ( ownr.Owner2LastName like '${odbc_escape(lastname)}%' AND ownr.Owner2FirstName like '${odbc_escape(firstname)}%' ) OR ( ownr.Owner3LastName like '${odbc_escape(lastname)}%' AND ownr.Owner3FirstName like '${odbc_escape(firstname)}%' ) )` )
 
             }else if( lastname ){
                 if( exact > 0 )
-                    filter.push( `ownr.Owner1LastName = '${lastname}' OR ownr.Owner2LastName = '${lastname}' OR ownr.Owner3LastName = '${lastname}'` )
+                    filter.push( `ownr.Owner1LastName = '${odbc_escape(lastname)}' OR ownr.Owner2LastName = '${odbc_escape(lastname)}' OR ownr.Owner3LastName = '${odbc_escape(lastname)}'` )
                 else
-                    filter.push( `ownr.Owner1LastName like '${lastname}%' OR ownr.Owner2LastName like '${lastname}%' OR ownr.Owner3LastName like '${lastname}%'` )
+                    filter.push( `ownr.Owner1LastName like '${odbc_escape(lastname)}%' OR ownr.Owner2LastName like '${odbc_escape(lastname)}%' OR ownr.Owner3LastName like '${odbc_escape(lastname)}%'` )
 
             }else if( firstname ){
                 if( exact > 0 )
-                    filter.push( `ownr.Owner1FirstName = '${firstname}' OR ownr.Owner2FirstName = '${firstname}' OR ownr.Owner3FirstName = '${firstname}'` )
+                    filter.push( `ownr.Owner1FirstName = '${odbc_escape(firstname)}' OR ownr.Owner2FirstName = '${odbc_escape(firstname)}' OR ownr.Owner3FirstName = '${odbc_escape(firstname)}'` )
                 else
-                    filter.push( `ownr.Owner1FirstName like '${firstname}%' OR ownr.Owner2FirstName like '${firstname}%' OR ownr.Owner3FirstName like '${firstname}%'` )
+                    filter.push( `ownr.Owner1FirstName like '${odbc_escape(firstname)}%' OR ownr.Owner2FirstName like '${odbc_escape(firstname)}%' OR ownr.Owner3FirstName like '${odbc_escape(firstname)}%'` )
             
             }
 
@@ -38,45 +39,50 @@ export const GET = async ( { url, locals } ) => {
                 getCaseBlock = ( val ) => {
                     switch( val ){
                         case "lastname":
-                                return `WHEN ( ownr.Owner1LastName like '${lastname}%' ) THEN LTRIM(RTRIM(ownr.Owner1LastName))
-                                        WHEN ( ownr.Owner2LastName like '${lastname}%' ) THEN LTRIM(RTRIM(ownr.Owner2LastName))
-                                        WHEN ( ownr.Owner3LastName like '${lastname}%' ) THEN LTRIM(RTRIM(ownr.Owner3LastName))
+                                return `WHEN ( ownr.Owner1LastName like '${odbc_escape(lastname)}%' ) THEN LTRIM(RTRIM(ownr.Owner1LastName))
+                                        WHEN ( ownr.Owner2LastName like '${odbc_escape(lastname)}%' ) THEN LTRIM(RTRIM(ownr.Owner2LastName))
+                                        WHEN ( ownr.Owner3LastName like '${odbc_escape(lastname)}%' ) THEN LTRIM(RTRIM(ownr.Owner3LastName))
                                         ELSE NULL`
                         
                         case "firstname":
-                            return `WHEN ( ownr.Owner1FirstName like '${firstname}%' ) THEN LTRIM(RTRIM(ownr.Owner1FirstName))
-                                    WHEN ( ownr.Owner2FirstName like '${firstname}%' ) THEN LTRIM(RTRIM(ownr.Owner2FirstName))
-                                    WHEN ( ownr.Owner3FirstName like '${firstname}%' ) THEN LTRIM(RTRIM(ownr.Owner3FirstName))
+                            return `WHEN ( ownr.Owner1FirstName like '${odbc_escape(firstname)}%' ) THEN LTRIM(RTRIM(ownr.Owner1FirstName))
+                                    WHEN ( ownr.Owner2FirstName like '${odbc_escape(firstname)}%' ) THEN LTRIM(RTRIM(ownr.Owner2FirstName))
+                                    WHEN ( ownr.Owner3FirstName like '${odbc_escape(firstname)}%' ) THEN LTRIM(RTRIM(ownr.Owner3FirstName))
                                     ELSE NULL`
 
                         case "fullname":
-                            return `WHEN ( ownr.Owner1LastName like '${lastname}%' AND ownr.Owner1FirstName like '${firstname}%' AND LEN(LTRIM(RTRIM(ownr.Owner1FirstName)))>0 ) THEN LTRIM(RTRIM(ownr.Owner1LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner1FirstName))
-                                    WHEN ( ownr.Owner2LastName like '${lastname}%' AND ownr.Owner2FirstName like '${firstname}%' AND LEN(LTRIM(RTRIM(ownr.Owner2FirstName)))>0  ) THEN LTRIM(RTRIM(ownr.Owner2LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner2FirstName))
-                                    WHEN ( ownr.Owner3LastName like '${lastname}%' AND ownr.Owner3FirstName like '${firstname}%' AND LEN(LTRIM(RTRIM(ownr.Owner3FirstName)))>0  ) THEN LTRIM(RTRIM(ownr.Owner3LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner3FirstName))
+                            return `WHEN ( ownr.Owner1LastName like '${odbc_escape(lastname)}%' AND ownr.Owner1FirstName like '${odbc_escape(firstname)}%' AND LEN(LTRIM(RTRIM(ownr.Owner1FirstName)))>0 ) THEN LTRIM(RTRIM(ownr.Owner1LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner1FirstName))
+                                    WHEN ( ownr.Owner2LastName like '${odbc_escape(lastname)}%' AND ownr.Owner2FirstName like '${odbc_escape(firstname)}%' AND LEN(LTRIM(RTRIM(ownr.Owner2FirstName)))>0  ) THEN LTRIM(RTRIM(ownr.Owner2LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner2FirstName))
+                                    WHEN ( ownr.Owner3LastName like '${odbc_escape(lastname)}%' AND ownr.Owner3FirstName like '${odbc_escape(firstname)}%' AND LEN(LTRIM(RTRIM(ownr.Owner3FirstName)))>0  ) THEN LTRIM(RTRIM(ownr.Owner3LastName)) + ', ' + LTRIM(RTRIM(ownr.Owner3FirstName))
                                     ELSE NULL`
 
                     }               
 
                 },
-                sql = {
-                    "lastname": `SELECT top 5 CASE ${getCaseBlock( 'lastname' )} END as value, 'OWNERLAST' as type, CASE ${getCaseBlock( 'lastname' )} END as srch_key
-                                    FROM Assess50Mecklenburg.dbo.Polaris_Owners as ownr
-                                    WHERE ${filter.join( " and " )}
-                                    GROUP BY CASE ${getCaseBlock( 'lastname' )} END`,
+                getSQL = typ => {
+                    switch( typ ){
+                        case "lastname":
+                            return `SELECT top 5 CASE ${getCaseBlock( 'lastname' )} END as value, 'OWNERLAST' as type, CASE ${getCaseBlock( 'lastname' )} END as srch_key
+                                        FROM Assess50Mecklenburg.dbo.Polaris_Owners as ownr
+                                        WHERE ${filter.join( " and " )}
+                                        GROUP BY CASE ${getCaseBlock( 'lastname' )} END`
 
-                    "firstname": `SELECT top 5 CASE ${getCaseBlock( 'firstname' )} END as value, 'OWNERFIRST' as type, CASE ${getCaseBlock( 'firstname' )} END as srch_key
-                                    FROM Assess50Mecklenburg.dbo.Polaris_Owners as ownr
-                                    WHERE ${filter.join( " and " )}
-                                    GROUP BY CASE ${getCaseBlock( 'firstname' )} END`,
+                        case "firstname":
+                            return `SELECT top 5 CASE ${getCaseBlock( 'firstname' )} END as value, 'OWNERFIRST' as type, CASE ${getCaseBlock( 'firstname' )} END as srch_key
+                                        FROM Assess50Mecklenburg.dbo.Polaris_Owners as ownr
+                                        WHERE ${filter.join( " and " )}
+                                        GROUP BY CASE ${getCaseBlock( 'firstname' )} END`
 
-                    "fullname": `SELECT top 5 CASE ${getCaseBlock( 'fullname' )} END as value,'OWNER' as type, CASE ${getCaseBlock( 'fullname' )} END as srch_key
-                                FROM Assess50Mecklenburg.dbo.Polaris_Owners as ownr
-                                WHERE ${filter.join( " and " )}
-                                GROUP BY CASE ${getCaseBlock( 'fullname' )} END, CASE ${getCaseBlock( 'lastname' )} END, CASE ${getCaseBlock( 'firstname' )} END`
+                        case "fullname":
+                            return `SELECT top 5 CASE ${getCaseBlock( 'fullname' )} END as value,'OWNER' as type, CASE ${getCaseBlock( 'fullname' )} END as srch_key
+                                        FROM Assess50Mecklenburg.dbo.Polaris_Owners as ownr
+                                        WHERE ${filter.join( " and " )}
+                                        GROUP BY CASE ${getCaseBlock( 'fullname' )} END, CASE ${getCaseBlock( 'lastname' )} END, CASE ${getCaseBlock( 'firstname' )} END`
+
+                    }
 
                 },
-
-                result  = await assess_pool.query( sql[ typ ] )
+                result  = await assess_pool.query( getSQL( typ ) )
 
             response = result.recordset
 

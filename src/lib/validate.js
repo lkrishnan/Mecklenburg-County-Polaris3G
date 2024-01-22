@@ -2,30 +2,25 @@ import {filterObj} from "$lib/utils"
 
 const validateNumeric = str => ( str.match( /^\d+$/ ) ? true : false ),
 
-validateAlphaNumeric = str => ( str.match( /^[a-zA-Z0-9 ]*$/ ) ? true : false ),
-
 validateSpChar = str => ( str.match( /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/ ) ? true : false ),
 
-validateTaxPID = str => ( str.match( /^[0-2]\d{2}-{0,1}\d{3}-{0,1}\d{1}([A-Za-z0-9])$/ ) ? true : false ),
+validateTaxPID = str => ( str.replace(/\s+/g, "" ).match( /^[0-2]\d{2}-{0,1}\d{3}-{0,1}\d{1}([A-Za-z0-9])$/ ) ? true : false ),
 
-validateTaxPIDMin7 = str => ( str.match( /^[0-2]\d{2}-{0,1}\d{3}-{0,1}\d{1}?([A-Za-z0-9])?$/ ) ? true : false ),
+validateTaxPIDMin7 = str => ( str.replace(/\s+/g, "" ).match( /^[0-2]\d{2}-{0,1}\d{3}-{0,1}\d{1}?([A-Za-z0-9])?$/ ) ? true : false ),
 
-validateGISID = str => ( str.match( /^[0-2]\d{4}(A|C|I|L|M|N|R|S|W|X|[0-9])\d{2}$/ ) ? true : false ),
+validateGISID = str => ( str.replace(/\s+/g, "" ).match( /^[0-2]\d{4}(A|C|I|L|M|N|R|S|W|X|[0-9])\d{2}$/ ) ? true : false ),
 
-validateCNumber = str => ( str.match( /^[0-2]\d{4}(C|c)\d{2}$/ ) ? true : false ),
+validateCNumber = str => ( str.replace(/\s+/g, "" ).match( /^[0-2]\d{4}(C|c)\d{2}$/ ) ? true : false ),
 
-validateIntersection = str => ( str.match( /^(\w+\s*){3}(AND|&)(\s*\w+){3}$/ ) ? true : false ),
+validateRoad = str => ( str.replace(/\s+/g, "" ).match( /^[A-Za-z0-9\'-]+$/ ) ? true : false ),
 
-validateOwnerName = str => ( str.replace(/\s/g, "" ).match( /^[A-Za-z0-9@&~`()_=+\';:\"\\\/?>.<-]+(,)[A-Za-z0-9@&~`()_=+\';:\"\\\/?>.<-]+$/ ) ? true : false ),
+validateIntersection = str => ( str.replace(/\s+/g, "" ).match( /^[A-Za-z0-9\'-]+(&|AND|and)[A-Za-z0-9\'-]+(&|AND|and)?[A-Za-z0-9\'-]+$/ ) ? true : false ), 
 
-validateName = str => ( str.replace(/\s/g, "" ).match( /^[A-Za-z0-9@&~`()_=+\';:\"\\\/?>.<-]+$/ ) ? true : false ),
+validateOwnerName = str => ( str.replace(/\s+/g, "" ).match( /^[A-Za-z0-9@&~`()_=+\';:\"\\\/?>.<-]+(,)[A-Za-z0-9@&~`()_=+\';:\"\\\/?>.<-]+$/ ) ? true : false ),
 
-validateAddress = str => {
-    const space_split = str.split( " " )
+validateName = str => ( str.replace(/\s+/g, "" ).match( /^[A-Za-z0-9$@&~`()_=+\';:\"\\\/?>.<-]+$/ ) ? true : false ),
 
-    return ( validateNumeric( space_split[ 0 ] ) ? true : false )
-
-},
+validateAddress = str => ( str.replace( /\s+/g, "+" ).match( /^\d{1,5}\+[A-Za-z0-9&+\'.-]+$/ ) ? true : false ),
     
 validateLatLng = str => {
     const coords = str.split( "," ).map( coord => parseFloat( coord.trim( ) ) )
@@ -82,5 +77,6 @@ validateForm = fields => {
 
 }
 
-export {validateNumeric, validateAlphaNumeric, validateSpChar, validateCNumber, validateTaxPID, 
-    validateGISID, validateOwnerName, validateIntersection, validateAddress, validateLatLng, validateStatePlane, validateRings, validateForm, validateName, validateTaxPIDMin7}
+export {validateNumeric, validateSpChar,validateTaxPID, validateTaxPIDMin7, validateGISID, validateCNumber,
+    validateRoad, validateIntersection, validateOwnerName, validateName, validateAddress, 
+    validateLatLng, validateStatePlane, validateRings, validateForm }

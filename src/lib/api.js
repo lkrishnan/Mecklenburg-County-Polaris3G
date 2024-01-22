@@ -29,32 +29,13 @@ const genError = err => ( { "statusCode":500, "error": "Internal Server Error", 
     getAPIURL = ( srch_type, srch_str ) => {
         switch( srch_type ){
             case "address":
-                return `/api/validate/address?addr=${srch_str}`
+                return `/api/validate/address?addr=${encodeURIComponent( srch_str )}`
+            
+            case "pid": 
+                return `/api/validate/pid?pid=${srch_str}`
 
-            case "situs":
-                return `/api/validate/situs?address=${srch_str}`
-
-            case "business": 
-                return `/api/validate/facility/business?name=${srch_str}`
-
-            case "busstop": 
-                return `/api/validate/facility/busstop?name=${srch_str}`
-
-            case "intersection": 
-                const amprsnd_split = srch_str.split( "&" ).map( item => item.trim( ) )
-                return `/api/validate/intersection?street1=${amprsnd_split[ 0 ]}&street2=${amprsnd_split[ 1 ]}`
-                
             case "gisid": 
                 return `/api/validate/gisid?gisid=${srch_str}`
-
-            case "lightrail": 
-                return `/api/validate/facility/lightrail?name=${srch_str}`
-
-            case "library": 
-                return `/api/validate/facility/library?name=${srch_str}`
-
-            case "lightrail": 
-                return `/api/validate/facility/lightrail?name=${srch_str}`
 
             case "owner": 
                 const comma_split = srch_str.split( "," ).map( item => item.trim( ) )
@@ -66,24 +47,40 @@ const genError = err => ( { "statusCode":500, "error": "Internal Server Error", 
             case "ownerlast":
                 return `/api/validate/owner?get=lastname&lastname=${encodeURIComponent( srch_str )}`
 
-            case "park": 
-                return `/api/validate/facility/park?name=${srch_str}`
-
-            case "pid": 
-                return `/api/validate/pid?pid=${srch_str}`
-
-            case "pick": 
-                return `/api/validate/pid?pid=${srch_str}`
-                
             case "road": 
                 return `/api/validate/road?name=${srch_str}`
 
             case "stcode": 
                 return `/api/validate/road?name=${srch_str}`
 
+            case "situs":
+                return `/api/validate/situs?address=${srch_str}`
+
+            case "intersection": 
+                return `/api/validate/intersection?${json2URL( srch_str.split( "&" ).map( ( item, i ) => ( { ['street'+(i+1)]: item.trim( ) } ) ).reduce( ( prev, curr ) => ( { ...prev, ...curr } ) ), )}`
+
+            case "intersectionstcode":
+                return `/api/validate/intersection?${json2URL( srch_str.split( "&" ).map( ( item, i ) => ( { ['stcode'+(i+1)]: item.trim( ) } ) ).reduce( ( prev, curr ) => ( { ...prev, ...curr } ) ), )}`
+            break
+
+            case "park": 
+                return `/api/validate/facility/park?name=${encodeURIComponent( srch_str )}`
+
             case "school": 
-                return `/api/validate/facility/school?name=${srch_str}`
-                
+                return `/api/validate/facility/school?name=${encodeURIComponent( srch_str )}`
+
+            case "library": 
+                return `/api/validate/facility/library?name=${encodeURIComponent( srch_str )}`
+
+            case "business": 
+                return `/api/validate/facility/business?name=${encodeURIComponent( srch_str )}`
+
+            case "lightrail": 
+                return `/api/validate/facility/lightrail?name=${encodeURIComponent( srch_str )}`
+
+            case "busstop": 
+                return `/api/validate/facility/busstop?name=${encodeURIComponent( srch_str )}`
+    
             default:
                 return null
 

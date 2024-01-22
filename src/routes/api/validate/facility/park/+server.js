@@ -1,4 +1,5 @@
-import {genError, getInvalidParams} from "$lib/api.js"
+import {genError, getInvalidParams} from "$lib/api"
+import {pg_escape} from "$lib/utils"
 
 /** @type {import('./validate/$types').RequestHandler} */
 export const GET = async ( { url, locals } ) => {
@@ -14,7 +15,7 @@ export const GET = async ( { url, locals } ) => {
                         prkname as name, prkaddr as address, prktype, prkstatus as status, prkdist as district,
                         prkname as srch_key
                         FROM parks_pt
-                        WHERE prkname ~* $$${name}$$
+                        WHERE prkname ~* $$${pg_escape( name )}$$
                         LIMIT 5`,
                 result = await gis_pool.query( sql )
 

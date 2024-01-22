@@ -2,9 +2,17 @@ const null2empty = inp => ( ( !inp || ( typeof inp === "undefined" ) ) ? "" : in
 
 removeArrayDups = arr => arr.reduce( ( unique, item ) => ( unique.includes( item ) ? unique : [ ...unique, item ] ), [ ], ),
 
-srchstr2qrystr = str => str.replace(/\s/g, "+").toLowerCase( ),
+srchstr2qrystr = str => str
+                            .replace( /\//g, "&sol;" )
+                            .replace( /\+/g, "&plus;" )
+                            .replace( /\s/g, "+")
+                            .toLowerCase( ),
 
-qrystr2srchstr = str => str.replace( /\+/g, " " ).toUpperCase( ),
+qrystr2srchstr = str => str
+                            .replace( /\+/g, " " )                            
+                            .replace( /&plus;/g, "+" )
+                            .replace( /&sol;/g, "/" )
+                            .toUpperCase( ),
 
 strIsNum = str => !isNaN( str ),
 
@@ -154,6 +162,7 @@ icon = ( typ, width=36, height=36 ) => {
         payment: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 96 960 960" width="${width}" class="fill-current"><path d="M540 636q-50 0-85-35t-35-85q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35ZM220 776q-24.75 0-42.375-17.625T160 716V316q0-24.75 17.625-42.375T220 256h640q24.75 0 42.375 17.625T920 316v400q0 24.75-17.625 42.375T860 776H220Zm100-60h440q0-42 29-71t71-29V416q-42 0-71-29t-29-71H320q0 42-29 71t-71 29v200q42 0 71 29t29 71Zm480 180H100q-24.75 0-42.375-17.625T40 836V376h60v460h700v60ZM220 716V316v400Z"/></svg>`,
         pdf: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 96 960 960" width="${width}" class="fill-current"><path d="M331 625h37v-83h48q15.725 0 26.362-10.638Q453 520.725 453 505v-48q0-15.725-10.638-26.362Q431.725 420 416 420h-85v205Zm37-120v-48h48v48h-48Zm129 120h84q15 0 26-10.638 11-10.637 11-26.362V457q0-15.725-11-26.362Q596 420 581 420h-84v205Zm37-37V457h47v131h-47Zm133 37h37v-83h50v-37h-50v-48h50v-37h-87v205ZM260 856q-24 0-42-18t-18-42V236q0-24 18-42t42-18h560q24 0 42 18t18 42v560q0 24-18 42t-42 18H260Zm0-60h560V236H260v560ZM140 976q-24 0-42-18t-18-42V296h60v620h620v60H140Zm120-740v560-560Z"/></svg>`,
         person: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 -960 960 960" width="${width}"><path d="M440.5-500Q378-500 334-544.062 290-588.125 290-650q0-63 44.062-106.5Q378.125-800 440-800q63 0 106.5 43.5t43.5 106q0 62.5-43.5 106.5t-106 44Zm-.5-60q38 0 64-26.438 26-26.437 26-63.562 0-38-26-64t-63.5-26q-37.5 0-64 26T350-650.5q0 37.5 26.438 64Q402.875-560 440-560ZM898-20 758-160q-23 17-47.5 23.5t-50.065 6.5q-71.015 0-120.725-49.618Q490-229.235 490-300.118 490-371 539.618-420.5q49.617-49.5 120.5-49.5Q731-470 780.5-420.29T830-299.565q0 25.565-6.5 50.065Q817-225 800-202L940-62l-42 42ZM660-190q47 0 78.5-31.5T770-300q0-47-31.5-78.5T660-410q-47 0-78.5 31.5T550-300q0 47 31.5 78.5T660-190Zm-540 30v-94q0-37 17.5-63t50.5-43q47-23 122.5-43.5T464-419q-8 13-15 28.5T438-360q-78-1-136 18.5T212-306q-14 8-23 21.5t-9 30.5v34h258q11 17 20 31.5t20 28.5H120Zm320-490Zm-2 430Z"/></svg>`,
+        piechart: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 -960 960 960" width="${width}"><path d="M520-520h278q-15-110-91.5-186.5T520-798v278Zm-80 358v-636q-121 15-200.5 105.5T160-480q0 122 79.5 212.5T440-162Zm80 0q110-14 187-91t91-187H520v278Zm-40-318Zm0 400q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 155.5 31.5t127 86q54.5 54.5 86 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Z"/></svg>`,
         polygon: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 0 24 24" width="${width}" class="fill-current"><path d="M2,2V8H4.28L5.57,16H4V22H10V20.06L15,20.05V22H21V16H19.17L20,9H22V3H16V6.53L14.8,8H9.59L8,5.82V2M4,4H6V6H4M18,5H20V7H18M6.31,8H7.11L9,10.59V14H15V10.91L16.57,9H18L17.16,16H15V18.06H10V16H7.6M11,10H13V12H11M6,18H8V20H6M17,18H19V20H17" /></svg>`,
         print: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 0 24 24" width="${width}" class="fill-current"><path d="M19 8C20.66 8 22 9.34 22 11V17H18V21H6V17H2V11C2 9.34 3.34 8 5 8H6V3H18V8H19M8 5V8H16V5H8M16 19V15H8V19H16M18 15H20V11C20 10.45 19.55 10 19 10H5C4.45 10 4 10.45 4 11V15H6V13H18V15M19 11.5C19 12.05 18.55 12.5 18 12.5C17.45 12.5 17 12.05 17 11.5C17 10.95 17.45 10.5 18 10.5C18.55 10.5 19 10.95 19 11.5Z" /></svg>`,
         propinfo: `<svg xmlns="http://www.w3.org/2000/svg" height="${height}" viewBox="0 -960 960 960" width="${width}"><path d="M680-600h80v-80h-80v80Zm0 160h80v-80h-80v80Zm0 160h80v-80h-80v80Zm0 160v-80h160v-560H480v56l-80-58v-78h520v720H680Zm-640 0v-400l280-200 280 200v400H360v-200h-80v200H40Zm80-80h80v-200h240v200h80v-280L320-622 120-480v280Zm560-360ZM440-200v-200H200v200-200h240v200Z"/></svg>`,
@@ -194,6 +203,13 @@ unEscape = str => str
                     .replace( /&gt;/g , ">" )
                     .replace( /&quot;/g , "\"" )
                     .replace( /&#39;/g , "\'" )
-                    .replace( /&amp;/g , "&" )
+                    .replace( /&amp;/g , "&" ),
 
-export { null2empty, removeArrayDups, srchstr2qrystr, qrystr2srchstr, filterObj, json2URL, debounce, icon, sortArrayofObjs, arrHasSameElems, arrHasAllElems, objIsEqual, URL2Obj, strIsNum, isDecimal, escape, unEscape, isJSON }
+pg_escape = str => str
+                        .replace( "(", "\\(" )
+                        .replace( "$", "\\$" ),
+
+odbc_escape = str => str
+                        .replace( "'", "''" )
+    
+export { null2empty, removeArrayDups, srchstr2qrystr, qrystr2srchstr, filterObj, json2URL, debounce, icon, sortArrayofObjs, arrHasSameElems, arrHasAllElems, objIsEqual, URL2Obj, strIsNum, isDecimal, escape, unEscape, isJSON, pg_escape, odbc_escape }
