@@ -31,7 +31,7 @@
                 {#if i!==basemap_idx}
                 <button class="border-2 {(i==basemap_idx?'border-segundo bg-segundo':'border-primero')} text-lienzo bg-primero text-xs rounded w-[60px] h-[64px] hover:border-segundo hover:bg-segundo hover:text-lienzo"
                     on:click="{(event)=>{handleClick( 'basemap', i )}}">
-                    <img alt="{basemap.label}" src="{basemap.img}" />    
+                    <img alt="{basemap.label}" src="{basemap.img}" class="w-full" />    
                     <div class="p-1">{basemap.label}</div>
                 
                 </button>

@@ -417,12 +417,9 @@
 
 			//print
 			print_layouts: [ 
-				//{ label: "Landscape 11 x 8.5", value: "letter-ansi-a-landscape" },
-				//{ label: "Portrait 11 x 8.5", value: "letter-ansi-a-portrait" },
 				{ label: "Landscape 11 x 8.5", value: "Landscape8x11" },
 				{ label: "Portrait 11 x 8.5", value: "Portrait8x11" },
 				{ label: "Screenshot", value: "MAP_ONLY" },
-
 
 			],
 			sel_print_layout: 0,
@@ -451,13 +448,6 @@
 				type: "text", color: "white", haloColor: [ 234, 88, 12, 1 ], haloSize: "2",  
 				font: { size: "12", family: "Arial",  weight: "bold" }
 			},
-			//cnd_centroid: { type: "simple-marker", style: "circle", size: "12px", color: [ 0, 255, 102, 1 ], outline: { color: [ 0, 255, 102, 1 ], width: "2px" } },
-			/*cnd_centroid: { 
-				type: "text", color: "black", haloColor: [ 0, 255, 102, 1 ], haloSize: "14",  
-				font: { size: "14", family: "Arial",  weight: "bold" }
-			},*/
-
-
 			identify: { type: "simple-marker", color: "#7dd3fc", size: "30px", outline: { color: "#075985", width: "2px", }, path: "M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z", },
 			poi: { type: "simple-marker", color: "#7dd3fc", size: "30px", outline: { color: "#075985", width: "2px", }, path: "M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z", },
 			sel_road: { type: "simple-line", color: [ 47, 204, 110 ], width: 4 },
@@ -478,7 +468,16 @@
 				try{
 					local_state.print_url = "progress"
 
-					const getLegendLayers = ( ) => {
+					if( !PrintTask ){
+						PrintTask = await import( "@arcgis/core/rest/print" )
+						PrintParameters = ( await import( "@arcgis/core/rest/support/PrintParameters" )  ).default
+
+					}
+
+					const getLegendLayers = async ( ) => {
+							if( !LegendLayer )
+								LegendLayer = ( await import( "@arcgis/core/rest/support/LegendLayer.js" ) ).default
+
 							return Object.keys( overlay_lyrs )
 									.filter( lyr_id => overlay_lyrs[ lyr_id ].sublayers.items.filter( item => item.visible ).length > 0 )
 									.map( lyr_id => ( new LegendLayer( { 
@@ -490,11 +489,11 @@
 
 						},
 						
-						getLayoutOption = ( ) => {
+						getLayoutOption = async ( ) => {
 							return { 
 									titleText: local_state.print_title, 
 									authorText: "Mecklenburg County GIS",
-									...( local_state.print_add_legend ? { legendLayers: getLegendLayers( ) } : { } )
+									...( local_state.print_add_legend ? { legendLayers: await getLegendLayers( ) } : { } )
 								}
 						},
 					
@@ -511,7 +510,7 @@
 										...( local_state.sel_print_layout === 2 ? { width: view.width, height: view.height } : { } )
 
 									},
-									...( local_state.sel_print_layout < 2 ? { layoutOptions: getLayoutOption( ) } : { } )
+									...( local_state.sel_print_layout < 2 ? { layoutOptions: await getLayoutOption( ) } : { } )
 									
 								}
 
@@ -576,7 +575,7 @@
 
 			},
 
-			tool_action: ( tool, action=null ) => {
+			tool_action: async ( tool, action=null ) => {
 				switch( tool ){
 					case "click_srch": case "identify":
 						if( sketch_widget ){
@@ -592,7 +591,7 @@
 					case "select_srch": 
 						local_state.map_tool = tool
 						if( !sketch_widget )
-							inits.sketch_widget( )
+							await inits.sketch_widget( )
 							 
 						sketch_widget.polygonSymbol = symbols.select_search
 						sketch_widget.updateOnGraphicClick = false
@@ -620,7 +619,7 @@
 						local_state.map_tool = tool
 
 						if( !dist_widget )
-							inits.dist_widget( )
+							await inits.dist_widget( )
 
 						dist_widget.create( "polyline" )
 						break
@@ -629,7 +628,7 @@
 						local_state.map_tool = tool
 
 						if( !area_widget )
-							inits.area_widget( )
+							await inits.area_widget( )
 
 						area_widget.create( "polygon" )
 
@@ -690,7 +689,7 @@
 						local_state.map_tool = tool
 
 						if( !sketch_widget )
-							inits.sketch_widget( )
+							await inits.sketch_widget( )
 
 						sketch_widget.pointSymbol = symbols.pt_markup
 						sketch_widget.updateOnGraphicClick = true
@@ -701,7 +700,7 @@
 						local_state.map_tool = tool
 
 						if( !sketch_widget )
-							inits.sketch_widget( )
+							await inits.sketch_widget( )
 													
 						sketch_widget.polylineSymbol = symbols.line_markup
 						sketch_widget.updateOnGraphicClick = true
@@ -712,7 +711,7 @@
 						local_state.map_tool = tool
 
 						if( !sketch_widget )
-							inits.sketch_widget( )
+							await inits.sketch_widget( )
 
 						sketch_widget.polygonSymbol = symbols.poly_markup
 						sketch_widget.updateOnGraphicClick = true
@@ -722,7 +721,7 @@
 					case "erase_markup":
 						if( sketch_widget ){
 							if( sketch_widget.updateGraphics.length > 0 )
-							sketch_widget.delete( )
+								sketch_widget.delete( )
 							else
 								local_state.blackout = true
 							
@@ -766,7 +765,10 @@
 		],
 
 		inits = {
-			sketch_widget: ( ) => {
+			sketch_widget: async ( ) => {
+				if( !SketchViewModel)
+					SketchViewModel = ( await import( "@arcgis/core/widgets/Sketch/SketchViewModel" ) ).default
+
 				sketch_widget = new SketchViewModel( { 
 					view: view, 
 					layer: sketch_lyr
@@ -814,7 +816,13 @@
 
 			},
 
-			area_widget: ( ) => {
+			area_widget: async ( ) => {
+				if( !GeometryEngine )
+					GeometryEngine = await import( "@arcgis/core/geometry/geometryEngine" )
+
+				if( !SketchViewModel)
+					SketchViewModel = ( await import( "@arcgis/core/widgets/Sketch/SketchViewModel" ) ).default	
+
 				area_widget = new SketchViewModel( { 
 					view: view, 
 					layer: sketch_lyr, 
@@ -875,7 +883,13 @@
 
 			},
 
-			dist_widget: ( ) => {
+			dist_widget: async ( ) => {
+				if( !GeometryEngine )
+					GeometryEngine = await import( "@arcgis/core/geometry/geometryEngine" )
+
+				if( !SketchViewModel)
+					SketchViewModel = ( await import( "@arcgis/core/widgets/Sketch/SketchViewModel" ) ).default
+				
 				dist_widget = new SketchViewModel( { 
 					view: view, 
 					layer: sketch_lyr, 
@@ -899,6 +913,7 @@
 					}
 					
 				} )
+
 				dist_widget.on( "update", event => { 
 					if( event.state === "complete" ){
 						const uid = event.graphics[ 0 ].uid
@@ -934,7 +949,7 @@
 
 					}
 
-				} )	
+				} )
 
 			}
 
@@ -989,21 +1004,13 @@
 	onMount( async ( ) => {
 		// Lazy Load ArcGIS API libraries 
 		Extent = ( await import( "@arcgis/core/geometry/Extent" ) ).default
-		GeometryEngine = await import( "@arcgis/core/geometry/geometryEngine" )
 		Graphic = ( await import( "@arcgis/core/Graphic" ) ).default
 		GraphicsLayer = ( await import( "@arcgis/core/layers/GraphicsLayer" ) ).default
-		LegendLayer = ( await import( "@arcgis/core/rest/support/LegendLayer.js" ) ).default
 		Map = ( await import( "@arcgis/core/Map" ) ).default
 		MapImageLayer = ( await import( "@arcgis/core/layers/MapImageLayer" ) ).default
 		MapView = ( await import( "@arcgis/core/views/MapView" ) ).default
-		PrintTask = await import( "@arcgis/core/rest/print" )
-		PrintParameters = ( await import( "@arcgis/core/rest/support/PrintParameters" )  ).default
 		ReactiveUtils = await import( "@arcgis/core/core/reactiveUtils" )
-		SketchViewModel = ( await import( "@arcgis/core/widgets/Sketch/SketchViewModel" ) ).default
 		TileLayer = ( await import( "@arcgis/core/layers/TileLayer" ) ).default
-
-		// Lazy Load Data
-		//overlays_data = ( await import ( "$lib/data/overlays" ) ).default
 		
 		//Initialize Layers
 		tile_lyrs = {
@@ -1145,10 +1152,6 @@
 
 						case "identify":
 							local_state.zoom_to = false
-							messenger.set( [ 
-									{ type: "clear_all_graphics" }, 
-									{ type: "add_identify_graphic", x: event.mapPoint.x, y: event.mapPoint.y } 
-								] )
 							goto( `/identify/${event.mapPoint.x.toFixed( 4 )},${event.mapPoint.y.toFixed( 4 )}/${local_state.id_lyr}` )
 							break
 
@@ -1212,10 +1215,7 @@
 								break
 
 							case "add_identify_graphic":
-								id_lyr.removeAll( )	
-								
-								grph = new Graphic( { geometry: getGeom( "point", { x: msg.x, y: msg.y } ), symbol: symbols.identify, } )
-								id_lyr.add( grph )
+								id_lyr.add( new Graphic( { geometry: getGeom( "point", { x: msg.x, y: msg.y } ), symbol: symbols.identify, } ) )
 
 								break
 
@@ -1269,7 +1269,8 @@
 								break
 
 							case "id_lyr":
-								local_state.id_lyr = msg.layer
+								if( local_state.id_lyr !== msg.layer )
+									local_state.id_lyr = msg.layer
 								break
 
 							case "toggle_layer":

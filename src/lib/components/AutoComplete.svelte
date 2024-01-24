@@ -34,7 +34,7 @@
         {/if}
     </div>
     
-  <div class="{is_open && !hide_items ? 'absolute z-50 mt-1' : 'hidden' } {(btnsize<10 ? '-' : '' )}mt-[{btnsize-2}px] left-0 w-full max-h-[350px] border border-edge overflow-y-auto scrollbar">
+    <div class="{is_open && !hide_items ? 'absolute z-50 mt-1' : 'hidden' } {(btnsize<10 ? '-' : '' )}mt-[{btnsize-2}px] left-0 w-full max-h-[350px] border border-edge overflow-y-auto scrollbar">
         <ul class="bg-lienzo shadow-lg" bind:this={list} >
             {#if !nomatch}
                 {#each results as result, i}

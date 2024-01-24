@@ -19,7 +19,7 @@
         <div class="mb-4 p-2">
             <div class="mb-2">Choose a layer from the dropdown to see field values.</div>
             <div class="bg-lienzo">
-                <Selecto on:hit={handleHit} items={items} selected={selected} />
+                <Selecto on:hit={handle.hit} items={items} selected={selected} />
             </div>
         </div>
     </div>
@@ -38,7 +38,7 @@
 	/** @type {import('./$types').LayoutData} */
     
     import {goto} from "$app/navigation"
-    import {messenger, mobile, dual} from "$lib/store"
+    import {messenger, mobile, dual, title} from "$lib/store"
     import {icon} from "$lib/utils"
 
     import Heading from "$lib/components/Heading.svelte"
@@ -49,7 +49,8 @@
 
     //Store Variables
     let _mobile,
-        _dual
+        _dual,
+        _title
 
     //Other Variables
     let items= [ 
@@ -85,15 +86,23 @@
         selected = items.findIndex( item => item.id === data.dataset ),
         infos = [ ]
 
-    const handleHit = event => {
-        messenger.set( [ { type: "id_lyr", layer: event.detail.value } ] )
-        goto( `/identify/${data.x},${data.y}/${event.detail.value}` )
+    const handle = {
+            hit: event => {
+                messenger.set( [ { type: "id_lyr", layer: event.detail.value } ] )
+                goto( `/identify/${data.x},${data.y}/${event.detail.value}` )
 
-    }
+            },
 
-    dual.subscribe( value => { _dual = value })
-    mobile.subscribe( value => { _mobile = value })
+            title_change: the_title => {
+				title.set( the_title )
+				
+			}
 
+        }
+
+    dual.subscribe( value => { _dual = value } )
+    mobile.subscribe( value => { _mobile = value } )
+    
     //reactives
     $: if( data ){
         infos = [ 
@@ -102,6 +111,17 @@
             { label: "USNG", value: data.usng }
             
         ]
+
+        _title = data.title
+
+        messenger.set( [ 
+                { type: "clear_all_graphics" }, 
+                { type: "add_identify_graphic", x: data.x, y: data.y },
+                { type: "id_lyr", layer: data.dataset }
+
+            ] )
+
+        
 
     }
         

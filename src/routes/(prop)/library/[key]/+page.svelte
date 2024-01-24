@@ -63,7 +63,7 @@
 
         },
 
-        handleLocChange = poi => {
+        handleLocChange = ( poi ) => {
             _poi = poi
 
             infos = [ 

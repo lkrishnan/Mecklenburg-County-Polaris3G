@@ -31,11 +31,11 @@ const getAssociateData = ( legal_description, sqft, land_size, land_unit, fire_d
         let ret = [ ]
 
         if( x && y ){
-            const fema_panel_resp = await fetch( `https://polaris3g.mecklenburgcountync.gov/polarisv/rest/services/layers/MapServer/44/query?where=&text=&objectIds=&time=&geometry=${x},${y}&geometryType=esriGeometryPoint&inSR=2264&spatialRel=esriSpatialRelIntersects&distance=1&units=esriSRUnit_Foot&relationParam=&outFields=EFF_DATE%2C+panel_id&returnGeometry=false&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&havingClause=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&returnExtentOnly=false&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&featureEncoding=esriDefault&f=json` ),
-                result = await fema_panel_resp.json( )
+            const fema_panel_resp = await fetch( encodeURI( `/api/query/gis?table=fema_panels_py&filter=ST_Within(ST_GeomFromText('POINT(${x} ${y})', 2264),shape)` ) ),
+                fema_panel_rows =  await fema_panel_resp.json( )
 
-            if( result.features.length > 0 )
-                ret.push( [ "FEMA Panel", `${result.features[ 0 ].attributes.panel_id} (${formatFEMADate( result.features[ 0 ].attributes.eff_date )})` ] )
+            if( fema_panel_rows.length > 0)
+                ret.push( [ "FEMA Panel", `${fema_panel_rows[ 0 ].panel_id} (${formatFEMADate( fema_panel_rows[ 0 ].eff_date )})` ] )
                 
         }
 

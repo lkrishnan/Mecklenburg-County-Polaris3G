@@ -321,6 +321,8 @@ const arrayToNumList = ( arr ) => {
 
 			} )
 
-	}
+	},
 
-export { arrayToNumList, concatArr, formatAddr, formatLandArea, formatLegalDesc, formatOwnersAsHTML, formatUCWords, formatDeed, formatCommas, formatMoney, formatDate, formatFullName, formatDecimal, formatArrAsHTML, formatIdentifyResult, formatOwnersAsHTML2, formatFullName2, formatStatePlane, formatLatLng, formatPercentage, formatFEMADate, formatAcres, formatSearchResults }
+	formatTitle = title => title + " - Polaris"
+
+export { arrayToNumList, concatArr, formatAddr, formatLandArea, formatLegalDesc, formatOwnersAsHTML, formatUCWords, formatDeed, formatCommas, formatMoney, formatDate, formatFullName, formatDecimal, formatArrAsHTML, formatIdentifyResult, formatOwnersAsHTML2, formatFullName2, formatStatePlane, formatLatLng, formatPercentage, formatFEMADate, formatAcres, formatSearchResults, formatTitle }

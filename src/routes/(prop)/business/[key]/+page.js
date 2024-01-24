@@ -1,6 +1,6 @@
 import {error} from "@sveltejs/kit"
 import {getAPIURL, getPOI} from "$lib/api"
-import {formatUCWords} from "$lib/format"
+import {formatUCWords, formatTitle} from "$lib/format"
 import {qrystr2srchstr} from "$lib/utils"
 import {validateSpChar, validateName} from "$lib/validate" 
 
@@ -16,13 +16,13 @@ export async function load( {fetch, params, route} ){
         throw error( 404, { message: `Polaris 3G can't find ${formatUCWords( srch_type )}: ${srch_str}. Enter a valid ${formatUCWords( srch_type )} Name.` } )
 
     const validate_data = await fetch( getAPIURL( srch_type, srch_str ) ),
-        data_rows = await validate_data.json( ),
-        poi = data_rows[ 0 ]
-
+        data_rows = await validate_data.json( )
+        
     if( data_rows.length === 0 )
         throw error( 404, { message: `Polaris 3G can't find ${formatUCWords( srch_type )}: ${srch_str}. Enter a valid ${formatUCWords( srch_type )} Name.` } )
 
-    const hit = { type: srch_type, srch_key: srch_str }
+    const poi = data_rows[ 0 ],
+        hit = { type: srch_type, srch_key: srch_str }
 
     return { 
 			hit: hit, 
@@ -30,6 +30,8 @@ export async function load( {fetch, params, route} ){
 			idx: -1, 
 			view: null,
 			poi: await getPOI( poi, fetch ), 
+            title: formatTitle( srch_str )
+
 
 		}
 

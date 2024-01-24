@@ -1,8 +1,7 @@
-<!--<svelte:head>
-	{@html webManifest}
-</svelte:head>-->
-
 <svelte:window bind:innerWidth={viewport_width} bind:innerHeight={viewport_height} />
+<svelte:head>
+	<title>{_title===undefined ? "Polaris" : _title}</title>
+</svelte:head>
 
 <Map />
 
@@ -10,15 +9,15 @@
 	{#if leftdrawer}
 		<div 
 			transition:slide="{{duration: 500, axis: ( _mobile ? 'y' : 'x' )}}" 
-			class="absolute z-40 left-0 w-full md:w-72 bottom-0 md:top-0 flex flex-col bg-luz border-t md:border-r shadow-lg transition-all duration-1000 transform"
+			class="absolute z-40 left-0 w-full md:w-72 bottom-0 md:top-0 flex flex-col bg-luz shadow-lg transition-all duration-1000 transform"
 		>
-				<div class="flex flex-row items-center p-2">
+				<div class="flex flex-row items-center p-2 bg-primero text-lienzo">
 					<div class="grow font-bold text-2xl">
 						Polaris
 					</div>
 					<div class="flex">
 						<button 
-							class="p-1 rounded-full group relative transition-colors duration-150 hover:text-segundo"
+							class="p-1 rounded-full group relative transition-colors duration-150 hover:text-primero hover:bg-lienzo"
 							on:click="{(event)=>{leftdrawer=false}}"
 						>
 							{@html icon( "close", 24, 24 )}
@@ -29,7 +28,7 @@
 				</div>
 
 				{#if _mobile}
-					<div class="flex justify-center gap-2">
+					<div class="flex justify-center gap-2 py-2">
 						{#each Object.keys( btns ) as btn, i}
 							{#if btns[ btn ].show }
 								<button 
@@ -276,20 +275,15 @@
 
 {/if}
 
-<!--{#if ReloadPrompt}
-	<svelte:component this={ReloadPrompt} />
-
-{/if}-->
-
 <script>
     import "../app.css"
+	import "@fontsource/roboto"
     
 	import {onMount} from "svelte"
-	//import {pwaInfo} from "virtual:pwa-info"
 	import {slide} from "svelte/transition"
 	import {goto} from "$app/navigation"
 	import {page} from "$app/stores"
-	import {offset, messenger, search, datadrawer, mobile, dual} from "$lib/store"
+	import {offset, messenger, search, datadrawer, mobile, dual, title} from "$lib/store"
 	import {getPrelimPlan} from "$lib/api"
 	import {formatSearchResults} from "$lib/format"
 	import {getPrelimPlans, getEnggrids, getAnlyzFieldsInit, getAnlyzDropDowns} from "$lib/formhelp"
@@ -305,14 +299,12 @@
 	import Banner from "$lib/components/Banner.svelte"
 	import Situs from "$lib/components/search/Situs.svelte"
 	
-	//let ReloadPrompt,
-
 	//Store Variables
-	let _offset,
-		_search,
+	let _search,
 		_datadrawer,
 		_mobile,
-		_dual
+		_dual,
+		_title
 
 	//Other Variables
 	let leftdrawer = false,
@@ -333,8 +325,7 @@
 			},
 			prelimplan: { icon: "architecture", tool: "prelimplan", tooltip: "Preliminary Plan Search", list: null, selected: 0, show: true },
 			enggrid: { icon: "grid", tool: "enggrid", tooltip: "Engineering Grid Search", list: null, selected: 0, show: true },
-			sidepanel: { icon: "expandless", tool: "sidepanel", tooltip: "Expand side panel", show: false
-			},
+			sidepanel: { icon: "expandless", tool: "sidepanel", tooltip: "Expand side panel", show: false },
 
 		},
 		left_btns = {
@@ -507,8 +498,6 @@
 	
 	//Events
 	onMount( async ( ) => {
-		//pwaInfo && ( ReloadPrompt = ( await import( "$lib/components/ReloadPrompt.svelte" ) ).default )
-
 		//Subscriptions
 		messenger.subscribe( msgs => { 
             msgs.forEach( msg => { 
@@ -532,7 +521,6 @@
 						break
 
 					case "scroll_to_top":
-						
 						//the_top.scrollIntoView(  )
 
 						break
@@ -543,15 +531,14 @@
 
         } )
 
-		offset.subscribe( value => { _offset = value } )
 		search.subscribe( value => { _search = value } )
 		datadrawer.subscribe( value => { _datadrawer = value } )
 		
-
 	} )
 
 	mobile.subscribe( value => { _mobile = value } )
 	dual.subscribe( value => { _dual = value } )
+	title.subscribe( value => { _title = value } )
 
 	//Reactives
 	$: if( $page.route.id )
@@ -577,7 +564,5 @@
 	
 	$: if( route === "/" )
 		messenger.set( [ { type: "clear_all_graphics" } ] )
-
-	
 			
 </script>

@@ -7,9 +7,31 @@ export const GET = async ( { url, locals, fetch } ) => {
 
     try{
         const name = url.searchParams.get( "name" ) ?? null,
-            { gis_pool } = locals
+            stcode = url.searchParams.get( "stcode" ) ?? null,
+            { gis_pool } = locals,
+            getFilter = srch_type => {
+                switch( srch_type ){
+                    case "name":
+                        return `regexp_replace(admkey, '\\s*:.....', ', ') || CASE
+                            WHEN municipality = 'CHAR' THEN 'CHARLOTTE'
+                            WHEN municipality = 'CORN' THEN 'CORNELIUS'
+                            WHEN municipality = 'DAVI' THEN 'DAVIDSON'
+                            WHEN municipality = 'HUNT' THEN 'HUNTERSVILLE'
+                            WHEN municipality = 'MATT' THEN 'MATTHEWS'
+                            WHEN municipality = 'MINT' THEN 'MINT HILL'
+                            WHEN municipality = 'PINE' THEN 'PINEVILLE'
+                            WHEN municipality = 'STAL' THEN 'STALLINGS'
+                            WHEN municipality = 'MECK' THEN 'MECKLENBURG'
+                            ELSE ''
+                        END ~* $$${pg_escape( name )}$$`
 
-        if( name ){
+                    case "stcode":
+                        return `countystcode = ${stcode}`
+
+                }
+            }
+
+        if( name || stcode ){
             const sql = `SELECT regexp_replace(admkey, '\\s*:.....', ', ') || 
                             CASE 
                                 WHEN municipality = 'CHAR' THEN 'CHARLOTTE' 
@@ -26,19 +48,7 @@ export const GET = async ( { url, locals, fetch } ) => {
                             'ROAD' as type,
                             countystcode as srch_key
                     FROM streetfile_tb
-                    WHERE regexp_replace(admkey, '\\s*:.....', ', ') ||
-                        CASE
-                            WHEN municipality = 'CHAR' THEN 'CHARLOTTE'
-                            WHEN municipality = 'CORN' THEN 'CORNELIUS'
-                            WHEN municipality = 'DAVI' THEN 'DAVIDSON'
-                            WHEN municipality = 'HUNT' THEN 'HUNTERSVILLE'
-                            WHEN municipality = 'MATT' THEN 'MATTHEWS'
-                            WHEN municipality = 'MINT' THEN 'MINT HILL'
-                            WHEN municipality = 'PINE' THEN 'PINEVILLE'
-                            WHEN municipality = 'STAL' THEN 'STALLINGS'
-                            WHEN municipality = 'MECK' THEN 'MECKLENBURG'
-                            ELSE ''
-                        END ~* $$${pg_escape( name )}$$
+                    WHERE ${getFilter( name ? "name" : "stcode" )}
                     LIMIT 5`,
                 result = await gis_pool.query( sql )
 

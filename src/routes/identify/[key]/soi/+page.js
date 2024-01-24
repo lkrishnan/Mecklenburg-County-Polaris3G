@@ -1,10 +1,11 @@
+import {formatIdentifyResult} from "$lib/format"
+
 /** @type {import('./$types').PageData} */
-import { idLayer } from "$lib/api"
-import { formatIdentifyResult } from "$lib/format"
+export async function load( {fetch, params} ){
+    const xy = params.key.split( "," ).map( coord => parseFloat(coord.trim( ) ) ),
+        response = await fetch( encodeURI( `/api/query/gis?table=sphereofinfluence_py&filter=ST_Within(ST_GeomFromText('POINT(${xy[0]} ${xy[1]})', 2264),shape)` ) ),
+        rows =  await response.json( )
 
-export async function load( {params} ){
-    const rows = await idLayer( params.key, 23 )
-    
-    return formatIdentifyResult( rows, "name" )
-
+        return formatIdentifyResult( rows, "name" )
+   
 }

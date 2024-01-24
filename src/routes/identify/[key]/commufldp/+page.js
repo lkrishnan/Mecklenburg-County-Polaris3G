@@ -1,14 +1,15 @@
-/** @type {import('./$types').PageData} */
-import { idLayer } from "$lib/api"
-import { formatIdentifyResult, formatDate } from "$lib/format"
+import {formatIdentifyResult, formatDate} from "$lib/format"
 
-export async function load( {params} ){
-    const rows = await idLayer( params.key, 43 ),
+/** @type {import('./$types').PageData} */
+export async function load( {fetch, params} ){
+    const xy = params.key.split( "," ).map( coord => parseFloat(coord.trim( ) ) ),
+        response = await fetch( encodeURI( `/api/query/gis?table=community_floodplain_changes_py&filter=ST_Within(ST_GeomFromText('POINT(${xy[0]} ${xy[1]})', 2264),shape)` ) ),
+        rows =  await response.json( ),
         field_format = { 
             "date": val => formatDate( val ),
             
         }
-    
-    return formatIdentifyResult( rows, "objectid", field_format )
 
+        return formatIdentifyResult( rows, "objectid", field_format )
+   
 }

@@ -38,7 +38,7 @@ export const GET = async ( {url, locals, fetch } ) => {
 			cama_data = rows[ 0 ],
 			x = cama_data.x ?? ( cama_data.centroid_x ?? null ), 
 			y = cama_data.y ?? ( cama_data.centroid_y ?? null )
-		
+
 		const margin = 30,
 			doc = new PDFDocument( { // Create a document 
 				size: "LETTER",
@@ -93,6 +93,7 @@ export const GET = async ( {url, locals, fetch } ) => {
 					doc.font("Helvetica").fontSize( 9 )
 				}
 			},
+
 			tables = { 
 				property_key : {
 					title: "", headers : [ { label:"Parcel ID" }, { label:"GIS ID" }, ],
@@ -291,14 +292,14 @@ export const GET = async ( {url, locals, fetch } ) => {
 			.font( "Helvetica-Bold" )
 			.text( "Zoning", { lineGap: 2 } )
 			.table( tables.zoning, { ...table_options, columnsSize: [ colwidth ] } )
-		
-		if( tables.environmental.rows.length > 0 )				
-				doc
-					.fontSize( 10 )
-					.font( "Helvetica-Bold" )
-					.text( "Environmental Information (View map to verify)", { lineGap: 2 } )
-					//.table( tables.environmental, { ...table_options, columnsSize: [ colwidth/3, colwidth*2/3 ] } )
-					.table( tables.environmental, { ...table_options, columnsSize: [ colwidth/2, colwidth/2 ] } )
+
+			if( tables.environmental.rows.length > 0 )				
+			doc
+				.fontSize( 10 )
+				.font( "Helvetica-Bold" )
+				.text( "Environmental Information (View map to verify)", { lineGap: 2 } )
+				//.table( tables.environmental, { ...table_options, columnsSize: [ colwidth/3, colwidth*2/3 ] } )
+				.table( tables.environmental, { ...table_options, columnsSize: [ colwidth/2, colwidth/2 ] } )
 
 		if( photo.strm ){
 			const img_info = { x: doc.x, y: doc.y, height: 200 }

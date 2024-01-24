@@ -17,7 +17,8 @@ export const GET = async ( { url, locals, fetch } ) => {
             if( validateNumeric( addr_array[ 0 ] ) ){
                 sql = `select full_address as value, 'ADDRESS' as type, cast(num_addr as text) as srch_key
                         from masteraddress_pt 
-                        where ${( validateNumeric( addr_array[ 0 ] ) ? "txt_street_number = '" + addr_array[ 0 ] + "' and " : "" )}soundex(substring(full_address from 1 for ${addr.length})) = soundex($$'${addr}'$$)` 
+                        where txt_cdeuse not in ('METER', 'VALUE-IMPR', 'MINING', 'SIGN', 'MASTER ADDRESS', 'BRIDGE', 'CATV', 'PHONE', 'UTILITY', 'SAW SERVICE', 'BUS STOP', 'CELL TOWER', 'UNKNOWN', 'OTHER MUNICIPAL', 'FOREST-PARK', 'OCS POLE', 'GREENWAY ENTRANCE', 'DUMPSTER' ) 
+                        and ${( validateNumeric( addr_array[ 0 ] ) ? "txt_street_number = '" + addr_array[ 0 ] + "' and " : "" )}soundex(substring(full_address from 1 for ${addr.length})) = soundex($$'${addr}'$$)`
 
                 result = await gis_pool.query( sql )
                 response = result.rows        

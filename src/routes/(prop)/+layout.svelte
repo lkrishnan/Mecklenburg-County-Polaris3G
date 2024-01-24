@@ -200,7 +200,7 @@
 	import {page} from "$app/stores"
 
 	//Store
-	import {messenger, datadrawer, results_count, results_index, mobile, dual} from "$lib/store.js"    
+	import {messenger, datadrawer, results_count, results_index, mobile, dual, title} from "$lib/store.js"    
 	
 	//Custom Libraries
 	import {formatFullName2} from "$lib/format"
@@ -223,7 +223,8 @@
 		_poi,
 		_datadrawer,
 		_dual,
-		_mobile
+		_mobile,
+		_title
 
 	const limit = 20,
 		view_tabs = [
@@ -267,7 +268,7 @@
 
 			redo: event => messenger.set( [ { type: "redo_analysis" } ] ),
 
-			results_change: results => {
+			results_change: ( results ) => {
 				if( results !== undefined ){
 					let msgs = [ ]
 
@@ -310,6 +311,7 @@
 
 					results_count.set( results.length )
 					
+					
 					if( msgs.length > 0 )
 						messenger.set( msgs )
 
@@ -325,6 +327,11 @@
 					_results = [ ..._results, ...rows ]
 
 			},
+
+			title_change: the_title => {
+				title.set( the_title )
+				
+			}
 
 		},
 
@@ -383,11 +390,13 @@
 		_idx = $page.data.idx
 		_view = $page.data.view
 		_poi = $page.data.poi
+		_title = $page.data.title
 	
 	}
 
 	$: { handle.index_change( _idx ) }
 	$: { handle.results_change( _results ) }
+	$: { handle.title_change( _title ) }
 			
 </script>
 

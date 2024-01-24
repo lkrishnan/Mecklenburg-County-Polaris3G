@@ -1,8 +1,8 @@
-/** @type {import('./$types').LayoutData} */
-import { json2URL } from "$lib/utils"
-import {validateStatePlane} from "$lib/validate"
 import {error} from "@sveltejs/kit"
+import {formatTitle} from "$lib/format"
+import {validateStatePlane} from "$lib/validate"
 
+/** @type {import('./$types').LayoutData} */
 export async function load( {fetch, params, route} ){
     if( validateStatePlane( params.key ) ){
         const xy = params.key.split( "," ).map( coord => parseFloat(coord.trim( ) ) ),
@@ -19,7 +19,8 @@ export async function load( {fetch, params, route} ){
             lat: lat,
             lng: lng,
             usng: usng_json.usng,
-            dataset: route_parts[ route_parts.length -1 ] 
+            dataset: route_parts[ route_parts.length -1 ],
+            title: formatTitle( `${route_parts[ route_parts.length -1 ]} @ ${xy}` )
 
         }
 

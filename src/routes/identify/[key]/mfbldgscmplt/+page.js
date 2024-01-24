@@ -1,10 +1,11 @@
+import {formatIdentifyResult} from "$lib/format"
+
 /** @type {import('./$types').PageData} */
-import { idLayer } from "$lib/api"
-import { formatIdentifyResult } from "$lib/format"
+export async function load( {fetch, params} ){
+    const xy = params.key.split( "," ).map( coord => parseFloat(coord.trim( ) ) ),
+        response = await fetch( encodeURI( `/api/query/gis?table=buildingpermits_pt&filter=ST_DWithin(geom, ST_GeomFromText('POINT(${xy[0]} ${xy[1]})',2264),50) and compldate >= (current_date-365) and typeofbldg IN ('New', 'New Bldg') and permtreqco = 'Y' and occupancy LIKE 'R2%'` ) ), 
+        rows =  await response.json( )
 
-export async function load( {params} ){
-    const rows = await idLayer( params.key, 5, "pt" )
-
-    return formatIdentifyResult( rows, "projname" )
-
+        return formatIdentifyResult( rows, "projname" )
+   
 }
