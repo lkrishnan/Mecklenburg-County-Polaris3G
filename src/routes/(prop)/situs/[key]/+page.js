@@ -10,13 +10,13 @@ export async function load( {fetch, params, route, url} ){
         srch_type = route.id.split( "/" ).filter( item => !validateSpChar( item ) && item.length > 0 )[ 0 ]
 
     if( !validateAddress( srch_str ) )
-        throw error( 404, { message: `Polaris 3G can't find anything. Enter a valid Situs Address.` } )
+        error( 404, { message: `Polaris 3G can't find anything. Enter a valid Situs Address.` } );
 
     const hit = { type: srch_type, situs: srch_str, page: 1 },
         rows = await finder( hit, fetch )
 
     if( rows.length === 0 )
-        throw error( 404, { message: `Polaris 3G can't find ${formatUCWords( srch_type )}: ${srch_str}. Enter a valid Situs Address.` } )
+        error( 404, { message: `Polaris 3G can't find ${formatUCWords( srch_type )}: ${srch_str}. Enter a valid Situs Address.` } );
         
     return { 
         hit: hit, 

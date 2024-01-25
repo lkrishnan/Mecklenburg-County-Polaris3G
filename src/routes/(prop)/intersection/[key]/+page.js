@@ -12,16 +12,16 @@ export async function load( {fetch, params, route} ){
         srch_type = route.id.split( "/" ).filter( item => !validateSpChar( item ) && item.length > 0 )[ 0 ]
 
     if( srch_str.length === 0 )
-        throw error( 404, { message: `Polaris 3G can't find anything. Enter a valid ${formatUCWords( srch_type )} Name.` } )
+        error( 404, { message: `Polaris 3G can't find anything. Enter a valid ${formatUCWords( srch_type )} Name.` } );
 
     if( !srch_str.split( "&" ).map( stcode => validateNumeric( stcode ) ).reduce( ( prev, curr ) => prev && curr ) )
-        throw error( 404, { message: `Polaris 3G can't find ${formatUCWords( srch_type )}: ${srch_str.replace( "&", " & ")}. Enter a valid ${formatUCWords( srch_type )}.` } )
+        error( 404, { message: `Polaris 3G can't find ${formatUCWords( srch_type )}: ${srch_str.replace( "&", " & ")}. Enter a valid ${formatUCWords( srch_type )}.` } );
 
     const validate_data = await fetch( getAPIURL( "intersectionstcode", srch_str ) ),
         data_rows = await validate_data.json( )
         
     if( data_rows.length === 0 )
-        throw error( 404, { message: `Polaris 3G can't find ${formatUCWords( srch_type )} with street codes: ${srch_str.replace( "&", " & ")}. Enter a valid ${formatUCWords( srch_type )}.` } )
+        error( 404, { message: `Polaris 3G can't find ${formatUCWords( srch_type )} with street codes: ${srch_str.replace( "&", " & ")}. Enter a valid ${formatUCWords( srch_type )}.` } );
 
     const poi = data_rows[ 0 ],
         hit = { type: srch_type, isrch_key: srch_str }

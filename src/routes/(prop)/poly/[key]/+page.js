@@ -11,10 +11,10 @@ export async function load( {fetch, params, route, url} ){
         srch_type = route.id.split( "/" ).filter( item => !validateSpChar( item ) && item.length > 0 )[ 0 ]
 
     if( srch_str.length === 0 )
-        throw error( 404, { message: `Polaris 3G can't find anything. Pass a valid polygon` } )
+        error( 404, { message: `Polaris 3G can't find anything. Pass a valid polygon` } );
 
     if( !validateRings( JSON.parse( srch_str ) ) )
-        throw error( 404, { message: `Polaris 3G can't find passed polygon: ${srch_str}. Pass a valid polygon` } )
+        error( 404, { message: `Polaris 3G can't find passed polygon: ${srch_str}. Pass a valid polygon` } );
 
     const hit = { type: srch_type, rings: JSON.parse( srch_str ), page: 1 },
         rows = await finder( hit, fetch )

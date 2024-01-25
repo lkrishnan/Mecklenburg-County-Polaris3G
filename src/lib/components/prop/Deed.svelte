@@ -2,9 +2,9 @@
     <Heading title="Deed and Sale Price" iconname="realestateagent" />
 
     {#if sale.length > 0}
-        <table class="w-full text-left text-primary mb-2">
+        <table class="w-full text-left mb-2">
             <thead>
-                <tr class="border-b border-primary">
+                <tr class="border-b border-primero">
                     <th class="px-4 py-2">
                         Deed
                     </th>

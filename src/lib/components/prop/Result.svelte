@@ -1,5 +1,5 @@
 <div 
-    class="flex flex-row gap-2 p-4 bg-lienzo border-b last:border-b-0 border-edge hover:bg-secondary hover:cursor-pointer"
+    class="flex flex-row gap-2 p-4 bg-lienzo border-b border-primero hover:bg-luz hover:cursor-pointer"
     role="button"
     tabindex=-1
     on:click|stopPropagation="{()=>handleHit( )}" 

@@ -10,17 +10,17 @@ export async function load( {fetch, params, route} ){
         srch_type = route.id.split( "/" ).filter( item => !validateSpChar( item ) && item.length > 0 )[ 0 ]
 
     if( srch_str.length === 0 )
-        throw error( 404, { message: `Polaris 3G can't find anything. Enter a valid Owner Name` } )
+        error( 404, { message: `Polaris 3G can't find anything. Enter a valid Owner Name` } );
 
     if( !validateOwnerName( srch_str ) )
-        throw error( 404, { message: `Polaris 3G can't find ${formatUCWords( srch_type )}: ${srch_str}. Enter a valid Owner Name` } )
+        error( 404, { message: `Polaris 3G can't find ${formatUCWords( srch_type )}: ${srch_str}. Enter a valid Owner Name` } );
 
     const comma_split = srch_str.split( "," ).map( item => item.trim( ) ),
         hit = { type: srch_type, lastname: comma_split[ 0 ], firstname: comma_split[ 1 ], page: 1 },
         rows = await finder( hit, fetch )
 
     if( rows.length === 0 )
-        throw error( 404, { message: `Polaris 3G can't find ${formatUCWords( srch_type )}: ${srch_str}. Enter a valid Owner Name` } )
+        error( 404, { message: `Polaris 3G can't find ${formatUCWords( srch_type )}: ${srch_str}. Enter a valid Owner Name` } );
         
     return { 
         hit: hit, 

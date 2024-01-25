@@ -10,13 +10,13 @@ export async function load( {fetch, params, route} ){
         srch_type = route.id.split( "/" ).filter( item => !validateSpChar( item ) && item.length > 0 )[ 0 ]
 
     if( !validateGISID( srch_str ) )
-        throw error( 404, { message: `Polaris 3G can't find anything. Enter a valid GIS ID` } )
+        error( 404, { message: `Polaris 3G can't find anything. Enter a valid GIS ID` } );
 
     const hit = { type: srch_type, gisid: srch_str, page: 1 },
         rows = await finder( hit, fetch )
 
     if( rows.length === 0 )
-        throw error( 404, { message: `Polaris 3G can't find GIS ID: ${srch_str}. Enter a valid GIS ID` } )
+        error( 404, { message: `Polaris 3G can't find GIS ID: ${srch_str}. Enter a valid GIS ID` } );
         
     return { 
         hit: hit, 

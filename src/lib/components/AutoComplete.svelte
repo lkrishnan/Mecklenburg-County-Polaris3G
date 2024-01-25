@@ -34,7 +34,7 @@
         {/if}
     </div>
     
-    <div class="{is_open && !hide_items ? 'absolute z-50 mt-1' : 'hidden' } {(btnsize<10 ? '-' : '' )}mt-[{btnsize-2}px] left-0 w-full max-h-[350px] border border-edge overflow-y-auto scrollbar">
+    <div class="{is_open && !hide_items ? 'absolute z-50 mt-1' : 'hidden' } {(btnsize<10 ? '-' : '' )}mt-[{btnsize-2}px] left-0 w-full max-h-[350px] border border-primero overflow-y-auto scrollbar">
         <ul class="bg-lienzo shadow-lg" bind:this={list} >
             {#if !nomatch}
                 {#each results as result, i}
@@ -44,7 +44,7 @@
                             on:keydown="{()=>handle.close( i )}"
                             role="button" 
                             tabindex=-1
-                            class="text-todo px-2 py-2 text-sm overflow-ellipsis overflow-hidden whitespace-nowrap hover:bg-luz hover:cursor-pointer { i === arrowCounter ? ' bg-secondary' : '' }"
+                            class="text-todo px-2 py-2 text-sm overflow-ellipsis overflow-hidden whitespace-nowrap hover:bg-luz hover:cursor-pointer { i === arrowCounter ? ' bg-luz' : '' }"
                         >
                             <span class="font-bold pr-1 text-segundo">{result.type}:</span>
                             {@html result.label}

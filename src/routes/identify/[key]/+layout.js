@@ -25,6 +25,6 @@ export async function load( {fetch, params, route} ){
         }
 
     }else
-        throw error( 404, { message: "Invalid coordinates passed. Unable to Identify Layers" } )
+        error( 404, { message: "Invalid coordinates passed. Unable to Identify Layers" } );
 
 }

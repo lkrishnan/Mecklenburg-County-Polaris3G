@@ -26,7 +26,7 @@
     <!-- PID and GISID -->
     <table class="w-full text-left mb-2">
         <thead>
-            <tr class="border-b border-primary">
+            <tr class="border-b border-primero">
                 <th class="px-4 py-2">
                     Parcel ID
                 </th>
@@ -50,7 +50,7 @@
     <!-- Address -->
     <table class="w-full text-left  mb-2">
         <thead class="text-sm font-normal">
-            <tr class="border-b border-primary">
+            <tr class="border-b border-primero">
                 <th class="px-4 py-2">
                     Address located on Property (Postal City)
                 </th>
@@ -77,7 +77,7 @@
     <!-- Ownership -->
     <table class="w-full text-left mb-2">
         <thead class="text-sm font-normal">
-            <tr class="border-b border-primary">
+            <tr class="border-b border-primero">
                 <th class="px-4 py-2">
                     Ownership
                 </th>
@@ -110,7 +110,7 @@
     <!-- Mailing Address -->
     <table class="w-full text-left  mb-2">
         <thead class="text-sm font-normal">
-            <tr class="border-b border-primary">
+            <tr class="border-b border-primero">
                 <th class="px-4 py-2">
                     Tax Billing Address
                 </th>

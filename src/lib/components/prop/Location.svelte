@@ -3,9 +3,9 @@
     <InfoTable infos={infos} />
 
     <!-- Situs Address -->
-    <table class="w-full text-left text-primary mb-2">
+    <table class="w-full text-leftmb-2">
         <thead class="text-sm font-normal">
-            <tr class="border-b border-primary">
+            <tr class="border-b border-primero">
                 <th class="px-4 py-2">
                     Tax Situs Addresses tied to Parcel
                 </th>

@@ -12,19 +12,19 @@ export async function load( {fetch, params, route, url} ){
     const arr = srch_str.split( "|" )
 
     if( arr.length !== 2 )
-        throw error( 404, { message: `Polaris 3G can't find anything. Enter a valid GIS ID and buffer between (0-5280 ft)` } ) 
+        error( 404, { message: `Polaris 3G can't find anything. Enter a valid GIS ID and buffer between (0-5280 ft)` } ); 
 
     const gisid = arr[ 0 ],
         buffer = parseInt( arr[ 1 ] )
 
     if( !( validateGISID( gisid ) && ( buffer >= 0 && buffer <= 5280 ) ) )
-        throw error( 404, { message: `Polaris 3G can't find anything. Enter a valid GIS ID and buffer between (0-5280 ft)` } ) 
+        error( 404, { message: `Polaris 3G can't find anything. Enter a valid GIS ID and buffer between (0-5280 ft)` } ); 
 
     const hit = { type: srch_type, buffer: srch_str, page: 1 },
         rows = await finder( hit, fetch )
 
     if( rows.length === 0 )
-        throw error( 404, { message: `No results were returned for a ${buffer} ft buffer search around a property with GIS ID: ${gisid}` } )
+        error( 404, { message: `No results were returned for a ${buffer} ft buffer search around a property with GIS ID: ${gisid}` } );
         
     return { 
         hit: { ...hit, gisid: gisid, buffer: buffer }, 

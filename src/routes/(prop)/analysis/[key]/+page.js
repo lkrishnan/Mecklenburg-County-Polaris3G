@@ -12,13 +12,13 @@ export async function load( {fetch, params, route, url} ){
         passed_params = URL2Obj( url.search )
 
     if( !arrHasAllElems( getAnlyzAllowedParams( ), Object.keys( passed_params ) ) )
-        throw error( 404, { message: `Polaris 3G can't work with passed params. Redo Market Analysis.` } )
+        error( 404, { message: `Polaris 3G can't work with passed params. Redo Market Analysis.` } );
 
     const hit = { type: srch_type, ...passed_params, page: 1 },
         rows = await finder( hit, fetch )
 
     if( rows.length === 0 )
-        throw error( 404, { message: `Polaris 3G can't work with passed params. Redo Market Analysis.` } )
+        error( 404, { message: `Polaris 3G can't work with passed params. Redo Market Analysis.` } );
 
     return { 
             hit: hit, 
