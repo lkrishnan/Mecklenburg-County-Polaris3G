@@ -224,7 +224,8 @@
 		_datadrawer,
 		_dual,
 		_mobile,
-		_title
+		_title,
+		the_top
 
 	const limit = 20,
 		view_tabs = [
@@ -357,6 +358,8 @@
 					msgs.push( { type: "add_road_graphic", stcode: hit.stcode } )
 					break
 
+				
+
 			}
 
 			return msgs
@@ -370,7 +373,6 @@
                 case "go_back":
                     _idx = -1
                     break
-
 
             }
 

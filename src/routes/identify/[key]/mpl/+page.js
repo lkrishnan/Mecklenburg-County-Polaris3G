@@ -1,12 +1,15 @@
-/** @type {import('./$types').PageData} */
-import { idLayer } from "$lib/api"
-import { formatIdentifyResult, formatDate, formatDecimal } from "$lib/format"
+import {formatIdentifyResult, formatDate, formatDecimal} from "$lib/format"
 
-export async function load( {params} ){
-    const rows = await idLayer( params.key, 60, "pt" ),
+/** @type {import('./$types').PageData} */
+export async function load( {params, fetch} ){
+    const xy = params.key.split( "," ).map( coord => parseFloat(coord.trim( ) ) ),
+        response = await fetch( encodeURI( `/api/query/gis?table=mpl_sites&filter=ST_Within(ST_GeomFromText('POINT(${xy[0]} ${xy[1]})', 2264),shape)` ) ),
+        rows =  await response.json( ),
         field_format = { 
-            "ADD_DATE": val => formatDate( val ),
-            "INIT_INVEST_DATE": val => formatDate( val ), 
+            "add_date": val => formatDate( val ),
+            "init_invest_date": val => formatDate( val ), 
+            "last_visit_date": val => formatDate( val ), 
+            "site_status_update_date": val => formatDate( val ),
             "open_date": val => formatDate( val ),
             "close_date": val => formatDate( val ),
             "updtdate": val => formatDate( val ),

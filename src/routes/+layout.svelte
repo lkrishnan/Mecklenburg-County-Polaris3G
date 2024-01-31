@@ -1,13 +1,34 @@
 <svelte:window bind:innerWidth={viewport_width} bind:innerHeight={viewport_height} />
+
 <svelte:head>
 	<title>{_title===undefined ? "Polaris" : _title}</title>
+	<meta charset="UTF-8">
+  	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<meta name="description" content="Polaris - Mecklenburg County Property Ownership and Land Records System.">
+	<meta name="author" content="Lak Krishnan">
+
+	<!-- Open Graph -->
+	<meta property="og:url" content="{href}">
+  	<meta property="og:type" content="website">
+	<meta property="og:title" content="{_title===undefined ? "Polaris" : _title}" />
+	<meta property="og:description" content="Polaris - Mecklenburg County Property Ownership and Land Records System.">
+	<meta property="og:image" content="https://meckgisdev.mecklenburgcountync.gov/android-icon-512.png">
+	<meta property="og:image:width" content="512">
+  	<meta property="og:image:height" content="512">
+
+	 <!-- icon and theme stuff -->
+	 <link rel="icon" href="/favicon.png" type="image/png"><!-- 32×32 -->
+	 <link rel="icon" href="/logo.svg" type="image/svg+xml">
+	 <link rel="apple-touch-icon" href="/apple-touch-icon.png"><!-- 180×180 -->
+	 <meta name="theme-color" content="#211746"/>
+
 </svelte:head>
 
 <Map />
 
 {#if _mobile !== undefined}
 	{#if leftdrawer}
-		<div 
+		<div
 			transition:slide="{{duration: 500, axis: ( _mobile ? 'y' : 'x' )}}" 
 			class="absolute z-40 left-0 w-full md:w-72 bottom-0 md:top-0 flex flex-col bg-luz shadow-lg transition-all duration-1000 transform"
 		>
@@ -116,7 +137,8 @@
 	</div>
 
 	{#if btns.analysis.open}
-		<Analysis 
+		<svelte:component 
+			this={Analysis} 
 			heading={btns.analysis.tooltip} 
 			fields={btns.analysis.fields}
 			list={btns.analysis.list}
@@ -135,7 +157,8 @@
 				{ search_active && _mobile ? 'bg-lienzo' : '' }"
 	>
 
-		<div 
+		<div
+			bind:this={the_top} 
 			class="{( $page.route.id.match( /(prop)|identify/ig ) && _datadrawer ) ? `` : `border-r-2` }"
 				
 		>
@@ -159,7 +182,8 @@
 				/>
 
 			{:else if _search === "owner"}	
-				<Owner 
+				<svelte:component 
+					this={Owner} 
 					leftdrawer={leftdrawer} 
 					hide_items={_mobile && true}
 					value={search_value}
@@ -170,11 +194,12 @@
 					on:leftdrawer={handle.left_drawer} 
 					on:open={handle.open} 
 					on:reset={handle.search_error}
-					  
-				/>
+					/>
+
 
 			{:else if _search === "situs"}
-				<Situs 
+				<svelte:component 
+					this={Situs} 
 					leftdrawer={leftdrawer} 
 					hide_items={_mobile && true}
 					value={search_value}
@@ -189,7 +214,8 @@
 				/>
 
 			{:else if _search === "prelimplan"}
-				<Prelimplan 
+				<svelte:component 
+					this={Prelimplan} 
 					leftdrawer={leftdrawer} 
 					list={btns.prelimplan.list}
 					selected={btns.prelimplan.selected}
@@ -203,7 +229,8 @@
 				/>
 
 			{:else if _search === "enggrid"}
-				<Enggrid 
+				<svelte:component 
+					this={Enggrid}
 					leftdrawer={leftdrawer} 
 					list={btns.enggrid.list}
 					selected={btns.enggrid.selected}
@@ -270,6 +297,7 @@
 			<slot />
 
 		</main>
+		<Analytics />
 
 	</div>
 
@@ -290,21 +318,20 @@
 	import {getToggleLayerList} from "$lib/mapping"
 	import {srchstr2qrystr, icon} from "$lib/utils"
 	
-	import Analysis from "$lib/components/search/Analysis.svelte"
-	import Enggrid from "$lib/components/search/Enggrid.svelte"
+	import Analytics from "$lib/components/Analytics.svelte"
 	import MainSearch from "$lib/components/search/MainSearch.svelte"
 	import Map from "$lib/components/Map.svelte"
-	import Owner from "$lib/components/search/Owner.svelte"
-	import Prelimplan from "$lib/components/search/Prelimplan.svelte"
 	import Banner from "$lib/components/Banner.svelte"
-	import Situs from "$lib/components/search/Situs.svelte"
-	
+
 	//Store Variables
 	let _search,
 		_datadrawer,
 		_mobile,
 		_dual,
 		_title
+
+	//Components
+	let Owner, Situs, Prelimplan, Enggrid, Analysis
 
 	//Other Variables
 	let leftdrawer = false,
@@ -339,6 +366,7 @@
 						
 		},
 		route,
+		href,
 		search_active = false,
 		search_error = "",
 		search_nomatch = false,
@@ -348,8 +376,9 @@
 		touch_startY,
 		touch_endY,
 		viewport_width,
-		viewport_height
-			
+		viewport_height,
+		the_top
+					
 	const widths = { strip: 50, datos: 406 },
 
 		handle = {
@@ -498,6 +527,12 @@
 	
 	//Events
 	onMount( async ( ) => {
+		Owner = ( await import( "$lib/components/search/Owner.svelte" ) ).default
+		Situs = ( await import( "$lib/components/search/Situs.svelte" ) ).default
+		Prelimplan = ( await import( "$lib/components/search/Prelimplan.svelte" ) ).default
+		Enggrid = ( await import( "$lib/components/search/Enggrid.svelte" ) ).default
+		Analysis = ( await import ( "$lib/components/search/Analysis.svelte" ) ).default
+
 		//Subscriptions
 		messenger.subscribe( msgs => { 
             msgs.forEach( msg => { 
@@ -521,8 +556,7 @@
 						break
 
 					case "scroll_to_top":
-						//the_top.scrollIntoView(  )
-
+						the_top.scrollIntoView( { behavior: "smooth" } )
 						break
 
                 }
@@ -541,8 +575,11 @@
 	title.subscribe( value => { _title = value } )
 
 	//Reactives
-	$: if( $page.route.id )
+	$: if( $page.route.id ){
 		route = $page.route.id
+		href =  $page.url.href
+
+	}
 
 	$: mobile.set( viewport_width <= 768 )
 

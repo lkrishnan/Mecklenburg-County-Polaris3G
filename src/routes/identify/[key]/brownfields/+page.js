@@ -1,9 +1,10 @@
-/** @type {import('./$types').PageData} */
-import { idLayer } from "$lib/api"
-import { formatIdentifyResult, formatDecimal, formatDate } from "$lib/format"
+import {formatIdentifyResult, formatDecimal, formatDate} from "$lib/format"
 
-export async function load( {params} ){
-    const rows = await idLayer( params.key, 61 ),
+/** @type {import('./$types').PageData} */
+export async function load( {fetch, params} ){
+    const xy = params.key.split( "," ).map( coord => parseFloat(coord.trim( ) ) ),
+        response = await fetch( `/api/query/gis?table=ncdeq_brownfields_py&filter=ST_Within(ST_GeomFromText('POINT(${xy[0]} ${xy[1]})', 2264),shape)` ),
+        rows =  await response.json( ),
         field_format = { 
             bf_acreage: val => formatDecimal( parseFloat( val ), 3 ),
             creationdate: val => formatDate( val ),
@@ -12,7 +13,7 @@ export async function load( {params} ){
             shape_Area: val => formatDecimal( parseFloat( val ), 3 )
 
         }
-    
-    return formatIdentifyResult( rows, "bf_name", field_format )
 
+        return formatIdentifyResult( rows, "bf_name", field_format )
+    
 }

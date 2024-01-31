@@ -1,6 +1,3 @@
-import * as query from "@arcgis/core/rest/query"
-import Point from "@arcgis/core/geometry/Point"
-import SpatialReference from "@arcgis/core/geometry/SpatialReference"
 import {json2URL} from "$lib/utils"
 
 const genError = err => ( { "statusCode":500, "error": "Internal Server Error", ...err } ),
@@ -88,23 +85,6 @@ const genError = err => ( { "statusCode":500, "error": "Internal Server Error", 
 
     },
 
-    idLayer = async ( xy_raw, lyr_id, target_geom="poly", fetch=null ) => {
-        // create the Query object
-        const xy = xy_raw.split( "," ).map( coord => parseFloat( coord.trim( ) ) ),
-            url = `https://polaris3g.mecklenburgcountync.gov/server/rest/services/layers/MapServer/${lyr_id}`,
-            options = { 
-                geometry: new Point( xy[ 0 ], xy[ 1 ], new SpatialReference( 2264 ) ),
-                outFields: [ "*" ], 
-                ...( target_geom === "poly" ? { } : { distance: 50, units: "feet", spatialRelationship: "intersects" } )
-
-            },
-            response = await query.executeQueryJSON( url, options ),
-            rows =  response.features.map( feature => feature.attributes )
-
-        return rows
-     
-    },
-
     getPrelimPlan = async projname => {
         const params = {
                 table: "preliminary_plans_ln",
@@ -154,4 +134,4 @@ const genError = err => ( { "statusCode":500, "error": "Internal Server Error", 
 
     }
     
-export {genError, getInvalidParams, getErrorMsg, getAPIURL, idLayer, getProjCoords, getUSNG, getPOI, getPrelimPlan}
+export {genError, getInvalidParams, getErrorMsg, getAPIURL,  getProjCoords, getUSNG, getPOI, getPrelimPlan}

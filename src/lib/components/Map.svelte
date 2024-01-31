@@ -1196,7 +1196,7 @@
 								grphs = msg.centroids.map( ( centroid, i ) => {
 									return [ 
 											new Graphic( { geometry: getGeom( "polygon", centroid.geom ), symbol: symbols.cnd_parcel,attributes: { idx: i }, } ),
-											new Graphic( { geometry: getGeom( "point", { x: centroid.x, y: centroid.y } ), symbol: { ...symbols.cnd_label, text: i },attributes: { idx: i }, } ), 
+											new Graphic( { geometry: getGeom( "point", { x: centroid.x, y: centroid.y } ), symbol: { ...symbols.cnd_label, text: i + 1 },attributes: { idx: i }, } ), 
 										]
 								} ).flat( ) 
 																

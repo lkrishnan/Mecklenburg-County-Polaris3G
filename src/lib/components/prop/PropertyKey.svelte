@@ -164,7 +164,8 @@
     </div>
 
     <!-- Building Photo -->
-    <BuildingPhoto photo_url={photo.photo_url} photo_date={photo.photo_date} />
+    <!--<BuildingPhoto photo_url={photo.photo_url} photo_date={photo.photo_date} />-->
+    <Photo list={photos}/>
 
     <!-- Links -->
     <LinkList links={links} />
@@ -178,7 +179,8 @@
     import {messenger, mobile, dual, datadrawer} from "$lib/store.js"    
     import {srchstr2qrystr, icon} from "$lib/utils"
     import {validateForm, validateNumeric} from "$lib/validate"
-    import BuildingPhoto from "$lib/components/BuildingPhoto.svelte"
+    //import BuildingPhoto from "$lib/components/BuildingPhoto.svelte"
+    import Photo from "$lib/components/Photo.svelte"
     import Heading from "$lib/components/Heading.svelte"
     import LinkList from "$lib/components/LinkList.svelte"
     import QuickButtons from "$lib/components/QuickButtons.svelte"
@@ -228,10 +230,9 @@
 
         },
         mounted = false,
-        show = false
+        show = false,
+        photos = [ ]
         
-        
-
         const handleHit = event => {
             goto( `/address/${srchstr2qrystr( event.detail.matid )}` )
 
@@ -291,14 +292,24 @@
             
                 ]
 
-                if( _gisid ){
+                /*if( _gisid ){
                     const response = await fetch( `/api/query/tax/photo?gisid=${gisid}` ),
                         rows = await response.json( )
 
                     photo = ( rows.length > 0 ? rows[ 0 ] : { photo_url: null, photo_date: null, } )
 
                 }else
-                    photo = { photo_url: null, photo_date: null, }
+                    photo = { photo_url: null, photo_date: null, }*/
+
+                if( _lat && _lng ){
+                    const response = await fetch( `/api/photo/list?lat=${_lat}&lng=${_lng}` )
+                
+                    photos = await response.json( )
+
+                    
+
+
+                }
 
                 show = false
 

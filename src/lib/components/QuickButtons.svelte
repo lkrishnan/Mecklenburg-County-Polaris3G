@@ -1,4 +1,4 @@
-<div class="w-full flex flex-wrap justify-{justify} gap-2 text-pop font-semibold text-xs p-2 justify-center">
+<div class="w-full flex flex-wrap justify-{justify} gap-2 text-pop font-semibold text-xs p-2 justify-center select-none">
     {#each btns as btn}
         {#if btn.hasOwnProperty( "link" )}
             <a

@@ -1,4 +1,4 @@
-<div class="mb-4 border border-primero rounded shadow-lg">
+<div class="mb-4 border border-primero rounded shadow-lg select-none">
     <Heading title="Land Analysis" iconname="piechart" />
     
     <div class="flex flex-col p-2">

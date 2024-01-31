@@ -39,10 +39,10 @@
 </div>
 
 <script>
-    import StreetsThumb from '$lib/images/street_thumb_b2wm.jpg'
-    import HybridThumb from "$lib/images/Jhbrid_thumb_b2.jpg"
-    import AerialsThumb from "$lib/images/thumbnail1591224931210.jpeg"
-    import TopoThumb from "$lib/images/Terrain_Labels_Web_map.jpg"
+    import StreetsThumb from '$lib/images/streets_thumb.jpg'
+    import HybridThumb from "$lib/images/hybrid_thumb.jpg"
+    import AerialsThumb from "$lib/images/aerial_thumb.jpg"
+    import TopoThumb from "$lib/images/topo_thumb.jpg"
     import { createEventDispatcher } from "svelte"
 
     let open = false,
