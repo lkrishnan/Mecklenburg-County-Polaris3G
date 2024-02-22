@@ -1,7 +1,12 @@
 <div class="w-full mb-2 px-4 select-none">
     {#each list as item, i}
         <a href="{item.photo_url}" target="_blank">
-            <img src="{item.photo_url}" alt="{item.photo_view}" class="{i===show_idx ? '' : 'hidden'} border border-primero rounded" />
+            <img 
+                src="{item.photo_url}" 
+                alt="{item.photo_view}" 
+                class="{i===show_idx ? '' : 'hidden'} border border-primero rounded" 
+                on:error="{(event)=>{item.photo_url = "/photo_not_available.jpg"}}"
+                />
 
         </a>
                     
@@ -21,7 +26,7 @@
 
             <div class="grow">
                 <span class="flex justify-center">
-                    {formatUCWords( list[ show_idx ].photo_view )} View ({show_idx+1}/{list.length})
+                    {formatUCWords( list[ show_idx ].photo_view )} ({show_idx+1}/{list.length})
     
                 </span>
                 <span class="flex justify-center">
@@ -58,3 +63,4 @@
         show_idx = 0
 
 </script>
+

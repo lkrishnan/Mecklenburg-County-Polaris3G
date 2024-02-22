@@ -89,7 +89,22 @@ getToggleLayerList = ( group_name, lyr_name ) => {
 
     return [ { group_idx: group_idx, lyr_idx: lyr_idx, visible: true } ]
 
+},
+
+getSubLayerList = ( overlays_data, typ ) => {
+    return overlays_data
+                .map( grp => grp.sublyrs )
+                .filter( grp => grp.hasOwnProperty( typ ) )
+                .map( item => item[ typ ] )
+                .flat( )
+                .reduce( ( a, b ) => {
+                    if( a.indexOf( b ) < 0 ) 
+                        a.push( b )
+
+                    return a
+
+                }, [ ] )
 }
 
 
-export { getGeom, getRings, getPath, getGeomAsTxt, getToggleLayerList }
+export { getGeom, getRings, getPath, getGeomAsTxt, getToggleLayerList, getSubLayerList }

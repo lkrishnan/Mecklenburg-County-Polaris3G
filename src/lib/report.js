@@ -146,32 +146,40 @@ const getAssociateData = ( legal_description, sqft, land_size, land_unit, fire_d
     getOwnershipData = owner=> owner.map( (o, i) => [ i+1+".", formatFullName2( o, false ) ] ),
     getMailingAddrData = mailaddr => [ mailaddr ],
     getSaleData = sale => sale.splice( 0, 3 ).map( item => [ formatDeed( item.legal_reference, item.sale_date , true ), formatDate( item.sale_date ), formatMoney( item.sale_price ) ] ),
-    getPropImage = async ( gisid, fetch, placeholder=false ) => {
-        const svg = '<?xml version="1.0" encoding="utf-8"?><svg fill="#cbd5e1" viewBox="0 0 32 32" id="icon" xmlns="http://www.w3.org/2000/svg"><defs><style>.cls-1{fill:none;}</style></defs><title>no-image</title><path d="M30,3.4141,28.5859,2,2,28.5859,3.4141,30l2-2H26a2.0027,2.0027,0,0,0,2-2V5.4141ZM26,26H7.4141l7.7929-7.793,2.3788,2.3787a2,2,0,0,0,2.8284,0L22,19l4,3.9973Zm0-5.8318-2.5858-2.5859a2,2,0,0,0-2.8284,0L19,19.1682l-2.377-2.3771L26,7.4141Z"/><path d="M6,22V19l5-4.9966,1.3733,1.3733,1.4159-1.416-1.375-1.375a2,2,0,0,0-2.8284,0L6,16.1716V6H22V4H6A2.002,2.002,0,0,0,4,6V22Z"/><rect id="_Transparent_Rectangle_" data-name="&lt;Transparent Rectangle&gt;" class="cls-1" width="32" height="32"/></svg>'
+    getPropImage = async ( lat, lng, view, fetch, placeholder=false ) => {
+        let ret = { 
+                strm: null, 
+                txt: null, 
+                dte: null,
+                svg: ( placeholder ? '<?xml version="1.0" encoding="utf-8"?><svg fill="#cbd5e1" viewBox="0 0 32 32" id="icon" xmlns="http://www.w3.org/2000/svg"><defs><style>.cls-1{fill:none;}</style></defs><title>no-image</title><path d="M30,3.4141,28.5859,2,2,28.5859,3.4141,30l2-2H26a2.0027,2.0027,0,0,0,2-2V5.4141ZM26,26H7.4141l7.7929-7.793,2.3788,2.3787a2,2,0,0,0,2.8284,0L22,19l4,3.9973Zm0-5.8318-2.5858-2.5859a2,2,0,0,0-2.8284,0L19,19.1682l-2.377-2.3771L26,7.4141Z"/><path d="M6,22V19l5-4.9966,1.3733,1.3733,1.4159-1.416-1.375-1.375a2,2,0,0,0-2.8284,0L6,16.1716V6H22V4H6A2.002,2.002,0,0,0,4,6V22Z"/><rect id="_Transparent_Rectangle_" data-name="&lt;Transparent Rectangle&gt;" class="cls-1" width="32" height="32"/></svg>' : null ) 
+            }
         
-        if( !gisid )
-            return { strm: null, photo_date: null, svg: ( placeholder ? svg : null ) }
+        if( lat && lng ){
+            const photo_info_resp = await fetch( `/api/photo?lat=${lat}&lng=${lng}&view=${view}` ),  
+                photo_info_rows = await photo_info_resp.json( )
+
+            if( photo_info_rows.length > 0 ){
+                const info = photo_info_rows[ 0 ],
+                    photo_resp = await fetch( info.photo_url )
+
+                if( photo_resp.statusText === "OK" ){
+                    const blob = await photo_resp.blob( ),
+                        buf = await blob.arrayBuffer( )
+
+                    ret = { 
+                            strm: Buffer.from( buf ), 
+                            txt: `${formatUCWords( info.photo_view )} on ${formatDate( info.photo_date )}`, 
+                            dte: formatDate( info.photo_date ),
+                            svg: null 
+                        }
+
+                }
+                    
+            }
             
-        const photo_info_resp = await fetch( `/api/query/tax/photo?gisid=${gisid}` ),
-            photo_info_rows = await photo_info_resp.json( )
-
-        if( photo_info_rows.length === 0 )
-            return { strm: null, photo_date: null, svg: ( placeholder ? svg : null ) }
-        
-        const photo_resp = await fetch( photo_info_rows[ 0 ].photo_url )
-
-        if( photo_resp.statusText !== "OK" )
-            return { strm: null, photo_date: null, svg: ( placeholder ? svg : null ) }
-
-        const blob = await photo_resp.blob( ),
-            buf = await blob.arrayBuffer( )
-
-        return { 
-            strm: Buffer.from( buf ), 
-            dte: photo_info_rows[ 0 ].photo_date, 
-            svg: null 
-
         }
+
+        return ret
 
     },
 

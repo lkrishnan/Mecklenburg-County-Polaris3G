@@ -7,7 +7,7 @@ import {json2URL, arrHasAllElems} from "$lib/utils"
 import {validateTaxPID} from "$lib/validate" 
 
 /** @type {import('./validate/$types').RequestHandler} */
-export const GET = async ( {url, locals, fetch } ) => {
+export const GET = async ( {url, locals, fetch} ) => {
 	let response, status = 200
 
 	try{
@@ -37,7 +37,12 @@ export const GET = async ( {url, locals, fetch } ) => {
 			} ) ),
 			cama_data = rows[ 0 ],
 			x = cama_data.x ?? ( cama_data.centroid_x ?? null ), 
-			y = cama_data.y ?? ( cama_data.centroid_y ?? null )
+			y = cama_data.y ?? ( cama_data.centroid_y ?? null ),
+			lat = cama_data.lat ?? ( cama_data.centroid_lat ?? null ), 
+			lng = cama_data.lng ?? ( cama_data.centroid_lng ?? null ),
+			photo_lat = ( cama_data.photo_lat ?? null ),
+			photo_lng = ( cama_data.photo_lng ?? null ),
+			photo_view = ( cama_data.photo_view ?? null )
 
 		const margin = 30,
 			doc = new PDFDocument( { // Create a document 
@@ -185,7 +190,7 @@ export const GET = async ( {url, locals, fetch } ) => {
 				
 			},
 
-			photo = await getPropImage( cama_data.gisid, fetch )
+			photo = await getPropImage( photo_lat, photo_lng, photo_view, fetch )
 
 		//Heading
 		doc
@@ -311,7 +316,7 @@ export const GET = async ( {url, locals, fetch } ) => {
 				.moveUp( 1.0 )
 				.fillColor( "yellow" )
 				.font( "Helvetica-Bold" )
-				.text( (photo.dte ? `${photo.dte.substring( 4, 6 )}/${photo.dte.substring( 6, 8 )}/${photo.dte.substring( 0, 4 )} from Mecklenburg County` : "" ), {align: "right"})
+				.text( (photo.txt ? photo.txt : "" ), {align: "right"})
 
 		}
 
@@ -334,7 +339,7 @@ export const GET = async ( {url, locals, fetch } ) => {
 		const b64 = Buffer.from( await getStreamAsBuffer( doc ) )
 
 		return new Response( b64, { status: 500, headers: { 'Content-Type': 'application/pdf' } } )
-        
+
     }catch( err ){
 		response = genError( { "message": err.message, "code": err.code } )
         status = 500

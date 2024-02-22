@@ -26,24 +26,26 @@
         links = [ ],
         mounted = false
 
-    const getFEMAPanel = item => {
-            let panel_date = new Date( item.eff_date )
+    const getFEMAPanel = ( panel_id, eff_date ) => {
+            let panel_date = new Date( eff_date )
 
-            panel_date.setDate( panel_date.getDate( ) + 1 )
+            panel_date.setDate( panel_date.getDate( ) )
 
-            const filename = item.panel_id + panel_date.getFullYear( ) + String( panel_date.getMonth( ) + 1 ).padStart( 2, "0" ) + String( panel_date.getDate() ).padStart( 2, "0" ) + ".pdf" 
+            const filename = panel_id + panel_date.getFullYear( ) + String( panel_date.getMonth( ) + 1 ).padStart( 2, "0" ) + String( panel_date.getDate( ) ).padStart( 2, "0" ) + ".pdf" 
         
-            return `<a class="text-signify underline underline-offset-4 hover:text-sky-600" href='https://mecklenburgcounty.exavault.com/p/stormwater/Floodplain%20Mapping/Effective%20Data/FIRM%20Panels/${filename}' target='_blank' rel='noreferrer'>${item.panel_id}</a>`
+            return `<a class="text-signify underline underline-offset-4 hover:text-sky-600" href='https://mecklenburgcounty.exavault.com/p/stormwater/Floodplain%20Mapping/Effective%20Data/FIRM%20Panels/${filename}' target='_blank' rel='noreferrer'>${panel_id}</a>`
 
         },
-        getFEMADate = item => {
-            let panel_date = new Date( item.eff_date )
+
+        getFEMADate = eff_date => {
+            let panel_date = new Date( eff_date )
             
-            panel_date.setDate( panel_date.getDate( ) + 1 )
+            panel_date.setDate( panel_date.getDate( ) )
 
-            return String( panel_date.getMonth( ) + 1 ).padStart( 2, "0" ) + "/" + String( panel_date.getDate() ).padStart( 2, "0" ) + "/" + panel_date.getFullYear( )
+            return String( panel_date.getMonth( ) + 1 ).padStart( 2, "0" ) + "/" + String( panel_date.getDate( ) ).padStart( 2, "0" ) + "/" + panel_date.getFullYear( )
 
         },
+
         getPaveInfo = juris => {
             let link
 
@@ -81,8 +83,8 @@
                     { url: ( _gisid ? `/api/overlay/feature/gis/?table_from=parcels_py&table_to=community_floodplain_changes_py&columns=community_floodplain_changes_py.objectid&filter=parcels_py.pid='${_gisid}'`: null ), tag: "comm_fldp" },
 
                     //fema panel
-                    { url: ( _x && _y ? `https://polaris3g.mecklenburgcountync.gov/polarisv/rest/services/layers/MapServer/44/query?where=&text=&objectIds=&time=&geometry=${_x},${_y}&geometryType=esriGeometryPoint&inSR=2264&spatialRel=esriSpatialRelIntersects&distance=1&units=esriSRUnit_Foot&relationParam=&outFields=EFF_DATE%2C+panel_id&returnGeometry=false&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&havingClause=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&returnExtentOnly=false&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&featureEncoding=esriDefault&f=json`: null ), tag: "fema_panel" },
-
+                    { url: ( _x && _y ? `/api/overlay/point/gis/?x=${_x}&y=${_y}&table=fema_firm_panels_py&columns=fema_firm_panels_py.firm_pan,fema_firm_panels_py.eff_date`: null ), tag: "fema_panel" },
+                    
                     //post construction district
                     { url: ( _x && _y ? `/api/overlay/point/gis/?x=${_x}&y=${_y}&table=PostConst_Districts_py&columns=PostConst_Districts_py.district`: null ), tag: "post_const" },
 
@@ -114,14 +116,11 @@
                     
                     ...( tags?.fema_panel ? [ {                 
                         label: "FEMA Panel No", 
-                        value: ( jsons[ tags.fema_panel ].features.length > 0 ? getFEMAPanel( jsons[ tags.fema_panel ].features[ 0 ].attributes ) : `NA` )
-                        } ] : [ ] ), 
+                        value: ( jsons[ tags.fema_panel ].length > 0 ? getFEMAPanel( jsons[ tags.fema_panel ][ 0 ].firm_pan, jsons[ tags.fema_panel ][ 0 ].eff_date ) : `NA` )
+                        } ] : [ ] ),
 
                     //fema panel date
-                    ...( tags?.fema_panel ? [ {                 
-                        label: "FEMA Panel Date", 
-                        value: getFEMADate( jsons[ tags.fema_panel ].features[ 0 ].attributes ) 
-                        } ] : [ ] ),
+                    ...( tags?.fema_panel ? [ { label: "FEMA Panel Date", value: getFEMADate( jsons[ tags.fema_panel ][ 0 ].eff_date ) } ] : [ ] ),
 
                     ...( tags?.post_const ? [ {                 
                         label: "Post Construction District", 

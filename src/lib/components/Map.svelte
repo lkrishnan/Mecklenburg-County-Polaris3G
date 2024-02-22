@@ -32,6 +32,34 @@
 
 		{/if}
 
+		<!-- Zoom In/Zoom Out -->
+		{#if !_mobile}
+			<div 
+				class="absolute z-10 bottom-0 {(( $page.route.id.match( /(prop)|identify/ig ) && _datadrawer ) ? 'ml-[466px]' : 'ml-[58px]' ) } mb-2 flex flex-col"
+			>
+				{#each tools.filter( tool => tool.type === "zoom_tools" ) as tool, i}
+					<button 
+						class="border-x-2 first:border-t-2 border-b-2 border-primero p-1.5 {local_state.map_tool === tool.id ? 'bg-segundo text-lienzo' : 'bg-lienzo'} first:rounded-t last:rounded-b group relative hover:bg-segundo hover:text-lienzo hover:fill-lienzo disabled:bg-todo"
+						on:click="{event=>{handle.tool_action( tool.id );}}"
+						disabled="{tool.disabled}"
+					>
+						{@html icon( tool.icon, 18, 18 )}
+						{#if !local_state.open}
+							<span
+								class="bg-primero text-lienzo py-1 px-2 rounded-xl pointer-events-none absolute top-[2px] left-[40px] w-max opacity-0 transition-opacity group-hover:opacity-100 text-sm"
+							>
+								{tool.tooltip}
+							</span>
+						{/if}
+
+					</button>
+
+				{/each}
+
+			</div>
+
+		{/if}
+
 		{#if local_state.main_tool === "basemap_mobile"}
 			<div
 				in:fly="{{ y: 180, duration: 1200 }}" out:fly="{{ y: 180, duration: 1200 }}"
@@ -372,7 +400,7 @@
 	import {messenger, offset, mobile, datadrawer, results_index} from "$lib/store"
 
 	//Custom Libraries
-	import {getGeom} from "$lib/mapping"
+	import {getGeom, getSubLayerList} from "$lib/mapping"
 	import {srchstr2qrystr, json2URL, icon} from "$lib/utils"
 
 	import AccordionItem from "$lib/components/AccordionItem.svelte"
@@ -430,6 +458,7 @@
 			blackout: false,
 
 		},
+		scales = [ 425000, 316800, 126720, 63360, 31680, 12000, 7200, 3600, 2400, 1200, 600 ],
 		
 		basemaps = {
 			0: [ "topo", "hollow" ],
@@ -578,14 +607,14 @@
 			tool_action: async ( tool, action=null ) => {
 				switch( tool ){
 					case "click_srch": case "identify":
+						local_state.map_tool = tool
+
 						if( sketch_widget ){
 							if( sketch_widget.activeTool )
 								sketch_widget.complete( )
 
 						}
-
-						local_state.map_tool = tool
-
+						
 						break
 
 					case "select_srch": 
@@ -734,6 +763,21 @@
 						local_state.map_tool = "click_srch"
 						break
 
+					case "zoom_in":
+						if( view.scale > scales[ scales.length - 1 ] ){
+							const idx = scales.findIndex( scale => scale === view.scale )
+							view.goTo( { center: view.center, scale: scales[ idx + 1 ] } )
+						}
+						break
+
+					case "zoom_out":
+						if( view.scale < scales[ 0 ] ){
+							const idx = scales.findIndex( scale => scale === view.scale )
+							view.goTo( { center: view.center, scale: scales[ idx - 1 ] } )
+
+						}	
+						break
+
 				}
 
 			}
@@ -744,6 +788,9 @@
 			{ icon: "arrowselect", id: "click_srch", tooltip: "Click Search", type: "select_tools", only_mobile: false, pop:false },
 			{ icon: "selectsrch", id: "select_srch", tooltip: "Polygon Search", disabled: true, type: "select_tools", only_mobile: false, pop:false },
 			{ icon: "id", id: "identify", tooltip: "Identify Layer", type: "select_tools", only_mobile: false, pop:false },
+
+			{ icon: "plus", id: "zoom_in", tooltip: "Zoom In", type: "zoom_tools", only_mobile: false, pop:false, disabled: false },
+			{ icon: "minus", id: "zoom_out", tooltip: "Zoom Out", type: "zoom_tools", only_mobile: false, pop:false, disabled: false },
 			
 			{ icon: "map", id: "basemap_mobile", tooltip: "Basemap", type: "main_tools", only_mobile: true, pop:false },
             { icon: "overlays", id: "overlays", tooltip: "Overlays", type: "main_tools", only_mobile: false, pop:false },
@@ -787,6 +834,9 @@
 
 							}
 
+						}else if( [  "click_srch", "identify" ].includes( local_state.map_tool ) ){
+							sketch_lyr.remove( sketch_lyr.graphics.filter( grph => grph.uid == event.graphic.uid ).items[ 0 ] )
+						
 						}else{
 							local_state.markup_list.push( event.graphic.uid )
 							//adjust erase tool's disabled property
@@ -1015,86 +1065,106 @@
 		//Initialize Layers
 		tile_lyrs = {
 				streets: new TileLayer( { 
-					id: "streets",
-					url: "https://polaris3g.mecklenburgcountync.gov/server/rest/services/basemap/MapServer"
-				} ),
-				/*streets: new TileLayer({
-					id: "streets",
-					url: "https://maps.mecklenburgcountync.gov/agsadaptor/rest/services/basemap/VectorBasemap/MapServer"
-				} ),*/
+						id: "streets",
+						url: "https://polaris3g.mecklenburgcountync.gov/server/rest/services/basemap/MapServer"
 
+					} ),
+				
 				hollow: new TileLayer( { 
-					id: "hollow",
-					url: "https://polaris3g.mecklenburgcountync.gov/server/rest/services/basemap_aerial/MapServer"
-				} ),
+						id: "hollow",
+						url: "https://polaris3g.mecklenburgcountync.gov/server/rest/services/basemap_aerial/MapServer"
+
+					} ),
 
 				topo: new TileLayer( { 
-					id: "topo",
-					url: "https://polaris3g.mecklenburgcountync.gov/server/rest/services/topohillshade/MapServer"
-				} ),
+						id: "topo",
+						url: "https://polaris3g.mecklenburgcountync.gov/server/rest/services/topohillshade/MapServer"
+
+					} ),
 
 				aerial_2023: new TileLayer( { 
-					id: "aerial_2023",
-					url: "https://polaris3g.mecklenburgcountync.gov/server/rest/services/aerial2023/MapServer"
+						id: "aerial_2023",
+						url: "https://polaris3g.mecklenburgcountync.gov/server/rest/services/aerial2023/MapServer"
+
 				} ),
 
 				aerial_2022: new TileLayer( { 
-					id: "aerial_2022",
-					url: "https://maps.mecklenburgcountync.gov/agsadaptor/rest/services/aerial2022/MapServer"
+						id: "aerial_2022",
+						url: "https://maps.mecklenburgcountync.gov/agsadaptor/rest/services/aerial2022/MapServer"
+
 				} ),
 
 				aerial_2021: new TileLayer( { 
-					id: "aerial_2021",
-					url: "https://maps.mecklenburgcountync.gov/agsadaptor/rest/services/aerial2021/MapServer"
+						id: "aerial_2021",
+						url: "https://maps.mecklenburgcountync.gov/agsadaptor/rest/services/aerial2021/MapServer"
+
 				} ),
 
 				aerial_2020: new TileLayer( { 
-					id: "aerial_2020",
-					url: "https://maps.mecklenburgcountync.gov/agsadaptor/rest/services/aerial2020/MapServer"
+						id: "aerial_2020",
+						url: "https://maps.mecklenburgcountync.gov/agsadaptor/rest/services/aerial2020/MapServer"
+
 				} ),
 
 				aerial_2019: new TileLayer( { 
-					id: "aerial_2019",
-					url: "https://maps.mecklenburgcountync.gov/agsadaptor/rest/services/aerial2019/MapServer"
+						id: "aerial_2019",
+						url: "https://maps.mecklenburgcountync.gov/agsadaptor/rest/services/aerial2019/MapServer"
+
 				} ),
 
 				aerial_2018: new TileLayer( { 
-					id: "aerial_2018",
-					url: "https://maps.mecklenburgcountync.gov/agsadaptor/rest/services/aerial2018/MapServer"
+						id: "aerial_2018",
+						url: "https://maps.mecklenburgcountync.gov/agsadaptor/rest/services/aerial2018/MapServer"
+
 				} ),
 
 				aerial_2017: new TileLayer( { 
 					id: "aerial_2017",
 					url: "https://maps.mecklenburgcountync.gov/agsadaptor/rest/services/aerial2017/MapServer"
+					
 				} ),
 
 			}
 
 		overlay_lyrs = {
+				/*Dimensions (0), Address Points (1), Parcel IDs (2), Businesses (3), MEDIC Posts (4), Police Stations (5), Clt Fire Stations (6), VFD Stations (7),
+					Schools - Public (8), Schools - Charter (9), Schools - Private (10), Pnts of Interest (11), Libraries (12), Rec Centers (13), Golf Courses (14), Hospitals (15), Lot Number (16)*/
 				lbls: new MapImageLayer( {
-					id: "lbls",
-					title: "Labels",
-					url: "https://polaris3g.mecklenburgcountync.gov/server/rest/services/labels/MapServer",
-					sublayers: [ 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 ].map( idx => { return { id: idx, visible: false } } )
-				
-				} ),
+						id: "lbls",
+						title: "Labels",
+						url: "https://polaris3g.mecklenburgcountync.gov/server/rest/services/labels/MapServer",
+						sublayers: getSubLayerList( overlays_data, "lbls" ).map( idx => { return { id: idx, visible: false } } ) 
+											
+					} ),
 
+				/*New Commercial Build in Progress (Last 365 Days) (0), New Commercial Build Completed (Last 365 Days) (1), New Single Family Build in Progress (Last 365 Days) (2)
+					New Single Family Build Completed (Last 365 Days) (3), New Mutli-Family Build in Progress (Last 365 Days) (4), New Mutli-Family Build Completed (Last 365 Days) (5)
+					Post Const Dist (6), Bus Stops (8), Bus Routes (9), Census Tracts (71), Commis Dist (11), Charlotte City Council Districts (12), Voter Precincts (13), Eng Grid (14),
+					Hist Districts - Charlotte (15), Hist Cemeteries (16), Hist Prop(Local) (17), Hist Prop(National) (18), , Municipal Service Dist (20), Traffic Cnts (21),
+					Prelim Plans (22), Sphere of Influence (23), Zipcode (25), Clt Zoning (26), Town Zoning (27), Misc Parcel Lines (28), Easements (29), Soils (30), 
+					CMPD Police Divisions (31), CMPD Response Areas (32), VFD Districts (33), Uptown Fire Districts (65), Hist Districts - Davidson (63), NC Monuments (34),
+					NC Roads (35), Town or City Roads (67), Private Roads (68), Bike Lanes (47), Signed Bike Lanes (48), Watershed (24), Regulated Drinking Watershed (36)*/
+
+					
 				ostreets: new MapImageLayer( {
-					id: "ostreets",
-					title: "Opaque Layers",
-					url: "https://polaris3g.mecklenburgcountync.gov/server/rest/services/layers/MapServer",
-					sublayers: [ 68, 67, 65, 64, 63, 48, 47, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 6, 5, 4, 3, 2, 1, 0 ].map( idx => { return { id: idx, visible: false } } )
-				
-				} ),
+						id: "ostreets",
+						title: "Opaque Layers",
+						url: "https://polaris3g.mecklenburgcountync.gov/server/rest/services/layers/MapServer",
+						sublayers: getSubLayerList( overlays_data, "ostreets" ).map( idx => { return { id: idx, visible: false } } ) 
+					
+					} ),
 
+				/*Post Const Buffers (38), FEMA Floodway (40), Community Floodway (41), FEMA Floodplain (42), Community Floodplain (43), 2000ft Geodetic Buff (45), Public Properties (46), 2023 Sales (69),
+					2022 Sales (66), 2021 Sales (64), 2020 Sales (62), 2019 Sales (49), 2018 Sales (50), 2017 Sales (51), 2016 Sales (52), 2015 Sales (53), 2014 Sales (54), 2013 Sales (55), 2012 Sales (56), 2011 Sales (57), 2010 Sales (58),
+					Landuse (10), BIP Opportunity Area (59), County MPL Contaminate Sites (60), NCDEQ Brownfields (61), Stormwater Conservation Easements (70) */
 				trans: new MapImageLayer( {
-					id: "trans",
-					title: "Transparent Layers",
-					url: "https://polaris3g.mecklenburgcountync.gov/server/rest/services/layers/MapServer",
-					opacity: 0.5,
-					sublayers: [ 69, 66, 64, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 46, 45, 43, 42, 41, 40, 39, 38 ].map( idx => { return { id: idx, visible: false } } )
+						id: "trans",
+						title: "Transparent Layers",
+						url: "https://polaris3g.mecklenburgcountync.gov/server/rest/services/layers/MapServer",
+						opacity: 0.5,
+						sublayers: getSubLayerList( overlays_data, "trans" ).map( idx => { return { id: idx, visible: false } } )
 				
-				} ),
+					} ),
 
 			}
 
@@ -1117,15 +1187,15 @@
 
 		//Initalize Map View
 		view = new MapView( {
-			container: "viewDiv",
-			map: map,
-			extent: new Extent( { ...full_extent, spatialReference: { wkid: 2264 } } ),
-			padding: _offset
+				container: "viewDiv",
+				map: map,
+				extent: new Extent( { ...full_extent, spatialReference: { wkid: 2264 } } ),
+				padding: _offset
 
-		} )
+			} )
 
-		view.ui.remove( [ "attribution" ] )
-		view.ui.move( "zoom", "bottom-left" )
+		view.ui.remove( [ "attribution", "zoom", ] )
+		//view.ui.move( "zoom", "bottom-left" )
 
 		view.on( "click", event => {
 			const screen_pt = { x: event.x, y: event.y }
@@ -1328,11 +1398,13 @@
 
 		} )
 
-		ReactiveUtils.watch( ( ) => [ view.stationary, view.scale ], ( [ stationary, zoom ] ) => { 
+		ReactiveUtils.watch( ( ) => [ view.stationary, view.scale ], ( [ stationary, view_scale ] ) => { 
 				if( stationary ){
-					tools[ tools.findIndex( tool => tool.id === "select_srch" ) ].disabled = ( zoom > 7200 )
+					tools[ tools.findIndex( tool => tool.id === "select_srch" ) ].disabled = ( view_scale > 7200 )
+					tools[ tools.findIndex( tool => tool.id === "zoom_in" ) ].disabled = ( view_scale === scales[ scales.length -1 ] )
+					tools[ tools.findIndex( tool => tool.id === "zoom_out" ) ].disabled = ( view_scale === scales[ 0 ] )
 
-					if( zoom > 7200 && local_state.map_tool === "select_srch" )
+					if( view_scale > 7200 && local_state.map_tool === "select_srch" )
 						handle.tool_action( "click_srch" )
 												
 				}
@@ -1351,7 +1423,7 @@
 
 	} )
 
-	mobile.subscribe( value => { _mobile = value } )
+	mobile.subscribe( value => { _mobile = value} )
 	datadrawer.subscribe( value => { _datadrawer = value } )
 	
 </script>

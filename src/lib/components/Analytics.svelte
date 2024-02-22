@@ -9,8 +9,7 @@
     	}
 
     	gtag( "js", new Date( ) )
-		//gtag( 'set', {cookie_flags: 'SameSite=None;Secure'} )
-    	gtag( "config", "MEASUREMENT_ID", { cookie_flags: 'SameSite=None;Secure' } )
+		gtag( "config", "MEASUREMENT_ID" )
 
   </script>
 
@@ -24,8 +23,7 @@
         	gtag('config', 'MEASUREMENT_ID', {
           		page_title: document.title,
           		page_path: $page.url.pathname,
-				cookie_flags: "SameSite=None;Secure"
-
+			
         	} )
 
       	}

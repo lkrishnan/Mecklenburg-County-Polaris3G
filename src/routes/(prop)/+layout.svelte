@@ -85,6 +85,14 @@
 							{@html icon( "expandless", 24, 24 )}
 								
 						</button>
+
+						<button 
+                			class="p-2 rounded-full group relative hover:bg-segundo hover:text-lienzo hover:fill-lienzo"
+                			on:click="{datadrawer.set( !_datadrawer )}"
+            			>
+                			{@html icon( "expandmore", 24, 24 )}
+                    
+            			</button>
 					
 					{/if}
 
@@ -132,6 +140,9 @@
 					y={_results[ _idx ].y ?? (_results[ _idx ].centroid_y ?? null)} 
 					mailing_addr={_results[ _idx ].mailing_address} 
 					owners={( _results[ _idx ]?.owner ? _results[ _idx ].owner.map( o => formatFullName2( o, false ) ) : [ ] )} 
+					photo_lat={_results[ _idx ].photo_lat ?? (_results[ _idx ].photo_lat ?? null)}
+					photo_lng={_results[ _idx ].photo_lng ?? (_results[ _idx ].photo_lng ?? null)}
+					photo_view={_results[ _idx ].photo_view ?? (_results[ _idx ].photo_view ?? null)}
 
 				/>
 
@@ -224,8 +235,7 @@
 		_datadrawer,
 		_dual,
 		_mobile,
-		_title,
-		the_top
+		_title
 
 	const limit = 20,
 		view_tabs = [

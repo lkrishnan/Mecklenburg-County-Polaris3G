@@ -197,6 +197,10 @@
     export let lng = null
     export let x = null
     export let y = null
+    export let e911 = null
+    export let photo_lat = null
+	export let photo_lng = null
+	export let photo_view = null
     export let mailing_addr = null
     export let owners = [ ]
 
@@ -206,8 +210,7 @@
         _datadrawer
 
     //Other Variables
-    let photo = { photo_url: null, photo_date: null, },
-        links = [ ],
+    let links = [ ],
         issues = [ 
             { label: "Wrong Property Information or Map", url: "https://mecklenburgcountync-563955.workflowcloud.com/forms/d024bf6c-b9b0-4cf5-a7d9-7ac376f0370c" },    
             { label: "Wrong Mailing Address", url: "https://mecklenburgcountync-563955.workflowcloud.com/forms/0314aa67-0083-4905-9b29-a571be01717e" },
@@ -271,7 +274,7 @@
 
         },
 
-        handleInfoChange = async ( _pid, _gisid, _matid, _address, _mats, _lat, _lng, _x, _y, _mailing_addr, _owners , _mounted ) => {
+        handleInfoChange = async ( _pid, _gisid, _matid, _address, _mats, _lat, _lng, _x, _y, _e911, _mailing_addr, _owners, _photo_lat, _photo_lng, _photo_view, _mounted ) => {
             if( _mounted ){
                 btns = [ 
                         { label: "Property Report", icon: "pdf", link: `/pdf/detail?pid=${_pid + (_matid ? "&matid="+_matid : "" )}`, width: "48px" },
@@ -283,37 +286,23 @@
 
                 links = [ 
                     //Google Street View
-                    ...( _lat && _lng ? [ { label: "Google Street View <span class='text-pop'>(Use for recent building photos)</span>", url: `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${_lat},${_lng}` } ] : [ ] ),
+                    ...( _lat && _lng ? [ { label: "Google Street View <span class='text-pop'>(Use for recent building photos)</span>", url: `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${(_photo_lat ? _photo_lat : _lat)},${(_photo_lng ? _photo_lng : _lng)}` } ] : [ ] ),
            
                     //Meckscope
-                    ...( _lat && _lng ? [ { label: "Birdseye View maintained by Mecklenburg County", url: `http://maps.co.mecklenburg.nc.us/meckscope/?lat=${_lat}&lon=${_lng}` } ] : [ ] ),
+                    ...( _lat && _lng ? [ { label: "Birdseye View maintained by Mecklenburg County", url: `http://maps.co.mecklenburg.nc.us/meckscope/?lat=${(_photo_lat ? _photo_lat : _lat)}&lon=${(_photo_lng ? _photo_lng : _lng)}` } ] : [ ] ),
 
                     { label: "Download Map Layers", url : "http://maps.co.mecklenburg.nc.us/openmapping/" }
             
                 ]
 
-                /*if( _gisid ){
-                    const response = await fetch( `/api/query/tax/photo?gisid=${gisid}` ),
-                        rows = await response.json( )
+                if( _photo_lat && _photo_lng && _photo_view && _gisid ){ //porperty has an address - show property photo
+                    const response = await fetch( `/api/photo?lat=${_photo_lat}&lng=${_photo_lng}&view=${_photo_view}&gisid=${_gisid}` )
 
-                    photo = ( rows.length > 0 ? rows[ 0 ] : { photo_url: null, photo_date: null, } )
-
-                }else
-                    photo = { photo_url: null, photo_date: null, }*/
-
-                if( _lat && _lng ){
-                    const response = await fetch( `/api/photo/list?lat=${_lat}&lng=${_lng}` )
-                
                     photos = await response.json( )
-
-                    
-
 
                 }
 
                 show = false
-
-                //ootha.scrollIntoView();
 
             }
             
@@ -329,6 +318,6 @@
     datadrawer.subscribe( value => { _datadrawer = value } )
 
     //reactives
-    $: { handleInfoChange( pid, gisid, matid, address, mats, lat, lng, x, y, mailing_addr, owners, mounted ) }
+    $: { handleInfoChange( pid, gisid, matid, address, mats, lat, lng, x, y, e911, mailing_addr, owners, photo_lat, photo_lng, photo_view, mounted ) }
 
 </script>

@@ -24,7 +24,7 @@
 
 </svelte:head>
 
-<Map />
+<svelte:component this={Map} />
 
 {#if _mobile !== undefined}
 	{#if leftdrawer}
@@ -168,7 +168,7 @@
 			
 		<div class="sticky { _mobile ? ( _dual ? '' : 'bg-luz' ) : 'bg-luz' } top-0 z-50 p-2 {( $page.route.id.match( /(prop)|identify/ig ) && _datadrawer ) ? `` : (_mobile ? `` : `border-b-2 border-r-2 rounded-br-lg` ) }">
 			{#if _search === "main"}
-				<MainSearch 
+				<MainSearch
 					leftdrawer={leftdrawer} 
 					hide_items={_mobile && true}
 					value={search_value}
@@ -287,17 +287,15 @@
 						
 		</div>
 		
-		<main 
-			class="{(( search_active || ( !_datadrawer && $page.status < 404 ) ) && _mobile ) ? 'hidden' : ''} 
-					{( _mobile && _dual ? ( $page.status < 404 ? 'fixed h-2/4 bottom-0 w-full' : 'fixed bottom-0 w-full' ) : '' )}"
-			on:touchmove={handle.touch_move}
-			on:touchend={handle.touch_end}
-			on:touchstart={handle.touch_start}
+		<main
+			class="{( $page.route.id.match( /(prop)|identify/ig ) && _datadrawer ) ? ( _mobile && _dual ? ( $page.status < 404 ? 'fixed h-2/4 bottom-0 w-full' : 'fixed bottom-0 w-full' ) : '' ) : '' }
+				{(( search_active || ( !_datadrawer && $page.status < 404 ) ) && _mobile ) ? 'hidden' : ''}"
 		>
 			<slot />
 
 		</main>
-		<Analytics />
+
+		<svelte:component this={Analytics} />
 
 	</div>
 
@@ -311,6 +309,7 @@
 	import {slide} from "svelte/transition"
 	import {goto} from "$app/navigation"
 	import {page} from "$app/stores"
+
 	import {offset, messenger, search, datadrawer, mobile, dual, title} from "$lib/store"
 	import {getPrelimPlan} from "$lib/api"
 	import {formatSearchResults} from "$lib/format"
@@ -318,11 +317,9 @@
 	import {getToggleLayerList} from "$lib/mapping"
 	import {srchstr2qrystr, icon} from "$lib/utils"
 	
-	import Analytics from "$lib/components/Analytics.svelte"
-	import MainSearch from "$lib/components/search/MainSearch.svelte"
-	import Map from "$lib/components/Map.svelte"
 	import Banner from "$lib/components/Banner.svelte"
-
+	import MainSearch from "$lib/components/search/MainSearch.svelte"
+	
 	//Store Variables
 	let _search,
 		_datadrawer,
@@ -331,7 +328,7 @@
 		_title
 
 	//Components
-	let Owner, Situs, Prelimplan, Enggrid, Analysis
+	let Owner, Situs, Prelimplan, Enggrid, Analysis, Analytics, Map
 
 	//Other Variables
 	let leftdrawer = false,
@@ -379,9 +376,7 @@
 		viewport_height,
 		the_top
 					
-	const widths = { strip: 50, datos: 406 },
-
-		handle = {
+	const handle = {
 			click: async ( tool, idx ) => {
 				switch( tool ){
 					case "hamburger": 
@@ -389,6 +384,9 @@
 						break
 
 					case "analysis":
+						if( Analysis === undefined )
+							Analysis = ( await import ( "$lib/components/search/Analysis.svelte" ) ).default
+
 						if( !btns.analysis.list )
 							btns.analysis.list = await getAnlyzDropDowns( )
 
@@ -398,6 +396,12 @@
 						break
 
 					case "owner": case "situs": case "main":
+						if( tool == "owner" && Owner === undefined )
+							Owner = ( await import( "$lib/components/search/Owner.svelte" ) ).default
+						
+						else if( tool == "situs" && Situs === undefined )
+							Situs = ( await import( "$lib/components/search/Situs.svelte" ) ).default
+
 						search.set( tool )
 						search_value = ""
 						search_error = ""
@@ -405,6 +409,9 @@
 						break
 					
 					case "prelimplan":
+					if( Prelimplan === undefined )
+						Prelimplan = ( await import( "$lib/components/search/Prelimplan.svelte" ) ).default
+
 						if( !btns.prelimplan.list )
 							btns.prelimplan.list = await getPrelimPlans( )		
 
@@ -414,6 +421,9 @@
 						break
 
 					case "enggrid":
+						if( Enggrid === undefined )
+							Enggrid = ( await import( "$lib/components/search/Enggrid.svelte" ) ).default
+
 						if( !btns.enggrid.list )
 							btns.enggrid.list = await getEnggrids( )		
 
@@ -527,24 +537,16 @@
 	
 	//Events
 	onMount( async ( ) => {
-		Owner = ( await import( "$lib/components/search/Owner.svelte" ) ).default
-		Situs = ( await import( "$lib/components/search/Situs.svelte" ) ).default
-		Prelimplan = ( await import( "$lib/components/search/Prelimplan.svelte" ) ).default
-		Enggrid = ( await import( "$lib/components/search/Enggrid.svelte" ) ).default
-		Analysis = ( await import ( "$lib/components/search/Analysis.svelte" ) ).default
-
 		//Subscriptions
 		messenger.subscribe( msgs => { 
             msgs.forEach( msg => { 
 				switch( msg.type ){
                     case "set_gisid_anlyz_buffer":
                         btns.analysis.gisid = msg.gisid
-
 						break
 
 					case "set_neigh_code":
                         btns.analysis.neigh_code = msg.neigh_code
-
                         break
 
 					case "redo_analysis":
@@ -567,6 +569,9 @@
 
 		search.subscribe( value => { _search = value } )
 		datadrawer.subscribe( value => { _datadrawer = value } )
+
+		Map = ( await import ( "$lib/components/Map.svelte" ) ).default
+		Analytics = ( await import ( "$lib/components/Analytics.svelte" ) ).default
 		
 	} )
 
@@ -587,6 +592,7 @@
 			left: ( !_mobile && route.match( /(prop)|identify/ig ) && _datadrawer ? 452 : (mobile ? -6 : 46 ) ), 
 			bottom: ( _mobile && _dual && route.match( /(prop)|identify/ig ) ? viewport_height/2 : 0 ), 
 			top: ( _mobile && _dual ? 50 : 0 ) 
+
 		} )
 
 	$: btns.sidepanel = { 
